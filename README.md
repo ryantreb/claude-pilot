@@ -41,7 +41,6 @@
 - **IDE Diagnostics** - Real-time error detection
 - **Database (dbhub)** - PostgreSQL integration
 - **FireCrawl** - Web scraping and search
-- **Playwright** - Browser automation
 - **MCP Funnel** - Tool filtering for token optimization
 
 ### 🛠️ Testing & Quality Tools
@@ -54,7 +53,7 @@
 ### 🐳 Automated Dev Container Setup (VS Code / Cursor / Windsurf)
 - **9 DevContainer Features** - Zsh, Node.js, Docker-in-Docker, uv, ruff, basedpyright, git, fzf, desktop
 - **27 VS Code Extensions** - Python, Docker, SQL, testing, formatting, and development tools
-- **7 CLI Tools** - qlty, Claude Code, Statusline, dotenvx, Cipher, Newman, Playwright
+- **6 CLI Tools** - qlty, Claude Code, Statusline, dotenvx, Cipher, Newman
 - **PostgreSQL Database** - Local instance on port 5433 for development and testing
 
 ---
@@ -160,13 +159,12 @@ Contributions welcome: custom skills, MCP integrations, workflow improvements, b
 - **[astral-sh/ruff](https://github.com/astral-sh/ruff)** - Fast Python linter and formatter
 - **[DetachHead/basedpyright](https://github.com/DetachHead/basedpyright)** - Enhanced Python type checker
 - **[python/mypy](https://github.com/python/mypy)** - Static type checker for Python
-- **[qltysh/qlty](https://github.com/qltysh/qlty)** - Code quality automation
 - **[dotenvx/dotenvx](https://github.com/dotenvx/dotenvx)** - Environment variable management
 
 **Testing & Automation:**
 - **[postmanlabs/newman](https://github.com/postmanlabs/newman)** - End-to-End API testing
-- **[microsoft/playwright](https://github.com/microsoft/playwright)** - Browser automation and testing
 - **[pytest-dev/pytest](https://github.com/pytest-dev/pytest)** - Python testing framework
+- **[qltysh/qlty](https://github.com/qltysh/qlty)** - Code quality automation
 
 **Claude Code Integration:**
 - **[campfirein/cipher](https://github.com/campfirein/cipher)** - Cross-session memory
@@ -180,7 +178,6 @@ Contributions welcome: custom skills, MCP integrations, workflow improvements, b
 - **[ref-tools/ref-tools-mcp](https://github.com/ref-tools/ref-tools-mcp)** - Documentation search
 - **[mendableai/firecrawl-mcp](https://github.com/mendableai/firecrawl)** - Web scraping
 - **[bytebase/dbhub](https://github.com/bytebase/dbhub)** - PostgreSQL connectivity
-- **[microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp)** - Browser automation
 - **[chris-schra/mcp-funnel](https://github.com/chris-schra/mcp-funnel)** - Tool filtering
 
 ---

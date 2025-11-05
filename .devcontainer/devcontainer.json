@@ -5,8 +5,7 @@
   },
   "runArgs": [
     "--name",
-    "claude-code-pro",
-    "--shm-size=1g"
+    "claude-code-pro"
   ],
   "workspaceFolder": "/workspaces/claude-code-pro",
   "customizations": {
@@ -42,19 +41,11 @@
     }
   },
   "forwardPorts": [
-    5433, // PostgreSQL
-    5901, // VNC
-    6080 // Desktop
+    5433 // PostgreSQL
   ],
   "portsAttributes": {
     "5433": {
       "label": "postgresql"
-    },
-    "5901": {
-      "label": "vnc"
-    },
-    "6080": {
-      "label": "desktop"
     }
   },
   /* GET FROM: https://containers.dev/features */
@@ -97,10 +88,6 @@
     },
     /* https://github.com/devcontainers-extra/features/tree/main/src/fzf */
     "ghcr.io/devcontainers-extra/features/fzf:1": {
-      "version": "latest"
-    },
-    /* https://github.com/devcontainers/features/tree/main/src/desktop-lite */
-    "ghcr.io/devcontainers/features/desktop-lite:1": {
       "version": "latest"
     }
   },

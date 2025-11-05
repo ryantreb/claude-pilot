@@ -14,18 +14,28 @@ model: sonnet
 
 **Process:** Run tests → Fix failures immediately → Re-test → Run program → Fix issues → Repeat until all green
 
+## MCP Servers for Verification
+
+**Primary tools for verification and fixing:**
+- **IDE Diagnostics**: `mcp__ide__getDiagnostics()` - Check errors/warnings
+- **Cipher**: `mcp__cipher__ask_cipher(...)` - Query issues, store fixes
+- **Claude Context**: `mcp__claude-context__search_code(...)` - Find similar code
+- **Database**: `mcp__dbhub-postgres__execute_sql(...)` - Verify data
+- **Firecrawl**: `mcp__firecrawl-mcp__firecrawl_search(...)` - Research solutions
+- **Ref/Context7**: `mcp__Ref__ref_search_documentation(...)` - Check docs
+
 ## Process
 
 ### Step 1: Gather Context & Fix Initial Issues
 
 **Understand what needs verification and fix obvious problems:**
-1. Check diagnostics: `getDiagnostics()`
+1. Check diagnostics: `mcp__ide__getDiagnostics()`
    - **If errors/warnings found:** Fix them immediately before proceeding
 2. Read plan (if exists): `Glob("docs/plans/*.md")` then `Read(latest_plan)`
    - Extract requirements, success criteria, architecture decisions
    - If no plan found, continue without (standalone verification)
 3. Check changes: `git status --short` and `git diff --stat` - Understand scope
-4. Query Cipher: `ask_cipher("What was implemented? Any known issues?")`
+4. Query Cipher: `mcp__cipher__ask_cipher("What was implemented? Any known issues?")`
 
 ### Step 2: Run & Fix Unit Tests
 
@@ -174,7 +184,7 @@ SELECT COUNT(*) FROM target_table WHERE created_at > NOW() - INTERVAL '1 hour';
 # Quick final check
 uv run pytest -q  # Quiet mode for quick pass/fail
 uv run python src/main.py  # Or whatever the main entry point is
-getDiagnostics()  # Must return zero issues
+mcp__ide__getDiagnostics()  # Must return zero issues
 ```
 
 **If anything fails:** Go back to the specific step and fix it
@@ -183,14 +193,14 @@ getDiagnostics()  # Must return zero issues
 
 **After fixing each major issue:**
 ```
-ask_cipher("Fixed: [issue description] in [file].
+mcp__cipher__ask_cipher("Fixed: [issue description] in [file].
 Solution: [what was done]
 Tests now passing: [test names]")
 ```
 
 **After successful completion:**
 ```
-ask_cipher("Verification complete for [feature/plan].
+mcp__cipher__ask_cipher("Verification complete for [feature/plan].
 All tests passing, coverage at X%, program runs successfully.
 Key fixes applied: [list of major fixes]")
 ```

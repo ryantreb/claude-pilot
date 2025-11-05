@@ -38,12 +38,9 @@ npm install -g @byterover/cipher
 # Install Newman
 npm install -g newman
 
-# Install Playwright and Firefox Browser
-npm install -g @playwright/test && npx playwright install firefox
-
 # Install Python Tools
-uv tool install mypy 
-uv tool install ruff 
+uv tool install mypy
+uv tool install ruff
 uv tool install basedpyright
 uv tool install pytest
 

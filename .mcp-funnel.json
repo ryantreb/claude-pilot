@@ -1,14 +1,5 @@
 {
-  "servers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["@playwright/mcp@latest", "--browser", "firefox"]
-    },
-    "firecrawl-mcp": {
-      "command": "npx",
-      "args": ["-y", "firecrawl-mcp"]
-    }
-  },
+  "servers": {},
   "exposeTools": [],
   "alwaysVisibleTools": [],
   "exposeCoreTools": ["discover_*", "get_tool_schema", "load_toolset", "bridge_tool_request"]

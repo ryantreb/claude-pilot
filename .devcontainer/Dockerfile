@@ -1,9 +1,25 @@
-FROM mcr.microsoft.com/devcontainers/base:debian-12
+FROM mcr.microsoft.com/devcontainers/base:bookworm
 
 SHELL ["/bin/bash", "-l", "-c"]
 
-# Install Standard Packages
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt install -y build-essential libssl-dev zlib1g-dev \
-    libbz2-dev libreadline-dev libsqlite3-dev curl git jq zsh vim netcat-openbsd \
-    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+# Install essential packages
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        build-essential \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libffi-dev \
+        liblzma-dev \
+        curl \
+        git \
+        jq \
+        vim \
+        netcat-openbsd && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*

@@ -34,26 +34,66 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 ## MCP Tools for Implementation
 
-1. **IDE Diagnostics** (FIRST & LAST): `getDiagnostics()` - Check errors before/after
-2. **Cipher**: Query patterns, store discoveries - `ask_cipher("How did we implement X?")`
-3. **Claude Context**: Search codebase - `search_code(path="/workspaces/...", query="patterns")`
-4. **Ref/Context7**: API docs - `ref_search_documentation(query="...")`
-5. **Database**: Schema/queries - `execute_sql("SELECT...")`
-6. **FireCrawl** (if needed): External docs - Enable with `discover_tools_by_words`
-7. **Playwright** (UI tests only): Browser automation - Enable when needed
+### Always Available (Direct Access)
+
+1. **IDE Diagnostics** (FIRST & LAST)
+   ```
+   mcp__ide__getDiagnostics() # Check errors/warnings before and after
+   mcp__ide__executeCode(code="...") # Run Python in Jupyter kernel (notebooks only)
+   ```
+
+2. **Cipher** - Query patterns, store discoveries
+   ```
+   mcp__cipher__ask_cipher("How did we implement X? What patterns worked?")
+   mcp__cipher__ask_cipher("Store: Fixed issue Y using pattern Z")
+   ```
+
+3. **Claude Context** - Search codebase semantically
+   ```
+   mcp__claude-context__search_code(path="/workspaces/...", query="similar patterns")
+   mcp__claude-context__index_codebase(path="/workspaces/...") # If search fails
+   ```
+
+4. **Database** - Check schema, run queries
+   ```
+   mcp__dbhub-postgres__execute_sql("SELECT * FROM table WHERE...")
+   ```
+
+5. **Ref/Context7** - Documentation research
+   ```
+   mcp__Ref__ref_search_documentation(query="pytest fixtures")
+   mcp__Ref__ref_read_url(url="https://...")
+   mcp__context7__resolve-library-id(libraryName="library")
+   mcp__context7__get-library-docs(context7CompatibleLibraryID="/org/lib")
+   ```
+
+6. **Firecrawl** - Web scraping/search
+   ```
+   mcp__firecrawl-mcp__firecrawl_search(query="...", sources=[{"type": "web"}])
+   mcp__firecrawl-mcp__firecrawl_scrape(url="https://...", formats=["markdown"])
+   ```
+
+### Tool Discovery (When Needed)
+
+7. **MCP Funnel** - Discover and bridge additional tools
+   ```
+   mcp__mcp-funnel__discover_tools_by_words(words="tool keywords", enable=true)
+   mcp__mcp-funnel__get_tool_schema(tool="discovered_tool_name")
+   mcp__mcp-funnel__bridge_tool_request(tool="tool_name", arguments={...})
+   ```
 
 ## Standard Task Flow (EVERY Task)
 
-1. **Diagnostics**: `getDiagnostics()`
-2. **Knowledge**: Query Cipher for patterns
-3. **Search**: Claude Context for similar code
-4. **Research**: Ref/Context7 if needed
+1. **Diagnostics**: `mcp__ide__getDiagnostics()`
+2. **Knowledge**: Query Cipher for patterns - `mcp__cipher__ask_cipher("...")`
+3. **Search**: Claude Context for similar code - `mcp__claude-context__search_code(...)`
+4. **Research**: Ref/Context7 if needed - `mcp__Ref__ref_search_documentation(...)`
 5. **Test**: Write failing test FIRST (MANDATORY)
 6. **Implement**: Minimal code to pass
 7. **Verify**: Diagnostics + run tests
 8. **Execute**: Run actual code and verify output (MANDATORY)
 9. **E2E** (APIs): Newman/Postman tests
-10. **Store**: Save discoveries in Cipher
+10. **Store**: Save discoveries in Cipher - `mcp__cipher__ask_cipher("Store: ...")`
 
 **CRITICAL - Execute Actual Code:** After tests pass, run the actual program/function to verify it works:
 - ETL: `uv run python src/main.py` → Check logs/DB records
@@ -99,8 +139,8 @@ Run: `newman run postman/collections/feature.json -e postman/environments/dev.js
 1. Count total tasks
 2. Review critically, raise concerns
 3. Create TodoWrite (mark completed if continuation)
-4. Run `getDiagnostics()` for clean state
-5. Search codebase for relevant patterns
+4. Run `mcp__ide__getDiagnostics()` for clean state
+5. Search codebase for relevant patterns using `mcp__claude-context__search_code(...)`
 
 ### Step 2: Execute Tasks Autonomously
 
@@ -108,11 +148,11 @@ Run: `newman run postman/collections/feature.json -e postman/environments/dev.js
 
 **Per task (CRITICAL - follow exactly):**
 1. Mark task as `in_progress` in TodoWrite
-2. Run `getDiagnostics()` to check for pre-existing errors
+2. Run `mcp__ide__getDiagnostics()` to check for pre-existing errors
 3. Execute Standard Task Flow (see above)
 4. Write failing test FIRST (TDD mandatory - NO exceptions)
 5. Implement minimal code to pass test
-6. Run `getDiagnostics()` again to verify no errors
+6. Run `mcp__ide__getDiagnostics()` again to verify no errors
 7. **Execute actual code** to verify functionality (MANDATORY - show output)
 8. Mark task as `completed` in TodoWrite ONLY if tests pass AND code executes successfully
 9. **UPDATE PLAN FILE:** Change `[ ]` to `[x]` for this task
@@ -167,8 +207,8 @@ If < 80%: Continue to next task without asking
 ### Step 4: Complete Development
 
 **When ALL tasks are `[x]` complete:**
-1. Run quick verification: `getDiagnostics()` and `uv run pytest`
-2. Store learnings: `ask_cipher("Store: Completed <feature>. Key learnings: <insights>")`
+1. Run quick verification: `mcp__ide__getDiagnostics()` and `uv run pytest`
+2. Store learnings: `mcp__cipher__ask_cipher("Store: Completed <feature>. Key learnings: <insights>")`
 3. **INFORM USER:** "✅ All tasks complete. Run `/verify` for comprehensive verification"
 4. DO NOT run /verify yourself - let user initiate
 

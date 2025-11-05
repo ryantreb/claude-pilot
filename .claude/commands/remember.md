@@ -36,7 +36,7 @@ Check `git status --short` → Update plan's Progress Tracking:
 ### Step 3: Store in Cipher
 
 ```
-ask_cipher("Store: [Feature] - [Title]
+mcp__cipher__ask_cipher("Store: [Feature] - [Title]
 Built: [What/how]
 Decisions: [Choice]: [Why]
 Patterns: [Pattern]: [Application]

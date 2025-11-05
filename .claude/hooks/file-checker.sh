@@ -198,9 +198,9 @@ if [[ $has_issues == true ]]; then
   fi
 
   echo -e "${RED}Fix all issues above before continuing${NC}" >&2
-  exit 1  # Exit with error code when issues found
+  exit 1 # Exit with error code when issues found
 else
   echo "" >&2
   echo -e "${GREEN}✅ Code quality good. Continue${NC}" >&2
-  exit 0  # Exit successfully when no issues
+  exit 0 # Exit successfully when no issues
 fi

@@ -2,12 +2,12 @@
 name = "claude-code-pro"
 version = "1.0.0"
 description = "Claude Code Pro"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 readme = "README.md"
 dependencies = ["ipykernel>=6.29.5", "jupyter>=1.1.1"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pylance>=0.24.1",
     "basedpyright>=1.32.1",
     "pytest>=8.3.3",
@@ -107,6 +107,9 @@ exclude = [
 ]
 min_confidence = 80
 paths = ["src"]
+
+[tool.mypy]
+ignore_missing_imports = true
 
 [tool.basedpyright]
 include = ["src"]

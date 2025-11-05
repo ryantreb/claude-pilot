@@ -43,33 +43,44 @@ Use when adding tasks to an existing plan. User can provide:
 
 1. **Cipher (START HERE)** - Query for past implementations, similar patterns, lessons learned
    ```
-   ask_cipher("Have we implemented something similar to <feature>? What patterns worked?")
-   ask_cipher("Store this implementation plan for <feature>")
+   mcp__cipher__ask_cipher("Have we implemented something similar to <feature>? What patterns worked?")
+   mcp__cipher__ask_cipher("Store this implementation plan for <feature>")
    ```
 
 2. **Claude Context** - Search codebase for existing patterns and exact file paths
    ```
-   search_code(path="/workspaces/...", query="authentication patterns")
+   mcp__claude-context__search_code(path="/workspaces/...", query="authentication patterns")
+   mcp__claude-context__index_codebase(path="/workspaces/...") # If not indexed
+   mcp__claude-context__get_indexing_status(path="/workspaces/...")
    ```
 
 3. **Ref/Context7** - Research documentation for design decisions and API details
    ```
-   ref_search_documentation(query="pytest fixtures documentation")
-   resolve-library-id(libraryName="react")
-   get-library-docs(context7CompatibleLibraryID="/facebook/react", topic="hooks")
+   mcp__Ref__ref_search_documentation(query="pytest fixtures documentation")
+   mcp__Ref__ref_read_url(url="https://...") # Read specific doc page
+   mcp__context7__resolve-library-id(libraryName="react")
+   mcp__context7__get-library-docs(context7CompatibleLibraryID="/facebook/react", topic="hooks")
    ```
 
 4. **Database (if planning DB changes)** - Check current schema
    ```
-   execute_sql("SELECT column_name FROM information_schema.columns WHERE table_name='users'")
+   mcp__dbhub-postgres__execute_sql("SELECT column_name FROM information_schema.columns WHERE table_name='users'")
    ```
 
-5. **FireCrawl (optional)** - External research for best practices
+5. **Firecrawl (when additional information from web needed)** - External research for best practices
    ```
-   discover_tools_by_words(words="firecrawl", enable=true)
+   mcp__firecrawl-mcp__firecrawl_search(query="best practices", sources=[{"type": "web"}])
+   mcp__firecrawl-mcp__firecrawl_scrape(url="https://...", formats=["markdown"])
    ```
 
-**NOT needed during planning:** IDE diagnostics (no code yet), Playwright (UI testing comes during implementation)
+6. **MCP Funnel (for tool discovery)** - Find and use additional tools if needed
+   ```
+   mcp__mcp-funnel__discover_tools_by_words(words="example_words", enable=true)
+   mcp__mcp-funnel__get_tool_schema(tool="tool_name")
+   mcp__mcp-funnel__bridge_tool_request(tool="tool_name", arguments={})
+   ```
+
+**NOT needed during planning:** IDE diagnostics (no code yet)
 
 ### Available Skills for Implementation
 
