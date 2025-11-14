@@ -28,9 +28,17 @@ Start shipping systematically with Spec-Driven Development, Skills, TDD, Semanti
 
 ---
 
-## 📦 What's Inside
+## 🚀 Getting Started
 
-<img src="docs/img/ide-screenshot.png" alt="IDE Screenshot" width="600">
+**Installation & Updates**: Run this shell command in any project directory for fresh install or to update to the latest version:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/maxritter/claude-codepro/main/scripts/install.sh | bash
+```
+
+---
+
+## 📦 What's Inside
 
 ### 📋 Flexible Development Workflows via Slash Commands
 
@@ -67,18 +75,6 @@ Start shipping systematically with Spec-Driven Development, Skills, TDD, Semanti
 - **Global Tools** - Python tools, qlty, Claude Code, Cipher, Newman installed globally
 - **Shell Integration** - Auto-configures bash, zsh, and fish with `cc` alias
 - **IDE Compatible** - Works with VS Code, Cursor, Windsurf, or any terminal
-
----
-
-## 🚀 Getting Started
-
-**Installation & Updates**: Run this one-liner in any project directory for fresh install or to update to the latest version:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/maxritter/claude-codepro/main/scripts/install.sh | bash
-```
-
-It will ask you a few questions and set up everything automatically, then show you how to get started.
 
 ---
 
@@ -159,7 +155,6 @@ Contributions welcome: custom skills, MCP integrations, workflow improvements, b
 
 ## 🙏 Acknowledgments
 
-- **[dotenvx/dotenvx](https://github.com/dotenvx/dotenvx)** - Automatic .env loading for Claude Code
 - **[qltysh/qlty](https://github.com/qltysh/qlty)** - Code quality automation
 - **[obra/superpowers](https://github.com/obra/superpowers)** - CC Skills inspiration
 - **[buildermethods/agent-os](https://github.com/buildermethods/agent-os)** - CC Spec-Driven inspiration
@@ -175,6 +170,7 @@ Contributions welcome: custom skills, MCP integrations, workflow improvements, b
 - **[astral-sh/ruff](https://github.com/astral-sh/ruff)** - Fast Python linter and formatter
 - **[DetachHead/basedpyright](https://github.com/DetachHead/basedpyright)** - Enhanced Python type checker
 - **[python/mypy](https://github.com/python/mypy)** - Static type checker for Python
+- **[dotenvx/dotenvx](https://github.com/dotenvx/dotenvx)** - Automatic .env loading for Claude Code
 
 ---
 
