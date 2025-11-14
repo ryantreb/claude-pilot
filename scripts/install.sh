@@ -3,6 +3,7 @@
 # =============================================================================
 # Claude CodePro Installation Script
 # Installs Claude CodePro directly on host machine (no container required)
+# Supports: macOS, Linux, WSL
 # =============================================================================
 
 set -e
@@ -142,6 +143,53 @@ install_file() {
 # Dependency Installation Functions
 # -----------------------------------------------------------------------------
 
+install_nodejs() {
+    if command -v npm &> /dev/null; then
+        print_success "npm already installed"
+        return 0
+    fi
+
+    print_status "Installing Node.js and npm..."
+
+    # Detect OS and install Node.js accordingly
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - use official installer
+        print_status "Downloading Node.js for macOS..."
+        local node_pkg="/tmp/node-installer.pkg"
+        curl -sL "https://nodejs.org/dist/v20.11.0/node-v20.11.0.pkg" -o "$node_pkg"
+        sudo installer -pkg "$node_pkg" -target /
+        rm -f "$node_pkg"
+    else
+        # Linux - use NodeSource repository
+        print_status "Setting up NodeSource repository..."
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - 2>/dev/null || \
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash - 2>/dev/null
+
+        # Try apt-get first (Debian/Ubuntu)
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get install -y nodejs
+        # Try yum (RHEL/CentOS/Fedora)
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y nodejs
+        # Try dnf (Fedora)
+        elif command -v dnf &> /dev/null; then
+            sudo dnf install -y nodejs
+        else
+            print_error "Could not detect package manager. Please install Node.js manually from https://nodejs.org/"
+            exit 1
+        fi
+    fi
+
+    # Verify installation
+    if command -v npm &> /dev/null; then
+        print_success "Installed Node.js and npm"
+        npm --version
+    else
+        print_error "npm installation failed. Please install Node.js manually from https://nodejs.org/"
+        exit 1
+    fi
+}
+
 install_uv() {
     if command -v uv &> /dev/null; then
         print_success "uv already installed"
@@ -236,7 +284,7 @@ install_dotenvx() {
     fi
 
     print_status "Installing dotenvx..."
-    curl -sfS https://dotenvx.sh | sh
+    npm install -g @dotenvx/dotenvx
 
     print_success "Installed dotenvx"
 }
@@ -318,14 +366,14 @@ main() {
     # Ask about Python support
     echo "Do you want to install advanced Python features?"
     echo "This includes: uv, ruff, mypy, basedpyright, and Python quality hooks"
-    read -r -p "Install Python support? (y/n): " -n 1 INSTALL_PYTHON
+    read -r -p "Install Python support? (y/n): " -n 1 INSTALL_PYTHON < /dev/tty
     echo ""
     echo ""
 
     # Check for existing Claude installation
     if [[ -d "$PROJECT_DIR/.claude" ]]; then
         print_warning ".claude already exists"
-        read -r -p "Overwrite? (y/n): " -n 1
+        read -r -p "Overwrite? (y/n): " -n 1 < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             echo "Installation cancelled"
@@ -353,7 +401,7 @@ main() {
                             print_warning "settings.local.json already exists"
                             echo "This file contains Claude Code configuration (permissions, hooks, MCP servers)."
                             echo "Overwriting will replace your current configuration with Claude CodePro defaults."
-                            read -r -p "Overwrite settings.local.json? (y/n): " -n 1
+                            read -r -p "Overwrite settings.local.json? (y/n): " -n 1 < /dev/tty
                             echo
                             if [[ ! $REPLY =~ ^[Yy]$ ]]; then
                                 print_warning "Skipped settings.local.json (keeping existing)"
@@ -430,6 +478,10 @@ with open('$PROJECT_DIR/.claude/settings.local.json', 'w') as f:
 
     # Install dependencies
     print_section "Installing Dependencies"
+
+    # Install Node.js first (required for npm packages)
+    install_nodejs
+    echo ""
 
     # Install Python tools if selected
     if [[ "$INSTALL_PYTHON" =~ ^[Yy]$ ]]; then

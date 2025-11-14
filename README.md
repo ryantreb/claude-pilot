@@ -72,11 +72,6 @@ Start shipping systematically with Spec-Driven Development, Skills, TDD, Semanti
 
 ## 🚀 Getting Started
 
-### 📋 Prerequisites
-
-- **Linux/macOS/WSL** - Shell environment required
-- **Node.js & npm** - For MCP servers and tooling
-
 ### 📥 Installation
 
 Run this one-liner in any existing project directory:
@@ -105,6 +100,7 @@ curl -sSL https://raw.githubusercontent.com/maxritter/claude-codepro/main/script
    - Firecrawl (web scraping)
 
 4. **Dependencies Installation** - Automatically installs:
+   - **Node.js & npm** (if not present): Required for MCP servers and tooling
    - **Core** (always): Claude Code CLI, qlty, Cipher, Newman, dotenvx, Statusline
    - **Python** (optional): uv, ruff, mypy, basedpyright
 

@@ -40,7 +40,7 @@ setup_env_file() {
 
     if [[ -f "$PROJECT_DIR/.env" ]]; then
         print_warning "Found existing .env file"
-        read -r -p "Do you want to keep it? (y/n): " -n 1
+        read -r -p "Do you want to keep it? (y/n): " -n 1 < /dev/tty
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             print_success "Keeping existing .env file"
@@ -66,10 +66,10 @@ setup_env_file() {
     echo "   4. Copy the Token and Public Endpoint"
     echo "   5. Go to Clusters -> Users -> Admin -> Reset Password"
     echo ""
-    read -r -p "   Enter MILVUS_TOKEN: " MILVUS_TOKEN
-    read -r -p "   Enter MILVUS_ADDRESS (Public Endpoint): " MILVUS_ADDRESS
-    read -r -p "   Enter VECTOR_STORE_USERNAME (usually db_xxxxx): " VECTOR_STORE_USERNAME
-    read -r -p "   Enter VECTOR_STORE_PASSWORD: " VECTOR_STORE_PASSWORD
+    read -r -p "   Enter MILVUS_TOKEN: " MILVUS_TOKEN < /dev/tty
+    read -r -p "   Enter MILVUS_ADDRESS (Public Endpoint): " MILVUS_ADDRESS < /dev/tty
+    read -r -p "   Enter VECTOR_STORE_USERNAME (usually db_xxxxx): " VECTOR_STORE_USERNAME < /dev/tty
+    read -r -p "   Enter VECTOR_STORE_PASSWORD: " VECTOR_STORE_PASSWORD < /dev/tty
     echo ""
 
     # OpenAI API Key
@@ -80,7 +80,7 @@ setup_env_file() {
     echo "   Used for: Low-usage LLM calls in Cipher memory system"
     echo "   Create at: https://platform.openai.com/account/api-keys"
     echo ""
-    read -r -p "   Enter OPENAI_API_KEY: " OPENAI_API_KEY
+    read -r -p "   Enter OPENAI_API_KEY: " OPENAI_API_KEY < /dev/tty
     echo ""
 
     # Context7 API Key
@@ -92,7 +92,7 @@ setup_env_file() {
     echo "   Create at: https://context7.com/dashboard"
     echo "   Note: Free tier available, set token limit to 2000 in dashboard"
     echo ""
-    read -r -p "   Enter CONTEXT7_API_KEY: " CONTEXT7_API_KEY
+    read -r -p "   Enter CONTEXT7_API_KEY: " CONTEXT7_API_KEY < /dev/tty
     echo ""
 
     # Ref API Key
@@ -104,7 +104,7 @@ setup_env_file() {
     echo "   Create at: https://ref.tools/dashboard"
     echo "   Note: You can add your own resources in the UI"
     echo ""
-    read -r -p "   Enter REF_API_KEY: " REF_API_KEY
+    read -r -p "   Enter REF_API_KEY: " REF_API_KEY < /dev/tty
     echo ""
 
     # Firecrawl API Key
@@ -115,7 +115,7 @@ setup_env_file() {
     echo "   Used for: Web scraping and crawling capabilities"
     echo "   Create at: https://www.firecrawl.dev/app"
     echo ""
-    read -r -p "   Enter FIRECRAWL_API_KEY: " FIRECRAWL_API_KEY
+    read -r -p "   Enter FIRECRAWL_API_KEY: " FIRECRAWL_API_KEY < /dev/tty
     echo ""
 
     # Create .env file
