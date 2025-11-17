@@ -65,24 +65,51 @@ log_warning() {
 
 load_rules() {
     log_info "Loading rules..."
+    log_info ""
 
     local rule_count=0
+    local standard_count=0
+    local custom_count=0
 
-    for category in core workflow extended; do
-        local category_dir="$RULES_DIR/$category"
-        [[ ! -d "$category_dir" ]] && continue
+    # Load from both standard and custom rules
+    for source in standard custom; do
+        local source_loaded=false
 
-        while IFS= read -r -d '' md_file; do
-            local rule_id
-            rule_id=$(basename "$md_file" .md)
-            # Store rule content in temp file instead of associative array
-            cat "$md_file" > "$TEMP_RULES_DIR/$rule_id"
-            log_success "Loaded $category/$(basename "$md_file")"
-            ((rule_count++)) || true
-        done < <(find "$category_dir" -maxdepth 1 -name "*.md" -print0 2>/dev/null)
+        for category in core workflow extended; do
+            local category_dir="$RULES_DIR/$source/$category"
+            [[ ! -d "$category_dir" ]] && continue
+
+            while IFS= read -r -d '' md_file; do
+                # Print section header on first file from this source
+                if [[ "$source_loaded" == false ]]; then
+                    if [[ "$source" == "standard" ]]; then
+                        log_info "  📦 Standard Rules:"
+                    else
+                        log_info ""
+                        log_info "  🎨 Custom Rules:"
+                    fi
+                    source_loaded=true
+                fi
+
+                local rule_id
+                rule_id=$(basename "$md_file" .md)
+
+                # Custom rules override standard rules (loaded second)
+                cat "$md_file" > "$TEMP_RULES_DIR/$rule_id"
+                log_success "    $category/$(basename "$md_file")"
+                ((rule_count++)) || true
+
+                if [[ "$source" == "standard" ]]; then
+                    ((standard_count++)) || true
+                else
+                    ((custom_count++)) || true
+                fi
+            done < <(find "$category_dir" -maxdepth 1 -name "*.md" -print0 2>/dev/null)
+        done
     done
 
-    log_info "Total rules loaded: $rule_count"
+    log_info ""
+    log_info "Total: $rule_count rules ($standard_count standard, $custom_count custom)"
 }
 
 # -----------------------------------------------------------------------------
@@ -91,32 +118,58 @@ load_rules() {
 
 discover_skills() {
     log_info "Discovering skills..."
-
-    local extended_dir="$RULES_DIR/extended"
-    [[ ! -d "$extended_dir" ]] && return
+    log_info ""
 
     local skill_count=0
+    local standard_count=0
+    local custom_count=0
 
-    while IFS= read -r -d '' md_file; do
-        local skill_name
-        skill_name=$(basename "$md_file" .md)
+    # Discover from both standard and custom (custom can add new skills)
+    for source in standard custom; do
+        local extended_dir="$RULES_DIR/$source/extended"
+        [[ ! -d "$extended_dir" ]] && continue
 
-        # Extract first non-empty, non-heading line as description
-        local description=""
-        while IFS= read -r line; do
-            line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-            if [[ -n "$line" && ! "$line" =~ ^# ]]; then
-                description="$line"
-                break
+        local source_has_skills=false
+
+        while IFS= read -r -d '' md_file; do
+            # Print section header on first skill from this source
+            if [[ "$source_has_skills" == false ]]; then
+                if [[ "$source" == "standard" ]]; then
+                    log_info "  📦 Standard Skills:"
+                else
+                    log_info ""
+                    log_info "  🎨 Custom Skills:"
+                fi
+                source_has_skills=true
             fi
-        done < "$md_file"
 
-        AVAILABLE_SKILLS+=("$skill_name|${description:-No description}")
-        log_success "Discovered @$skill_name"
-        ((skill_count++)) || true
-    done < <(find "$extended_dir" -maxdepth 1 -name "*.md" -print0 2>/dev/null | sort -z)
+            local skill_name
+            skill_name=$(basename "$md_file" .md)
 
-    log_info "Total skills discovered: $skill_count"
+            # Extract first non-empty, non-heading line as description
+            local description=""
+            while IFS= read -r line; do
+                line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                if [[ -n "$line" && ! "$line" =~ ^# ]]; then
+                    description="$line"
+                    break
+                fi
+            done < "$md_file"
+
+            AVAILABLE_SKILLS+=("$skill_name|${description:-No description}")
+            log_success "    @$skill_name"
+            ((skill_count++)) || true
+
+            if [[ "$source" == "standard" ]]; then
+                ((standard_count++)) || true
+            else
+                ((custom_count++)) || true
+            fi
+        done < <(find "$extended_dir" -maxdepth 1 -name "*.md" -print0 2>/dev/null | sort -z)
+    done
+
+    log_info ""
+    log_info "Total: $skill_count skills ($standard_count standard, $custom_count custom)"
 }
 
 # -----------------------------------------------------------------------------
@@ -170,6 +223,8 @@ parse_yaml_commands() {
     local -a rules_list=()
     local in_commands=false
     local in_rules=false
+    local in_standard=false
+    local in_custom=false
 
     while IFS= read -r line; do
         # Remove leading/trailing whitespace
@@ -188,9 +243,21 @@ parse_yaml_commands() {
             # Rules section
             if [[ "$line" == "rules:" ]]; then
                 in_rules=true
+                in_standard=false
+                in_custom=false
 
-            # New command (no leading spaces before command name, and not "rules:")
-            elif [[ "$line" =~ ^([a-z_-]+):$ && "$line" != "rules:" ]]; then
+            # Standard subsection within rules
+            elif [[ "$line" == "standard:" ]]; then
+                in_standard=true
+                in_custom=false
+
+            # Custom subsection within rules
+            elif [[ "$line" == "custom:" ]]; then
+                in_standard=false
+                in_custom=true
+
+            # New command (no leading spaces before command name)
+            elif [[ "$line" =~ ^([a-z_-]+):$ && "$line" != "rules:" && "$line" != "standard:" && "$line" != "custom:" ]]; then
                 # Output previous command if exists
                 if [[ -n "$current_command" ]]; then
                     echo "$current_command|$description|$model|$inject_skills|${rules_list[*]}"
@@ -203,6 +270,8 @@ parse_yaml_commands() {
                 inject_skills="false"
                 rules_list=()
                 in_rules=false
+                in_standard=false
+                in_custom=false
 
             # Description field
             elif [[ "$line" =~ ^description:[[:space:]]*(.+)$ ]]; then
@@ -216,9 +285,12 @@ parse_yaml_commands() {
             elif [[ "$line" =~ ^inject_skills:[[:space:]]*(true|false)$ ]]; then
                 inject_skills="${BASH_REMATCH[1]}"
 
-            # Rule item
-            elif [[ "$in_rules" == true && "$line" =~ ^-[[:space:]]*(.+)$ ]]; then
-                rules_list+=("${BASH_REMATCH[1]}")
+            # Rule item (in either standard or custom section, or old format)
+            elif [[ "$line" =~ ^-[[:space:]]*(.+)$ ]]; then
+                # Accept rules from both standard and custom sections, or old flat format
+                if [[ "$in_rules" == true ]]; then
+                    rules_list+=("${BASH_REMATCH[1]}")
+                fi
             fi
         fi
     done < "$config_file"
@@ -290,25 +362,28 @@ build_skills() {
     mkdir -p "$SKILLS_DIR"
 
     local skill_count=0
-    local extended_dir="$RULES_DIR/extended"
 
-    [[ ! -d "$extended_dir" ]] && echo "0" && return
+    # Build from both standard and custom
+    for source in standard custom; do
+        local extended_dir="$RULES_DIR/$source/extended"
+        [[ ! -d "$extended_dir" ]] && continue
 
-    while IFS= read -r -d '' md_file; do
-        local rule_id
-        rule_id=$(basename "$md_file" .md)
+        while IFS= read -r -d '' md_file; do
+            local rule_id
+            rule_id=$(basename "$md_file" .md)
 
-        [[ ! -f "$TEMP_RULES_DIR/$rule_id" ]] && continue
+            [[ ! -f "$TEMP_RULES_DIR/$rule_id" ]] && continue
 
-        local skill_dir="$SKILLS_DIR/$rule_id"
-        mkdir -p "$skill_dir"
+            local skill_dir="$SKILLS_DIR/$rule_id"
+            mkdir -p "$skill_dir"
 
-        local skill_file="$skill_dir/SKILL.md"
-        cat "$TEMP_RULES_DIR/$rule_id" > "$skill_file"
+            local skill_file="$skill_dir/SKILL.md"
+            cat "$TEMP_RULES_DIR/$rule_id" > "$skill_file"
 
-        log_success "Generated $rule_id/SKILL.md"
-        ((skill_count++)) || true
-    done < <(find "$extended_dir" -maxdepth 1 -name "*.md" -print0 2>/dev/null)
+            log_success "Generated $rule_id/SKILL.md"
+            ((skill_count++)) || true
+        done < <(find "$extended_dir" -maxdepth 1 -name "*.md" -print0 2>/dev/null)
+    done
 
     echo "$skill_count"
 }
