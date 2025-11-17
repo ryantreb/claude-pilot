@@ -14,6 +14,8 @@ set -e
 
 NON_INTERACTIVE=false
 SKIP_ENV_SETUP=false
+LOCAL_MODE=false
+LOCAL_REPO_DIR=""
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
@@ -25,17 +27,28 @@ while [[ $# -gt 0 ]]; do
 		SKIP_ENV_SETUP=true
 		shift
 		;;
+	--local)
+		LOCAL_MODE=true
+		# Detect local repo directory (script location)
+		SCRIPT_LOCATION="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+		LOCAL_REPO_DIR="$(cd "$SCRIPT_LOCATION/.." && pwd)"
+		shift
+		;;
 	--help)
 		echo "Usage: $0 [OPTIONS]"
 		echo ""
 		echo "Options:"
 		echo "  --non-interactive  Run without interactive prompts (use env vars)"
 		echo "  --skip-env        Skip environment setup (API keys)"
+		echo "  --local           Use local files instead of downloading from GitHub"
 		echo "  --help            Show this help message"
 		echo ""
 		echo "Environment Variables for Non-Interactive Mode:"
 		echo "  INSTALL_PYTHON=Y|N  Install Python support (default: Y)"
 		echo "  OVERWRITE_SETTINGS=Y|N  Overwrite settings.local.json if exists (default: N)"
+		echo ""
+		echo "Local Testing:"
+		echo "  --local --non-interactive --skip-env"
 		exit 0
 		;;
 	*)
@@ -66,14 +79,26 @@ TEMP_DIR=$(mktemp -d)
 _bootstrap_download() {
 	local repo_path=$1
 	local dest_path=$2
-	local file_url="${REPO_URL}/raw/${REPO_BRANCH}/${repo_path}"
 
 	mkdir -p "$(dirname "$dest_path")"
 
-	if curl -sL --fail "$file_url" -o "$dest_path" 2>/dev/null; then
-		return 0
+	# Use local files if in local mode
+	if [[ "$LOCAL_MODE" == "true" ]]; then
+		local source_file="$LOCAL_REPO_DIR/$repo_path"
+		if [[ -f "$source_file" ]]; then
+			cp "$source_file" "$dest_path"
+			return 0
+		else
+			return 1
+		fi
 	else
-		return 1
+		# Download from GitHub
+		local file_url="${REPO_URL}/raw/${REPO_BRANCH}/${repo_path}"
+		if curl -sL --fail "$file_url" -o "$dest_path" 2>/dev/null; then
+			return 0
+		else
+			return 1
+		fi
 	fi
 }
 
@@ -89,6 +114,8 @@ download_lib_modules() {
 		"files.sh"
 		"dependencies.sh"
 		"shell.sh"
+		"migration.sh"
+		"setup-env.sh"
 	)
 
 	for module in "${modules[@]}"; do
@@ -116,12 +143,95 @@ source "$PROJECT_DIR/scripts/lib/files.sh"
 source "$PROJECT_DIR/scripts/lib/dependencies.sh"
 # shellcheck source=lib/shell.sh
 source "$PROJECT_DIR/scripts/lib/shell.sh"
+# shellcheck source=lib/migration.sh
+source "$PROJECT_DIR/scripts/lib/migration.sh"
 
 # =============================================================================
 # Setup cleanup trap
 # =============================================================================
 
 trap cleanup EXIT
+
+# =============================================================================
+# Config Merging
+# =============================================================================
+
+# Merge rules config.yaml preserving custom sections
+# Args: $1 = new config path, $2 = existing config path
+merge_rules_config() {
+	local new_config=$1
+	local existing_config=$2
+
+	# Try to install and use yq for YAML merging
+	if ensure_yq; then
+		# Extract custom sections from existing config
+		local temp_merged="${TEMP_DIR}/merged-config.yaml"
+
+		# Use yq to merge: take all from new config, but preserve custom arrays from existing
+		yq eval-all '
+			select(fileIndex == 0) as $new |
+			select(fileIndex == 1) as $old |
+			$new |
+			.commands = ($new.commands * $old.commands |
+				with_entries(
+					.value.rules.custom = ($old.commands[.key].rules.custom // [])
+				)
+			)
+		' "$new_config" "$existing_config" > "$temp_merged"
+
+		mv "$temp_merged" "$existing_config"
+		print_success "Merged config.yaml (preserved custom rules)"
+	else
+		# Fallback: manually preserve custom sections using grep/awk
+		print_warning "yq not available - using manual config merge"
+
+		local temp_merged="${TEMP_DIR}/merged-config.yaml"
+		local current_command=""
+		local in_custom=false
+
+		# Read new config and inject custom sections from old config
+		while IFS= read -r line; do
+			echo "$line" >> "$temp_merged"
+
+			# Detect command name
+			if [[ "$line" =~ ^[[:space:]]*([a-z_-]+):$ ]]; then
+				current_command="${BASH_REMATCH[1]}"
+			fi
+
+			# When we see "custom:" in new config, replace with custom from old config
+			if [[ "$line" =~ ^[[:space:]]*custom: ]]; then
+				# Extract custom section from old config for this command
+				if [[ -n "$current_command" ]] && [[ -f "$existing_config" ]]; then
+					# Use awk to extract custom rules for this command
+					local custom_rules=$(awk -v cmd="$current_command" '
+						/^[[:space:]]*[a-z_-]+:$/ {
+							current_cmd = $1;
+							gsub(/:/, "", current_cmd);
+							gsub(/^[[:space:]]+/, "", current_cmd);
+							in_target = (current_cmd == cmd);
+							in_custom = 0;
+						}
+						in_target && /^[[:space:]]*custom:/ { in_custom = 1; next; }
+						in_target && in_custom && /^[[:space:]]*-/ { print; }
+						in_target && in_custom && /^[[:space:]]*[a-z_-]+:/ { in_custom = 0; }
+					' "$existing_config")
+
+					# If we found custom rules, output them (remove the "custom: []" line we just wrote)
+					if [[ -n "$custom_rules" ]]; then
+						# Remove the last line (custom: [])
+						sed -i.bak '$ d' "$temp_merged" && rm -f "${temp_merged}.bak"
+						# Add custom: header and the rules
+						echo "      custom:" >> "$temp_merged"
+						echo "$custom_rules" >> "$temp_merged"
+					fi
+				fi
+			fi
+		done < "$new_config"
+
+		mv "$temp_merged" "$existing_config"
+		print_success "Merged config.yaml (manually preserved custom rules)"
+	fi
+}
 
 # =============================================================================
 # Build Rules
@@ -152,8 +262,16 @@ build_rules() {
 main() {
 	print_section "Claude CodePro Installation"
 
+	# Check for required system dependencies
+	if ! check_required_dependencies; then
+		exit 1
+	fi
+
 	print_status "Installing into: $PROJECT_DIR"
 	echo ""
+
+	# Run migration if needed (must be before file installation)
+	run_migration
 
 	# Ask about Python support (skip if non-interactive)
 	if [[ $NON_INTERACTIVE == true ]]; then
@@ -176,7 +294,7 @@ main() {
 
 	print_section "Installing Claude CodePro Files"
 
-	# Download .claude directory (update existing files, preserve settings.local.json)
+	# Download .claude directory (update existing files, preserve settings.local.json and custom rules)
 	print_status "Installing .claude files..."
 
 	local files
@@ -186,24 +304,33 @@ main() {
 	if [[ -n $files ]]; then
 		while IFS= read -r file_path; do
 			if [[ -n $file_path ]]; then
+				# Skip custom rules (never overwrite)
+				if [[ $file_path == *"rules/custom/"* ]]; then
+					continue
+				fi
+
 				# Skip Python hook if Python not selected
 				if [[ $INSTALL_PYTHON =~ ^[Yy]$ ]] || [[ $file_path != *"file_checker_python.sh"* ]]; then
 					# Ask about settings.local.json if it already exists
 					if [[ $file_path == *"settings.local.json"* ]] && [[ -f "$PROJECT_DIR/.claude/settings.local.json" ]]; then
-						if [[ $NON_INTERACTIVE == true ]]; then
-							# Use environment variable or default to N (preserve existing)
-							OVERWRITE_SETTINGS=${OVERWRITE_SETTINGS:-N}
-							if [[ ! $OVERWRITE_SETTINGS =~ ^[Yy]$ ]]; then
-								print_success "Non-interactive mode: Kept existing settings.local.json"
-								continue
-							fi
-						else
-							print_warning "settings.local.json already exists"
-							echo "This file may contain new features in this version."
-							read -r -p "Overwrite settings.local.json? (y/n): " -n 1 </dev/tty
-							echo
-							[[ ! $REPLY =~ ^[Yy]$ ]] && print_success "Kept existing settings.local.json" && continue
+						print_warning "settings.local.json already exists"
+						echo "This file may contain new features in this version."
+						read -r -p "Overwrite settings.local.json? (y/N): " -n 1 </dev/tty
+						echo
+						[[ ! $REPLY =~ ^[Yy]$ ]] && print_success "Kept existing settings.local.json" && continue
+					fi
+
+					# Special handling for config.yaml to preserve custom rules
+					if [[ $file_path == *"rules/config.yaml"* ]] && [[ -f "$PROJECT_DIR/.claude/rules/config.yaml" ]]; then
+						# Download new config to temp location
+						local temp_config="${TEMP_DIR}/config.yaml"
+						if download_file "$file_path" "$temp_config" 2>/dev/null; then
+							# Merge configs preserving custom sections
+							merge_rules_config "$temp_config" "$PROJECT_DIR/.claude/rules/config.yaml"
+							((file_count++)) || true
+							echo "   ✓ config.yaml (merged with custom rules)"
 						fi
+						continue
 					fi
 
 					local dest_file="${PROJECT_DIR}/${file_path}"
@@ -215,6 +342,17 @@ main() {
 			fi
 		done <<<"$files"
 	fi
+
+	# Create custom rules directories if they don't exist
+	print_status "Setting up custom rules directories..."
+	for category in core extended workflow; do
+		local custom_dir="$PROJECT_DIR/.claude/rules/custom/$category"
+		if [[ ! -d "$custom_dir" ]]; then
+			mkdir -p "$custom_dir"
+			touch "$custom_dir/.gitkeep"
+			echo "   ✓ Created custom/$category/"
+		fi
+	done
 
 	# Remove Python hook from settings.local.json if Python not selected
 	if [[ ! $INSTALL_PYTHON =~ ^[Yy]$ ]] && [[ -f "$PROJECT_DIR/.claude/settings.local.json" ]]; then
@@ -281,10 +419,11 @@ main() {
 	echo ""
 
 	# Install scripts
-	mkdir -p "$PROJECT_DIR/scripts"
-	install_file "scripts/setup-env.sh" "$PROJECT_DIR/scripts/setup-env.sh"
+	mkdir -p "$PROJECT_DIR/scripts/lib"
+	install_file "scripts/lib/setup-env.sh" "$PROJECT_DIR/scripts/lib/setup-env.sh"
 	install_file "scripts/build-rules.sh" "$PROJECT_DIR/scripts/build-rules.sh"
 	chmod +x "$PROJECT_DIR/scripts/"*.sh
+	chmod +x "$PROJECT_DIR/scripts/lib/"*.sh
 	echo ""
 
 	# Create .nvmrc for Node.js version management
@@ -304,7 +443,7 @@ main() {
 		echo ""
 	else
 		print_section "Environment Setup"
-		bash "$PROJECT_DIR/scripts/setup-env.sh"
+		bash "$PROJECT_DIR/scripts/lib/setup-env.sh"
 	fi
 
 	# =============================================================================
