@@ -1,82 +1,47 @@
-## Coding Standards and Best Practices
+## Coding Standards
 
-**Standards:** DRY/YAGNI | Clean imports | Check diagnostics before/after
+Apply these standards to all code changes. Prioritize simplicity, clarity, and maintainability.
 
-### DRY (Don't Repeat Yourself)
+### Core Principles
 
-Extract duplicated logic into reusable functions or classes.
+**DRY (Don't Repeat Yourself)**: When you see duplicated logic, extract it into a reusable function immediately. If you're about to copy-paste code, stop and create a shared function instead.
 
-Identify common patterns and abstract them. If you're copying code, extract it into a shared function instead.
+**YAGNI (You Aren't Gonna Need It)**: Build only what's explicitly required. Don't add abstractions, features, or complexity for hypothetical future needs. Add them when you have concrete evidence they're needed.
 
-### YAGNI (You Aren't Gonna Need It)
+**Single Responsibility**: Each function should do one thing well. If you need "and" to describe what a function does, it's doing too much and should be split.
 
-Don't add features, abstractions, or complexity until they're actually needed.
+### Naming Conventions
 
-Build the simplest thing that works. Add abstractions when you have concrete evidence they're needed, not because they might be useful someday.
+Use descriptive names that reveal intent without requiring comments:
+- Functions: `calculate_discount`, `validate_email`, `fetch_active_users`
+- Avoid: `process`, `handle`, `data`, `temp`, `x`, `do_stuff`
+- Use domain terminology familiar to the project
+- Spell out words unless the abbreviation is universally understood
 
-### Small, Focused Functions
+### Code Organization
 
-Keep functions small and focused on a single responsibility.
+**Imports**: Order as standard library → third-party → local application. Remove unused imports immediately.
 
-Each function should do one thing well. If a function has "and" in its description, it probably does too much.
+**Dead Code**: Delete unused functions, commented-out blocks, and unreachable code. Use version control to recover old code if needed.
 
-### Meaningful Names
+**Function Size**: Keep functions small and focused. Extract complex logic into well-named helper functions.
 
-Use clear, descriptive names that reveal intent.
+### Quality Checks
 
-**Good names:** `calculate_discount`, `validate_email`, `fetch_active_users`
-**Bad names:** `process`, `handle`, `data`, `temp`, `x`
+**Diagnostics**: Use `getDiagnostics` tool before starting work and after making changes. Fix all errors before considering the task complete.
 
-Avoid abbreviations except for widely understood ones. Use domain terminology.
+**Formatting**: Let automated formatters handle code style. Don't manually format code.
 
-### Clean Imports
+**Backward Compatibility**: Only add compatibility logic when explicitly required by the user. Don't assume you need to support old versions.
 
-Organize imports logically and remove unused ones.
+### Decision Framework
 
-**Order:** Standard library → Third-party → Local application
+When writing code, ask:
+1. Is this the simplest solution that works?
+2. Am I duplicating existing logic?
+3. Will the names make sense to someone reading this in 6 months?
+4. Does each function have a single, clear purpose?
+5. Have I removed all unused code and imports?
+6. Have I checked diagnostics?
 
-Remove unused imports immediately. They add noise and confusion.
-
-### Remove Dead Code
-
-Delete unused code, commented-out blocks, and unused imports.
-
-Don't leave commented code "just in case". Use version control to recover old code if needed.
-
-### Check Diagnostics
-
-Run diagnostics before and after changes to catch issues early.
-
-Use `mcp__ide__getDiagnostics()` at start and end of every task. Fix errors immediately.
-
-### Consistent Formatting
-
-Use automated formatters to maintain consistent code style.
-
-Configure your formatter once, then let it handle indentation, line breaks, and spacing.
-
-### Backward Compatibility
-
-Only add backward compatibility logic when explicitly required.
-
-Don't assume you need to support old versions unless specifically instructed.
-
-### Best Practices
-
-**DO:**
-- Extract duplicate code into functions
-- Build the simplest solution first
-- Use descriptive names
-- Keep functions small and focused
-- Remove dead code immediately
-- Run diagnostics before and after
-- Use automated formatting
-
-**DON'T:**
-- Copy-paste code
-- Over-engineer solutions
-- Use vague names like "process" or "handle"
-- Leave functions doing multiple things
-- Keep commented-out code
-- Skip diagnostic checks
-- Manually format code
+If any answer is no, refactor before proceeding.

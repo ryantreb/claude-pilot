@@ -1,105 +1,160 @@
 ## Execution Verification
 
-**Standards:** Tests passing ≠ Program working | Always execute | Verify output
+**Core Rule:** Tests passing ≠ Program working. Always execute and verify real output.
 
-### Core Principle
+### Mandatory Execution
 
-**Tests passing ≠ Program working**
+Run the actual program after tests pass. Tests use mocks and fixtures - they don't prove the real program works.
 
-You MUST run the actual program and verify real output. Tests might mock incorrectly, miss runtime issues, or pass while the program fails.
+**Execute after:**
+- Tests pass
+- Refactoring code
+- Modifying imports or dependencies
+- Changing configuration
+- Working with entry points
+- Before marking any task complete
 
-### When to Execute
+**If there's a runnable program, RUN IT.**
 
-Execute in EVERY situation where:
-- After refactoring code
-- After tests pass
-- When about to mark task complete
-- After dependency changes
-- When working with entry points
-- After infrastructure changes
-- When imports were modified
+### How to Execute by Type
 
-**If there's a runnable program, RUN IT. No exceptions.**
+**Scripts/CLI Tools:**
+```bash
+# Run the actual command
+python script.py --args
+node cli.js command
 
-### What to Execute
+# Verify: exit code, stdout/stderr, file changes
+```
 
-**ETL Pipelines:** Run the actual ETL, verify logs, check database records, verify exports
+**API Services:**
+```bash
+# Start server (use controlBashProcess for long-running)
+npm start
+# Or for quick verification
+python -m uvicorn app:app
 
-**API Services:** Start server, test endpoints, verify responses, check database side effects
+# Test endpoints with curl or httpie
+curl http://localhost:8000/api/endpoint
 
-**CLI Tools:** Run commands, verify exit codes, check stdout/stderr, verify file changes
+# Verify: response status, payload, database changes
+```
 
-**Batch Jobs/Scripts:** Run script, verify files created, check database changes, verify logs
+**ETL/Data Pipelines:**
+```bash
+# Run the pipeline
+python etl/pipeline.py
+
+# Verify: logs, database records, output files
+```
+
+**Build Artifacts:**
+```bash
+# Build the package
+npm run build
+# Or
+python -m build
+
+# Run the built artifact, not source
+node dist/index.js
+# Or
+pip install dist/*.whl && run-command
+```
 
 ### Verification Checklist
 
-After running, verify:
-- No import errors
-- No runtime errors
-- Expected output in logs
-- Side effects correct (database/files/APIs updated)
-- Configuration loads correctly
-- Dependencies available
-- Performance acceptable
+After execution, confirm:
+- [ ] No import/module errors
+- [ ] No runtime exceptions
+- [ ] Expected output in logs/stdout
+- [ ] Side effects correct (files created, DB updated, API called)
+- [ ] Configuration loaded properly
+- [ ] Dependencies resolved
+- [ ] Performance reasonable
 
-### What "Verification" Means
+### Evidence Required
 
-**BAD:**
-- "The tests pass so it should work"
+Show concrete evidence, not assumptions:
+
+❌ **Insufficient:**
+- "Tests pass so it should work"
 - "I'm confident the imports are correct"
-- "It will probably work in production"
+- "It will probably work"
 
-**GOOD:**
-- "I ran the program and saw: [actual logs]"
-- "Database now contains 150 records"
-- "API returned 200 with payload: [show response]"
+✅ **Required:**
+- "Ran `python app.py` - output: [paste logs]"
+- "Server started on port 8000, GET /health returned 200"
+- "Database query returned 150 records as expected"
+- "Script created output.csv with 1000 rows"
 
-### Integration with TDD Flow
+### Integration with TDD
 
 1. Write failing test (RED)
-2. Write minimal code (GREEN)
-3. Run tests - PASS ✓
-4. **⚠️ RUN ACTUAL PROGRAM** ← Critical step
-5. Verify real output
-6. Refactor if needed
-7. Mark task complete
+2. Verify test fails correctly
+3. Write minimal code (GREEN)
+4. Verify tests pass
+5. **⚠️ RUN ACTUAL PROGRAM** ← Don't skip
+6. Verify real output matches expectations
+7. Refactor if needed
+8. Re-verify execution
+9. Mark complete
 
-**Never skip step 4.** Tests use mocks and fixtures. Real program uses real imports, config, and dependencies.
+Tests validate logic. Execution validates integration.
 
-### Common Failures This Prevents
+### Common Issues Caught
 
-**Import Errors:** Tests mock imports, but real code has missing/wrong imports
-**Configuration Issues:** Tests use mock settings, real program reads env vars that are missing
-**Missing Dependencies:** Tests mock libraries, real program needs actual package installed
-**Build Issues:** Tests use source directly, built package has missing files
+Execution catches what tests miss:
 
-### When Execution is Not Applicable
+- **Import errors:** Tests mock imports, real code has wrong paths
+- **Missing dependencies:** Tests mock libraries, real program needs installed packages
+- **Configuration errors:** Tests use fixtures, real program reads missing env vars
+- **Build issues:** Tests run source, built package has missing files
+- **Path issues:** Tests run from project root, real program runs from different directory
 
-**ONLY skip execution if:**
-- Pure refactoring of internal functions (no entry points)
-- Documentation changes only
+### When to Skip Execution
+
+Skip ONLY for:
+- Documentation-only changes
 - Test-only changes
-- Infrastructure-as-code (where "synth" is the execution)
-- Configuration files
+- Pure internal refactoring (no entry points affected)
+- Configuration files (where validation is the execution)
 
-**If in doubt, execute.**
+**If uncertain, execute.**
 
-### Error Handling
+### When Execution Fails
 
-When execution fails after tests pass:
-1. Don't ignore it - this is a real bug
+If execution fails after tests pass:
+
+1. This is a real bug - don't ignore it
 2. Fix the issue immediately
-3. Run tests again
-4. Execute again to verify
-5. Update tests to catch this failure
+3. Run tests again (should still pass)
+4. Execute again to verify fix
+5. Add test to catch this failure type
 
-### Final Rule
+This reveals gaps in test coverage.
 
-**Before marking ANY task complete:**
+### Completion Checklist
 
-Ask yourself: "Did I run the actual program and verify output?"
+Before marking work complete:
 
-**If no:** Stop. Run it. Verify. Then complete.
-**If yes:** Show the output. Then complete.
+- [ ] All tests pass
+- [ ] Executed actual program
+- [ ] Verified real output (shown evidence)
+- [ ] No errors in execution
+- [ ] Side effects verified
 
-Tests are necessary but not sufficient. Execution is mandatory.
+**If you can't check all boxes, the work isn't complete.**
+
+### Quick Reference
+
+| Situation              | Action          |
+| ---------------------- | --------------- |
+| Tests just passed      | Execute program |
+| About to mark complete | Execute program |
+| Changed imports        | Execute program |
+| Refactored code        | Execute program |
+| Modified config        | Execute program |
+| Uncertain if needed    | Execute program |
+| Documentation only     | Skip execution  |
+
+**Default action: Execute.**

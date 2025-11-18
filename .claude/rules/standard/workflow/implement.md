@@ -1,31 +1,46 @@
-## Task Execution and Batch Processing
+# IMPLEMENT MODE: Task Execution with Mandatory Context Gathering
 
 **Execute ALL tasks continuously. NO stopping unless context manager says context is full.**
 
-### Session Context Awareness
+## Mandatory Context Gathering Phase (REQUIRED)
 
-**ALWAYS read plan first**, then:
-- Check git: `git status --short` and `git diff --name-only`
-- If changes exist: Continuation - read files, query Cipher, search codebase
-- Check plan file for `[x]` completed tasks - SKIP these, resume from first `[ ]` task
-- If no changes: Fresh start from Task 1
+**Before ANY implementation, you MUST:**
 
-### Per-Task Execution Flow
+1. **Read the COMPLETE plan** - Understanding overall architecture and design
+2. **Verify comprehension** - Summarize what you learned to demonstrate understanding
+3. **Identify dependencies** - List files, functions, classes that need modification
+4. **Check current state:**
+   - Git status: `git status --short` and `git diff --name-only`
+   - Diagnostics: `mcp__ide__getDiagnostics()`
+   - Plan progress: Check for `[x]` completed tasks
+5. **Query knowledge base:**
+   - Cipher: Past implementations and gotchas
+   - Codebase: Related patterns and components
+
+## Per-Task Execution Flow
 
 **For EVERY task, follow this exact sequence:**
 
 1. **READ PLAN'S IMPLEMENTATION STEPS** - List all files to create/modify/delete
-2. **Mark task as in_progress** in TodoWrite
-3. **Check diagnostics** - `mcp__ide__getDiagnostics()`
-4. **Execute Standard Task Flow** - TDD mandatory
-5. **Verify tests pass** - `uv run pytest tests/path/to/test.py -v`
-6. **Run actual program** - Show real output
-7. **Check diagnostics again** - Must be zero errors
-8. **Mark task completed** in TodoWrite
-9. **Update plan file** - Change `[ ]` to `[x]`
-10. **Check context usage** - See context-management.yaml
+2. **Perform Call Chain Analysis:**
+   - **Trace Upwards (Callers):** Identify what calls the code you're modifying
+   - **Trace Downwards (Callees):** Identify what the modified code calls
+   - **Side Effects:** Check for database, cache, external system impacts
+3. **Mark task as in_progress** in TodoWrite
+4. **Check diagnostics** - `mcp__ide__getDiagnostics()`
+5. **Execute TDD Flow:**
+   - Write failing test first (RED phase)
+   - Implement minimal code to pass (GREEN phase)
+   - Refactor if needed (REFACTOR phase)
+6. **Verify tests pass** - `uv run pytest tests/path/to/test.py -v`
+7. **Run actual program** - Show real output with sample data
+8. **Check diagnostics again** - Must be zero errors
+9. **Validate Definition of Done** - Check all criteria from plan
+10. **Mark task completed** in TodoWrite
+11. **Update plan file** - Change `[ ]` to `[x]`
+12. **Check context usage** - See context-management.yaml
 
-### Critical Task Rules
+## Critical Task Rules
 
 **⚠️ NEVER SKIP TASKS:**
 - EVERY task MUST be fully implemented
@@ -33,7 +48,7 @@
 - If blocked: STOP and report specific blockers
 - NEVER mark complete without doing the work
 
-### Verification Checklist
+## Verification Checklist
 
 Before marking complete:
 - [ ] Test written and FAILED (RED phase)
@@ -42,7 +57,7 @@ Before marking complete:
 - [ ] Program executed with verified output
 - [ ] No diagnostics errors
 
-### When All Tasks Complete
+## When All Tasks Complete
 
 1. Quick verification: `mcp__ide__getDiagnostics()` and `uv run pytest`
 2. Store learnings in Cipher

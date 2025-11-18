@@ -16,10 +16,10 @@ commands:
     rules:
       standard:
         - plan
+        - context-management
         - git-operations
         - mcp-tools
-        - project-conventions
-        - context-management
+        - tdd-enforcement
       custom: []
   implement:
     description: Execute implementation plans in batches
@@ -28,16 +28,15 @@ commands:
     rules:
       standard:
         - implement
-        - tdd-enforcement
+        - coding-standards
+        - context-management
+        - execution-verification
         - git-operations
         - mcp-tools
-        - coding-standards
-        - project-conventions
-        - error-handling
-        - validation
-        - execution-verification
-        - testing-strategies
-        - context-management
+        - systematic-debugging
+        - tdd-enforcement
+        - testing-strategies-coverage
+        - verification-before-completion
       custom: []
   verify:
     description: Run tests and fix issues end-to-end
@@ -46,14 +45,15 @@ commands:
     rules:
       standard:
         - verify
-        - testing-strategies
+        - coding-standards
+        - context-management
+        - execution-verification
         - git-operations
         - mcp-tools
-        - execution-verification
-        - coding-standards
-        - error-handling
-        - validation
-        - context-management
+        - systematic-debugging
+        - tdd-enforcement
+        - testing-strategies-coverage
+        - verification-before-completion
       custom: []
   quick:
     description: Fast, focused development without spec-driven workflow overhead
@@ -62,15 +62,15 @@ commands:
     rules:
       standard:
         - quick
-        - tdd-enforcement
-        - git-operations
         - coding-standards
-        - mcp-tools
-        - project-conventions
-        - error-handling
-        - validation
-        - execution-verification
         - context-management
+        - execution-verification
+        - git-operations
+        - mcp-tools
+        - systematic-debugging
+        - tdd-enforcement
+        - testing-strategies-coverage
+        - verification-before-completion
       custom: []
   remember:
     description: Store learnings before clearing context

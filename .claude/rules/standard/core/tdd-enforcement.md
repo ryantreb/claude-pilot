@@ -1,111 +1,167 @@
-## TDD (Test-Driven Development) - NON-NEGOTIABLE
+## TDD (Test-Driven Development) - Mandatory Workflow
 
-**RED-GREEN-REFACTOR:** Write test → Verify fail → Minimal code → Verify pass → Refactor → Repeat
+**Core Rule:** No production code without a failing test first. No exceptions.
 
-### The Iron Law
+### The Red-Green-Refactor Cycle
 
+Follow this exact sequence for every feature, function, or behavior change:
+
+#### 1. RED - Write Failing Test
+
+Write one minimal test that describes the desired behavior.
+
+**Test requirements:**
+- Tests one specific behavior
+- Has descriptive name: `test_<function>_<scenario>_<expected_result>`
+- Uses real code (avoid mocks unless testing external dependencies)
+- Focuses on behavior, not implementation details
+
+**Example:**
+```python
+def test_calculate_discount_with_valid_coupon_returns_discounted_price():
+    result = calculate_discount(price=100, coupon="SAVE20")
+    assert result == 80
 ```
-NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+
+#### 2. VERIFY RED - Confirm Test Fails
+
+**MANDATORY STEP - Never skip this verification.**
+
+Execute the test and verify:
+- Test fails with expected failure message
+- Fails because feature doesn't exist (not syntax errors or typos)
+- Failure message clearly indicates what's missing
+
+**If test passes:** You're testing existing behavior. Rewrite the test.
+**If test errors:** Fix the error first, then re-run until it fails correctly.
+
+**Why this matters:** A test that passes immediately proves nothing. You must see it fail to know it actually tests the feature.
+
+#### 3. GREEN - Write Minimal Code
+
+Write the simplest code that makes the test pass.
+
+**Rules:**
+- Implement only what the test requires
+- No extra features or "improvements"
+- No refactoring of other code
+- Hardcoding is acceptable if it passes the test
+
+**Example:**
+```python
+def calculate_discount(price, coupon):
+    if coupon == "SAVE20":
+        return price * 0.8
+    return price
 ```
 
-Write code before the test? Delete it. Start over.
+#### 4. VERIFY GREEN - Confirm Test Passes
 
-**No exceptions:** Don't keep it as "reference", don't "adapt" it, don't look at it. Delete means delete.
+**MANDATORY STEP.**
 
-### Red-Green-Refactor Cycle
+Execute the test and verify:
+- New test passes
+- All existing tests still pass
+- No errors or warnings in output
+- Use `getDiagnostics` to check for type errors or linting issues
 
-#### RED - Write Failing Test
+**If test fails:** Fix the implementation, not the test.
+**If other tests fail:** Fix immediately before proceeding.
 
-Write one minimal test showing what should happen.
+#### 5. REFACTOR - Improve Code Quality
 
-**Requirements:**
-- One behavior per test
-- Clear, descriptive name
-- Real code (no mocks unless unavoidable)
-
-#### Verify RED - Watch It Fail
-
-**MANDATORY. Never skip.**
-
-Run the test and confirm:
-- Test fails (not errors)
-- Failure message is expected
-- Fails because feature missing (not typos)
-
-**Test passes?** You're testing existing behavior. Fix test.
-**Test errors?** Fix error, re-run until it fails correctly.
-
-#### GREEN - Minimal Code
-
-Write simplest code to pass the test.
-
-Don't add features, refactor other code, or "improve" beyond the test.
-
-#### Verify GREEN - Watch It Pass
-
-**MANDATORY.**
-
-Run the test and confirm:
-- Test passes
-- Other tests still pass
-- Output pristine (no errors, warnings)
-
-**Test fails?** Fix code, not test.
-**Other tests fail?** Fix now.
-
-#### REFACTOR - Clean Up
-
-After green only:
+Only after tests are green, improve code quality:
 - Remove duplication
-- Improve names
-- Extract helpers
+- Improve variable/function names
+- Extract helper functions
+- Simplify logic
 
-Keep tests green. Don't add behavior.
+**Critical:** Keep tests passing throughout refactoring. Re-run tests after each change.
 
-### Why Order Matters
+**Do not add new behavior during refactoring.**
 
-**"I'll write tests after to verify it works"**
+### AI Assistant Workflow
 
-Tests written after code pass immediately. Passing immediately proves nothing:
-- Might test wrong thing
-- Might test implementation, not behavior
-- Might miss edge cases you forgot
-- You never saw it catch the bug
+When implementing features, follow this exact sequence:
 
-Test-first forces you to see the test fail, proving it actually tests something.
+1. **Announce intention:** "Writing test for [behavior]"
+2. **Write test:** Create failing test file
+3. **Execute test:** Run test and show failure output
+4. **Verify failure:** Confirm it fails for the right reason
+5. **Announce implementation:** "Writing minimal code to pass test"
+6. **Write code:** Implement minimal solution
+7. **Execute test:** Run test and show passing output
+8. **Verify success:** Confirm all tests pass, check diagnostics
+9. **Refactor if needed:** Improve code while keeping tests green
+10. **Confirm completion:** Show final test run with all tests passing
 
-### Common Rationalizations
+### When TDD Applies
 
-| Excuse | Reality |
-|--------|---------|
-| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
-| "I'll test after" | Tests passing immediately prove nothing. |
-| "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run. |
-| "Deleting X hours is wasteful" | Sunk cost fallacy. Keeping unverified code is technical debt. |
-| "TDD will slow me down" | TDD faster than debugging. Pragmatic = test-first. |
+**Always use TDD for:**
+- New functions or methods
+- New API endpoints
+- New business logic
+- Bug fixes (write test that reproduces bug first)
+- Behavior changes
 
-### Red Flags - STOP and Start Over
+**TDD not required for:**
+- Documentation-only changes
+- Configuration file updates
+- Dependency version updates
+- Formatting/style-only changes
 
-- Code before test
-- Test after implementation
-- Test passes immediately
-- Can't explain why test failed
-- Tests added "later"
-- Rationalizing "just this once"
-- "It's about spirit not ritual"
+**When uncertain, use TDD.**
 
-**All of these mean: Delete code. Start over with TDD.**
+### Common Mistakes to Avoid
+
+**Writing code before test:**
+If you catch yourself writing implementation code before a failing test exists, stop immediately. Delete the code and start with the test.
+
+**Test passes immediately:**
+This means you're testing existing behavior or the test is wrong. Rewrite the test to actually test new functionality.
+
+**Skipping verification steps:**
+Always execute tests and show output. Don't assume tests pass or fail - verify it.
+
+**Testing implementation instead of behavior:**
+Test what the code does, not how it does it. Tests should survive refactoring.
+
+**Using mocks unnecessarily:**
+Only mock external dependencies (APIs, databases, file systems). Don't mock your own code.
 
 ### Verification Checklist
 
-Before marking work complete:
+Before marking any implementation complete, verify:
 
-- [ ] Every new function/method has a test
+- [ ] Every new function/method has at least one test
 - [ ] Watched each test fail before implementing
-- [ ] Each test failed for expected reason (feature missing, not typo)
+- [ ] Each test failed for expected reason (missing feature, not typo)
 - [ ] Wrote minimal code to pass each test
-- [ ] All tests pass
-- [ ] Output pristine (no errors, warnings)
-- [ ] Tests use real code (mocks only if unavoidable)
+- [ ] All tests pass (executed and verified)
+- [ ] `getDiagnostics` shows no errors or warnings
+- [ ] Tests use real code (mocks only for external dependencies)
+- [ ] Can explain why each test failed initially
 
-Can't check all boxes? You skipped TDD. Start over.
+**If any checkbox is unchecked, TDD was not followed. Start over.**
+
+### Why This Order Matters
+
+**Test-after proves nothing:** Tests written after implementation pass immediately, which doesn't prove they test the right thing. You never saw them catch the bug.
+
+**Test-first proves correctness:** Seeing the test fail first proves it actually tests the feature. When it passes, you know the implementation is correct.
+
+**Minimal code prevents over-engineering:** Writing only enough code to pass the test prevents unnecessary complexity and wasted effort.
+
+**Refactor-after-green prevents breaking changes:** Refactoring with passing tests ensures you don't accidentally break functionality.
+
+### Decision Tree
+
+```
+Need to add/change behavior?
+├─ YES → Write failing test first
+│   ├─ Test fails correctly? → Write minimal code
+│   │   ├─ Test passes? → Refactor if needed → Done
+│   │   └─ Test fails? → Fix code, re-run
+│   └─ Test passes immediately? → Rewrite test
+└─ NO (docs/config only) → Skip TDD
+```

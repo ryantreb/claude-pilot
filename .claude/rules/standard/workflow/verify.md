@@ -1,8 +1,10 @@
-## Verification and Quality Assurance Process
+# VERIFY MODE: Verification and Quality Assurance Process with Code Review
 
-**Process:** Tests → Run program → Coverage → Quality checks → E2E → Final verification
+## The Process
 
-Active verification that immediately fixes issues as discovered, ensuring all tests pass and system works end-to-end.
+Tests → Program execution → Call chain analysis → Coverage → Quality checks → Code review → E2E → Final verification
+
+Active verification with comprehensive code review that immediately fixes issues as discovered, ensuring all tests pass, code quality is high, and system works end-to-end.
 
 ### Step 1: Run & Fix Unit Tests
 
@@ -30,17 +32,51 @@ Run the actual program and verify real output.
 
 **If simple fixes:** Fix directly, re-run, continue
 
-### Step 4: Check Coverage
+### Step 4: Call Chain Analysis
+
+**Perform deep impact analysis for all changes:**
+
+1. **Trace Upwards (Callers):**
+   - Identify all code that calls modified functions
+   - Verify they handle new return values/exceptions
+   - Check for breaking changes in interfaces
+
+2. **Trace Downwards (Callees):**
+   - Identify all dependencies of modified code
+   - Verify correct parameter passing
+   - Check error handling from callees
+
+3. **Side Effect Analysis:**
+   - Database state changes
+   - Cache invalidation needs
+   - External system impacts
+   - Global state modifications
+
+### Step 5: Check Coverage
 
 Verify test coverage meets requirements.
 
 **If insufficient:** Identify uncovered lines → Write tests for critical paths → Verify improvement
 
-### Step 5: Run Quality Checks
+### Step 6: Run Quality Checks
 
 Run automated quality tools and fix any issues found.
 
-### Step 6: E2E Verification (if applicable)
+### Step 7: Code Review Simulation
+
+**Perform self-review using code review checklist:**
+
+- [ ] **Logic Correctness:** Edge cases handled, algorithms correct
+- [ ] **Architecture & Design:** SOLID principles, no unnecessary coupling
+- [ ] **Performance:** No N+1 queries, efficient algorithms, no memory leaks
+- [ ] **Security:** No SQL injection, XSS, proper auth/authz
+- [ ] **Readability:** Clear naming, complex logic documented
+- [ ] **Error Handling:** Graceful error handling, adequate logging
+- [ ] **Convention Compliance:** Follows project standards
+
+**If issues found:** Document and fix immediately
+
+### Step 8: E2E Verification (if applicable)
 
 Run end-to-end tests as appropriate for the application type.
 
@@ -74,17 +110,21 @@ newman run postman/collections/api-tests.json \
 - At minimum: test health check, main CRUD operations
 - Document endpoint testing approach in PR/commit
 
-### Step 7: Final Verification
+### Step 9: Final Verification
 
 **Run everything one more time:**
 - All tests
 - Program execution
 - Diagnostics
+- Call chain validation
 
 **Success criteria:**
 - All tests passing
 - No diagnostics errors
 - Program executes successfully with correct output
 - Coverage ≥ 80%
+- All Definition of Done criteria met
+- Code review checklist complete
+- No breaking changes in call chains
 
 **Fix immediately | Test after each fix | No "should work" - verify it works | Keep fixing until green**

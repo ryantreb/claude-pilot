@@ -1,90 +1,75 @@
-## Context Management (90% Rule)
+## Context Management
 
-### Critical: System Warnings Show ONLY Message Tokens!
+### Understanding Token Usage
 
-**⚠️ System warnings are misleading - they exclude 30-35k overhead!**
+System warnings display message tokens only: `Token usage: X/200000`
 
-System warnings show: `Token usage: X/200000`
-- This is ONLY message tokens (conversation text)
-- Missing: System prompt (~3k) + System tools (~17k) + MCP tools (~11-15k)
-- **Overhead: ~30-35k tokens (varies by project)**
+This excludes ~30-35k overhead from system prompts, tools, and MCP servers. Always add 32k to the displayed value to estimate real context usage.
 
-### How to Estimate REAL Context
+**Quick calculation:** System warning + 32k = Real total
 
-**From system warning, add ~32k overhead:**
+| System Warning | Real Total | Real % | Status   |
+| -------------- | ---------- | ------ | -------- |
+| 140k           | 172k       | 86%    | Safe     |
+| 150k           | 182k       | 91%    | Critical |
+| 160k           | 192k       | 96%    | Danger   |
+| 168k+          | 200k+      | 100%+  | Stop     |
 
-| System Warning | Messages | + Overhead | REAL Total | REAL % |
-|----------------|----------|------------|------------|--------|
-| 140k/200k | 140k | +32k | **172k** | **86%** |
-| 150k/200k | 150k | +32k | **182k** | **91%** |
-| 160k/200k | 160k | +32k | **192k** | **96%** |
+### Behavior by Context Level
 
-**Be conservative:** Assume 32-35k overhead. When in doubt, ask user to run `/context`
+**Below 80% (< 148k displayed)**
+- Work normally on any task
+- No restrictions
 
-### Thresholds & Actions (Based on REAL Total)
-
-**Use system warning + 32k overhead for all calculations!**
-
-**< 80% real (< 148k in system warning):**
-- Continue freely
-- Take on any size task
-
-**80-85% real (148k-158k in system warning):**
-- Context aware mode
+**80-85% (148k-158k displayed)**
 - Finish current work
-- Avoid starting large tasks (big refactors, reading many files)
-- Prefer small, focused changes
+- Avoid large refactors or reading many files
+- Prefer focused, small changes
 
-**85-90% real (158k-168k in system warning):**
+**85-90% (158k-168k displayed)**
 - Complete small fixes only
-- No new feature implementation
-- Focus on wrapping up
-- Ask user to check `/context` if unsure
+- No new features
+- Wrap up current task
+- Suggest user run `/context` if uncertain
 
-**≥ 90% real (≥ 168k in system warning):**
-- **HARD STOP - no exceptions**
-- Risk of context overflow with any operation
-- Overhead can push you over the limit!
+**90%+ (168k+ displayed)**
+- STOP immediately - no exceptions
+- Follow mandatory sequence below
 
-### At 90% Real - Mandatory Sequence
+### Mandatory Sequence at 90%
 
-When system warning shows **≥ 168k** (which = 90% real with overhead):
+When system warning shows 168k or higher:
 
-1. **Calculate real %**: System warning + 32k = Real total
-2. **Inform user immediately:**
+1. Calculate real percentage: `(displayed + 32k) / 200k`
+2. Inform user:
    ```
-   ⚠️ Context at ~XX% real (system shows Xk + ~32k overhead = ~Xk total).
-   Running /remember to preserve learnings.
-   Please run: `/clear` then `/implement <plan>` to continue.
+   Context at ~XX% (displayed Xk + 32k overhead = Xk real).
+   Running /remember to preserve work.
+   Please run /clear then continue with /implement.
    ```
-3. **Run `/remember`** - Store learnings in Cipher
-4. **STOP all work** - No "one more fix"
+3. Run `/remember` to store learnings in Cipher
+4. Stop all work - do not attempt "one more fix"
 
-**If uncertain:** Ask user to run `/context` to verify exact percentage
+If uncertain about percentage, ask user to run `/context` for exact value.
 
-### What Gets Preserved After /clear
+### After Context Clear
 
-**✅ Kept:**
-- All code and tests in repository
+**Preserved:**
+- Repository code and tests
 - Plan files in `docs/plans/`
-- Cipher learnings (via /remember)
+- Cipher memory (via `/remember`)
 - Searchable codebase
 
-**❌ Lost:**
+**Lost:**
 - Conversation history
-- Context about decisions (unless stored in Cipher)
+- Undocumented decisions
 
-### Resume Process After /clear
+**Resume workflow:**
+1. Read plan from `docs/plans/`
+2. Check `git status` for completed work
+3. Query Cipher for stored context
+4. Continue from unchecked tasks (`[ ]` in plan)
 
-1. **Read plan** - Understand what's being built
-2. **Check git status** - See what's done
-3. **Query Cipher** - Retrieve stored learnings
-4. **Continue from pending tasks** - Look for `[ ]` vs `[x]` in plan
+### Why 90% Threshold
 
-### Why 90% Not Higher?
-
-- Tool calls can consume 5-10k tokens
-- File reads add significant context
-- Error traces can be large
-- Better safe than context overflow mid-task
-- Provides buffer for completion and cleanup
+Tool calls, file reads, and error traces can consume 5-10k tokens unexpectedly. The 90% threshold provides safety margin to complete current operations and preserve state before overflow.

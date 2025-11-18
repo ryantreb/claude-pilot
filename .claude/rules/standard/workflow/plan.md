@@ -1,4 +1,19 @@
-## Six-Phase Planning Discovery Process
+# PLAN MODE: Six-Phase Planning Discovery Process
+
+## Extending Existing Plans
+
+**When adding tasks to existing plan:**
+
+1. Load existing plan: `Read(file_path="docs/plans/...")`
+2. Parse structure (architecture, completed tasks, pending tasks)
+3. Check git status for partially completed work
+4. Verify new tasks are compatible with existing architecture
+5. Check total: If original + new > 12 tasks, suggest splitting
+6. Mark new tasks with `[NEW]` prefix
+7. Update total count: `Total Tasks: X (Originally: Y)`
+8. Add extension history: `> Extended [Date]: Tasks X-Y for [feature]`
+
+## Creating New Plans
 
 ### Phase 0: Research and Discovery
 
@@ -8,33 +23,35 @@
 3. Query relevant MCP servers for external systems
 
 **Goals:**
-- Understand existing patterns
-- Find similar implementations
+- Understand existing patterns and architecture
+- Find similar implementations to learn from
 - Identify reusable components
-- Learn from past decisions
+- Learn from past decisions and gotchas
 
-### Phase 1: Understanding
+### Phase 1: Requirements Definition with EARS
 
-**Ask clarifying questions ONE at a time:**
-- Use **AskUserQuestion tool** for structured choices
-- Gather: Purpose, constraints, success criteria, integration points
-- Don't assume - verify requirements explicitly
+**Generate formal requirements using EARS syntax:**
+- Transform user request into User Stories with acceptance criteria
+- Use EARS keywords: WHEN, THEN, IF, WHILE, WHERE, SHALL
+- Be comprehensive - include edge cases and error conditions
+- Don't ask multiple clarifying questions before first draft
 
-**Example structured question:**
+**Required Format:**
+```markdown
+### Requirement 1
+**User Story:** As a [role], I want [feature], so that [benefit]
+
+#### Acceptance Criteria
+1. WHEN [event] THEN the system SHALL [response]
+2. IF [precondition] THEN the system SHALL [response]
+3. WHERE [state] the system SHALL [behavior]
+4. WHILE [ongoing condition] the system SHALL [maintain behavior]
 ```
-Question: "Where should data be stored?"
-Options:
-  - "Session storage" (Secure, cleared on logout)
-  - "Local storage" (Persistent across sessions)
-  - "Cookies" (SSR-compatible, HTTP accessible)
-```
 
-**What to understand:**
-- What problem does this solve?
-- Who will use this feature?
-- What are the constraints? (performance, security, compatibility)
-- What defines success?
-- How does it integrate with existing systems?
+**After generating requirements:**
+- Present draft and ask: "Do the requirements look good? If so, we can move on to the design phase."
+- MUST receive explicit approval (yes/approved/looks good) before proceeding
+- Iterate based on feedback until approved
 
 ### Phase 2: Exploration
 
@@ -69,21 +86,14 @@ Let the user choose the direction based on their priorities.
 - Adjust based on feedback
 - Don't proceed until design is validated
 
-### Phase 4: Implementation Planning
+### Phase 4: Implementation Planning with Definition of Done
 
 **CRITICAL: Task Count Limit**
 - **Maximum: 10-12 tasks per plan**
 - If initial breakdown exceeds 12 tasks, STOP
 - Ask user to split into multiple features
 
-**Example split suggestion:**
-```
-"This feature requires 18 tasks. Should we split into:
-(A) Core CRUD + Database (8 tasks)
-(B) Frontend + Infrastructure (10 tasks)"
-```
-
-**Task Structure:**
+**Enhanced Task Structure:**
 ```markdown
 ### Task N: [Component Name]
 
@@ -99,6 +109,16 @@ Let the user choose the direction based on their priorities.
 2. Implement minimal code - Make test pass
 3. Verify execution - Run actual program
 4. Integration test - Test with other components
+
+**Definition of Done:**
+- [ ] All tests pass (unit, integration if applicable)
+- [ ] No diagnostics errors (linting, type checking)
+- [ ] Code functions correctly with real data
+- [ ] Edge cases handled appropriately
+- [ ] Error messages are clear and actionable
+
+**Requirements Traceability:**
+- Satisfies: Requirement 1.2, 1.3 (reference to EARS requirements)
 ```
 
 **Zero-context assumption:**
@@ -142,16 +162,3 @@ Let the user choose the direction based on their priorities.
 1. Store in Cipher: `mcp__cipher__ask_cipher("Store this implementation plan for <feature>")`
 2. Inform user: "✅ Plan saved to docs/plans/YYYY-MM-DD-<feature>.md"
 3. Provide next steps: "Ready for implementation. Run `/clear` then `/implement <plan-path>`"
-
-## Extending Existing Plans
-
-**When adding tasks to existing plan:**
-
-1. Load existing plan: `Read(file_path="docs/plans/...")`
-2. Parse structure (architecture, completed tasks, pending tasks)
-3. Check git status for partially completed work
-4. Verify new tasks are compatible with existing architecture
-5. Check total: If original + new > 12 tasks, suggest splitting
-6. Mark new tasks with `[NEW]` prefix
-7. Update total count: `Total Tasks: X (Originally: Y)`
-8. Add extension history: `> Extended [Date]: Tasks X-Y for [feature]`

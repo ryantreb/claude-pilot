@@ -1,6 +1,4 @@
-# Quick Development Mode
-
-**Purpose:** Fast, focused development without spec-driven workflow overhead.
+# QUICK MODE: Fast, focused development without spec-driven workflow overhead
 
 **When to use:** Quick fixes, refactoring, experiments, config changes, documentation - anything that doesn't need /plan → /implement → /verify ceremony.
 

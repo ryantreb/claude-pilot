@@ -228,3 +228,6 @@ data/
 .claude/settings.local.json
 .claude/commands/
 .claude/skills/
+
+# Kiro
+.kiro/
