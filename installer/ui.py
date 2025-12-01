@@ -66,17 +66,49 @@ class Console:
         return self._non_interactive
 
     def banner(self) -> None:
-        """Print the Claude CodePro banner."""
-        banner_text = Text()
-        banner_text.append("╔═══════════════════════════════════════════════════════════╗\n", style="cyan")
-        banner_text.append("║  ", style="cyan")
-        banner_text.append("🚀 Claude CodePro Installer", style="bold white")
-        banner_text.append("                              ║\n", style="cyan")
-        banner_text.append("║  ", style="cyan")
-        banner_text.append("Professional development environment for Claude Code", style="dim white")
-        banner_text.append("  ║\n", style="cyan")
-        banner_text.append("╚═══════════════════════════════════════════════════════════╝", style="cyan")
-        self._console.print(banner_text)
+        """Print the Claude CodePro banner with feature highlights."""
+        # ASCII art logo
+        logo = """
+[bold cyan]   _____ _                 _        _____          _      _____
+  / ____| |               | |      / ____|        | |    |  __ \\
+ | |    | | __ _ _   _  __| | ___ | |     ___   __| | ___| |__) | __ ___
+ | |    | |/ _` | | | |/ _` |/ _ \\| |    / _ \\ / _` |/ _ \\  ___/ '__/ _ \\
+ | |____| | (_| | |_| | (_| |  __/| |___| (_) | (_| |  __/ |   | | | (_) |
+  \\_____|_|\\__,_|\\__,_|\\__,_|\\___| \\_____\\___/ \\__,_|\\___|_|   |_|  \\___/[/bold cyan]
+"""
+        self._console.print(logo)
+
+        # Tagline
+        tagline = Text()
+        tagline.append("  ✨ ", style="yellow")
+        tagline.append("Professional Development Environment for Claude Code", style="bold white")
+        tagline.append(" ✨", style="yellow")
+        self._console.print(tagline, justify="center")
+        self._console.print()
+
+        # Feature highlights in a styled panel
+        features = Text()
+        features.append("  🎯 ", style="yellow")
+        features.append("Curated Rules", style="bold green")
+        features.append(" — Battle-tested coding standards & best practices\n", style="white")
+        features.append("  ⚡ ", style="yellow")
+        features.append("Smart Commands", style="bold green")
+        features.append(" — /plan, /implement, /verify workflows\n", style="white")
+        features.append("  🔧 ", style="yellow")
+        features.append("Auto-Configuration", style="bold green")
+        features.append(" — Git, linting, testing setup out of the box\n", style="white")
+        features.append("  🚀 ", style="yellow")
+        features.append("Premium Features", style="bold green")
+        features.append(" — Advanced tooling for power users", style="white")
+
+        panel = Panel(
+            features,
+            border_style="cyan",
+            padding=(1, 2),
+            title="[bold white]What You're Getting[/bold white]",
+            title_align="left",
+        )
+        self._console.print(panel)
         self._console.print()
 
     def set_total_steps(self, total: int) -> None:
