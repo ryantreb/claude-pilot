@@ -88,18 +88,24 @@ class Console:
 
         # Feature highlights in a styled panel
         features = Text()
-        features.append("  🎯 ", style="yellow")
-        features.append("Curated Rules", style="bold green")
-        features.append(" — Battle-tested coding standards & best practices\n", style="white")
-        features.append("  ⚡ ", style="yellow")
-        features.append("Smart Commands", style="bold green")
-        features.append(" — /plan, /implement, /verify workflows\n", style="white")
-        features.append("  🔧 ", style="yellow")
-        features.append("Auto-Configuration", style="bold green")
-        features.append(" — Git, linting, testing setup out of the box\n", style="white")
-        features.append("  🚀 ", style="yellow")
-        features.append("Premium Features", style="bold green")
-        features.append(" — Advanced tooling for power users", style="white")
+        features.append("  📋 ", style="yellow")
+        features.append("Spec-Driven Workflow", style="bold green")
+        features.append(" — /plan, /implement, /verify, /remember commands\n", style="white")
+        features.append("  💡 ", style="yellow")
+        features.append("Context-Loaded Rules", style="bold green")
+        features.append(" — Auto-generated standards + custom project rules\n", style="white")
+        features.append("  🔌 ", style="yellow")
+        features.append("MCP Servers", style="bold green")
+        features.append(" — Semantic search, persistent memory, web search\n", style="white")
+        features.append("  🛠️ ", style="yellow")
+        features.append("Quality Automation", style="bold green")
+        features.append(" — Post-edit hooks, linting, type checking\n", style="white")
+        features.append("  🏗️ ", style="yellow")
+        features.append("Dev Container", style="bold green")
+        features.append(" — Isolated environment with pre-configured tools\n", style="white")
+        features.append("  💎 ", style="yellow")
+        features.append("Premium Features", style="bold magenta")
+        features.append(" — AI Rules Supervisor, TDD Enforcer, Context Monitor", style="white")
 
         panel = Panel(
             features,
@@ -109,6 +115,13 @@ class Console:
             title_align="left",
         )
         self._console.print(panel)
+
+        # Premium callout
+        premium_text = Text()
+        premium_text.append("  💎 ", style="magenta")
+        premium_text.append("Unlock premium features with a license key from ", style="dim white")
+        premium_text.append("www.claude-code.pro", style="bold cyan underline")
+        self._console.print(premium_text)
         self._console.print()
 
     def set_total_steps(self, total: int) -> None:
