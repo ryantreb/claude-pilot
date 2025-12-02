@@ -51,23 +51,15 @@ jobs:
 
       - name: Build binary
         run: |
-          # Build in Docker with Ubuntu 20.04 for GLIBC 2.31 compatibility
-          # Install Python 3.12 from deadsnakes PPA
+          # Use Python 3.12 with Debian Bullseye (GLIBC 2.31)
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            ubuntu:20.04 \
+            python:3.12-slim-bullseye \
             bash -c "
-              apt-get update && \
-              apt-get install -y software-properties-common && \
-              add-apt-repository -y ppa:deadsnakes/ppa && \
-              apt-get update && \
-              apt-get install -y python3.12 python3.12-venv && \
-              python3.12 -m ensurepip --upgrade && \
-              python3.12 -m pip install --upgrade pip && \
-              python3.12 -m pip install pyinstaller rich && \
-              python3.12 -m pip install httpx typer platformdirs && \
-              cd installer && python3.12 build.py
+              pip install --upgrade pip && \
+              pip install pyinstaller rich httpx typer platformdirs && \
+              cd installer && python build.py
             "
 
       - name: Upload artifact
@@ -149,22 +141,15 @@ jobs:
 
       - name: Build binary
         run: |
-          # Build in Docker with Ubuntu 20.04 for GLIBC 2.31 compatibility
-          # Install Python 3.12 from deadsnakes PPA
+          # Use Python 3.12 with Debian Bullseye (GLIBC 2.31)
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace/premium \
-            ubuntu:20.04 \
+            python:3.12-slim-bullseye \
             bash -c "
-              apt-get update && \
-              apt-get install -y software-properties-common && \
-              add-apt-repository -y ppa:deadsnakes/ppa && \
-              apt-get update && \
-              apt-get install -y python3.12 python3.12-venv && \
-              python3.12 -m ensurepip --upgrade && \
-              python3.12 -m pip install --upgrade pip && \
-              python3.12 -m pip install pyinstaller && \
-              python3.12 build.py
+              pip install --upgrade pip && \
+              pip install pyinstaller && \
+              python build.py
             "
 
       - name: Upload artifact
@@ -233,7 +218,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Python 3.13
+      - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
