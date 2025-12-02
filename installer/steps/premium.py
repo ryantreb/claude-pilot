@@ -114,7 +114,10 @@ def download_premium_binary(
         except Exception as e:
             return False, f"Copy error: {e}"
 
-    url = f"https://github.com/{GITHUB_REPO}/releases/download/{version}/{binary_name}"
+    if version == "latest":
+        url = f"https://github.com/{GITHUB_REPO}/releases/latest/download/{binary_name}"
+    else:
+        url = f"https://github.com/{GITHUB_REPO}/releases/download/{version}/{binary_name}"
 
     try:
         request = urllib.request.Request(
