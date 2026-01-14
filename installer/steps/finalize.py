@@ -73,6 +73,9 @@ class FinalizeStep(BaseStep):
             ]
         )
 
+        if ctx.config.get("installed_extensions"):
+            installed_items.append(f"VS Code Extensions ({ctx.config['installed_extensions']})")
+
         if ctx.install_python:
             installed_items.append("Python development tools")
 
@@ -87,15 +90,16 @@ class FinalizeStep(BaseStep):
             [
                 (
                     "Connect to dev container",
-                    f"Open your favorite terminal (iTerm, Terminal, etc.) and run:\n"
+                    f"Option A: Use VS Code's integrated terminal (required for image pasting)\n"
+                    f"     Option B: Use your favorite terminal (iTerm, Warp, etc.) and run:\n"
                     f'     docker exec -it $(docker ps --filter "name={project_slug}" -q) zsh',
                 ),
                 ("Start Claude CodePro", "Run: ccp"),
                 ("Connect IDE", "Run: /ide → Enables real-time diagnostics"),
                 (
-                    "Install IDE Extensions",
-                    "Open Extensions sidebar → Filter by '@recommended' → Install all\n"
-                    "     (Extensions may not auto-install in fresh containers)",
+                    "Image Pasting (Optional)",
+                    "Install dkodr.claudeboard extension via the Marketplace\n"
+                    "     Only works in VS Code's integrated terminal",
                 ),
                 (
                     "Custom MCP Servers (Optional)",

@@ -25,7 +25,8 @@
         "pkief.material-icon-theme",
         "redhat.vscode-xml",
         "redhat.vscode-yaml",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "dkodr.claudeboard"
       ]
     }
   },
@@ -82,6 +83,8 @@
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
     },
+    /* https://github.com/devcontainers/features/tree/main/src/github-cli */
+    "ghcr.io/devcontainers/features/github-cli:1": {},
     /* https://github.com/devcontainers/features/tree/main/src/go */
     "ghcr.io/devcontainers/features/go:1": {},
     /* https://github.com/michidk/devcontainers-features/tree/main/src/bun */

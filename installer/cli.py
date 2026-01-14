@@ -12,6 +12,7 @@ from typing import Optional
 import typer
 
 from installer import __build__
+from installer.config import load_config, save_config
 from installer.context import InstallContext
 from installer.errors import FatalInstallError
 from installer.steps.base import BaseStep
@@ -23,6 +24,7 @@ from installer.steps.environment import EnvironmentStep
 from installer.steps.finalize import FinalizeStep
 from installer.steps.git_setup import GitSetupStep
 from installer.steps.shell_config import ShellConfigStep
+from installer.steps.vscode_extensions import VSCodeExtensionsStep
 from installer.ui import Console
 
 app = typer.Typer(
@@ -42,6 +44,7 @@ def get_all_steps() -> list[BaseStep]:
         DependenciesStep(),
         EnvironmentStep(),
         ShellConfigStep(),
+        VSCodeExtensionsStep(),
         FinalizeStep(),
     ]
 
@@ -107,8 +110,7 @@ def install(
 
     effective_local_repo_dir = local_repo_dir if local_repo_dir else (Path.cwd() if local else None)
 
-    # In local mode, skip all interactive prompts and use defaults
-    skip_prompts = non_interactive or local
+    skip_prompts = non_interactive
 
     claude_dir = Path.cwd() / ".claude"
     if claude_dir.exists() and not skip_prompts:
@@ -139,7 +141,6 @@ def install(
                     path = Path(directory) / f
                     if path.is_fifo() or path.is_socket() or path.is_block_device() or path.is_char_device():
                         ignored.append(f)
-                    # Also skip tmp directory which contains runtime files
                     if f == "tmp":
                         ignored.append(f)
                 return ignored
@@ -147,24 +148,59 @@ def install(
             shutil.copytree(claude_dir, backup_dir, ignore=ignore_special_files)
             console.success(f"Backup created: {backup_dir}")
 
+    project_dir = Path.cwd()
+    saved_config = load_config(project_dir)
+
     install_python = not skip_python
     if not skip_python and not skip_prompts:
-        console.print()
-        console.print("  [bold]Do you want to install advanced Python features?[/bold]")
-        console.print("  This includes: uv, ruff, mypy, basedpyright, and Python quality hooks")
-        install_python = console.confirm("Install Python support?", default=True)
+        if "install_python" in saved_config:
+            install_python = saved_config["install_python"]
+            console.print()
+            console.print(f"  [dim]Using saved preference: Python support = {install_python}[/dim]")
+        else:
+            console.print()
+            console.print("  [bold]Do you want to install advanced Python features?[/bold]")
+            console.print("  This includes: uv, ruff, mypy, basedpyright, and Python quality hooks")
+            install_python = console.confirm("Install Python support?", default=True)
 
     install_typescript = not skip_typescript
     if not skip_typescript and not skip_prompts:
-        console.print()
-        console.print("  [bold]Do you want to install TypeScript features?[/bold]")
-        console.print("  This includes: TypeScript quality hooks (eslint, tsc, prettier)")
-        install_typescript = console.confirm("Install TypeScript support?", default=True)
+        if "install_typescript" in saved_config:
+            install_typescript = saved_config["install_typescript"]
+            console.print(f"  [dim]Using saved preference: TypeScript support = {install_typescript}[/dim]")
+        else:
+            console.print()
+            console.print("  [bold]Do you want to install TypeScript features?[/bold]")
+            console.print("  This includes: TypeScript quality hooks (eslint, tsc, prettier)")
+            install_typescript = console.confirm("Install TypeScript support?", default=True)
+
+    install_agent_browser = True
+    if not skip_prompts:
+        if "install_agent_browser" in saved_config:
+            install_agent_browser = saved_config["install_agent_browser"]
+            console.print(f"  [dim]Using saved preference: Agent browser = {install_agent_browser}[/dim]")
+        else:
+            console.print()
+            console.print("  [bold]Do you want to install agent-browser?[/bold]")
+            console.print("  This includes: Headless Chromium browser for web automation and testing")
+            console.print("  [dim]Note: Downloads ~150MB, can be skipped if not needed[/dim]")
+            install_agent_browser = console.confirm("Install agent-browser?", default=True)
+
+    if not skip_prompts:
+        save_config(
+            project_dir,
+            {
+                "install_python": install_python,
+                "install_typescript": install_typescript,
+                "install_agent_browser": install_agent_browser,
+            },
+        )
 
     ctx = InstallContext(
-        project_dir=Path.cwd(),
+        project_dir=project_dir,
         install_python=install_python,
         install_typescript=install_typescript,
+        install_agent_browser=install_agent_browser,
         non_interactive=non_interactive,
         skip_env=skip_env,
         local_mode=local,

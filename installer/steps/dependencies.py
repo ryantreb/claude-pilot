@@ -181,16 +181,36 @@ def _configure_firecrawl_mcp() -> bool:
         return False
 
 
-def install_claude_code() -> bool:
-    """Install/upgrade Claude Code CLI via npm and configure defaults."""
+def _get_forced_claude_version(project_dir: Path) -> str | None:
+    """Check settings.local.json for FORCE_CLAUDE_VERSION in env section."""
+    import json
+
+    settings_path = project_dir / ".claude" / "settings.local.json"
+    if settings_path.exists():
+        try:
+            settings = json.loads(settings_path.read_text())
+            return settings.get("env", {}).get("FORCE_CLAUDE_VERSION")
+        except (json.JSONDecodeError, OSError):
+            pass
+    return None
+
+
+def install_claude_code(project_dir: Path) -> tuple[bool, str]:
+    """Install/upgrade Claude Code CLI via npm and configure defaults.
+
+    Returns (success, version_installed).
+    """
     _remove_native_claude_binaries()
 
-    if not _run_bash_with_retry("npm install -g @anthropic-ai/claude-code@latest"):
-        return False
+    forced_version = _get_forced_claude_version(project_dir)
+    version = forced_version if forced_version else "latest"
+
+    if not _run_bash_with_retry(f"npm install -g @anthropic-ai/claude-code@{version}"):
+        return False, version
 
     _configure_claude_defaults()
     _configure_firecrawl_mcp()
-    return True
+    return True, version
 
 
 def install_qlty(project_dir: Path) -> tuple[bool, bool]:
@@ -429,6 +449,14 @@ def install_mcp_cli() -> bool:
     return _run_bash_with_retry("bun install -g https://github.com/philschmid/mcp-cli")
 
 
+def install_agent_browser() -> bool:
+    """Install agent-browser CLI for headless browser automation."""
+    if not _run_bash_with_retry("npm install -g agent-browser"):
+        return False
+
+    return _run_bash_with_retry("echo 'y' | agent-browser install --with-deps")
+
+
 def _install_with_spinner(ui: Any, name: str, install_fn: Any, *args: Any) -> bool:
     """Run an installation function with a spinner."""
     if ui:
@@ -460,7 +488,6 @@ class DependenciesStep(BaseStep):
         if _install_with_spinner(ui, "Node.js", install_nodejs):
             installed.append("nodejs")
 
-        # Always install uv - needed for Vexor regardless of Python support
         if _install_with_spinner(ui, "uv", install_uv):
             installed.append("uv")
 
@@ -468,10 +495,22 @@ class DependenciesStep(BaseStep):
             if _install_with_spinner(ui, "Python tools", install_python_tools):
                 installed.append("python_tools")
 
-        if _install_with_spinner(ui, "Claude Code", install_claude_code):
-            installed.append("claude_code")
-            if ui:
+        if ui:
+            with ui.spinner("Installing Claude Code..."):
+                success, version = install_claude_code(ctx.project_dir)
+            if success:
+                installed.append("claude_code")
+                if version != "latest":
+                    ui.success(f"Claude Code installed (pinned to v{version})")
+                else:
+                    ui.success("Claude Code installed (latest)")
                 ui.success("Claude Code config defaults applied")
+            else:
+                ui.warning("Could not install Claude Code - please install manually")
+        else:
+            success, _ = install_claude_code(ctx.project_dir)
+            if success:
+                installed.append("claude_code")
 
         if ctx.install_typescript:
             if _install_with_spinner(ui, "TypeScript LSP", install_typescript_lsp):
@@ -489,6 +528,17 @@ class DependenciesStep(BaseStep):
 
         if _install_with_spinner(ui, "mcp-cli", install_mcp_cli):
             installed.append("mcp_cli")
+
+        if ctx.install_agent_browser:
+            if _install_with_spinner(ui, "agent-browser", install_agent_browser):
+                installed.append("agent_browser")
+        else:
+            if not ctx.local_mode:
+                agent_browser_rule = ctx.project_dir / ".claude" / "rules" / "standard" / "agent-browser.md"
+                if agent_browser_rule.exists():
+                    agent_browser_rule.unlink()
+                    if ui:
+                        ui.info("Removed agent-browser.md (agent-browser not installed)")
 
         if _install_with_spinner(ui, "Vexor semantic search", install_vexor):
             installed.append("vexor")

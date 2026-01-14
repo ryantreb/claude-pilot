@@ -62,7 +62,7 @@ class TestDependenciesStep:
 
         # Setup mocks
         mock_nodejs.return_value = True
-        mock_claude.return_value = True
+        mock_claude.return_value = (True, "latest")  # Returns (success, version)
         mock_typescript_lsp.return_value = True
         mock_claude_mem.return_value = True
         mock_context7.return_value = True
@@ -121,7 +121,7 @@ class TestDependenciesStep:
         mock_nodejs.return_value = True
         mock_uv.return_value = True
         mock_python_tools.return_value = True
-        mock_claude.return_value = True
+        mock_claude.return_value = (True, "latest")  # Returns (success, version)
         mock_typescript_lsp.return_value = True
         mock_pyright_lsp.return_value = True
         mock_claude_mem.return_value = True
@@ -183,62 +183,79 @@ class TestDependencyInstallFunctions:
 class TestClaudeCodeInstall:
     """Test Claude Code installation."""
 
+    @patch("installer.steps.dependencies._get_forced_claude_version", return_value=None)
     @patch("installer.steps.dependencies._configure_firecrawl_mcp")
     @patch("installer.steps.dependencies._configure_claude_defaults")
     @patch("subprocess.run")
     @patch("installer.steps.dependencies._remove_native_claude_binaries")
-    def test_install_claude_code_removes_native_binaries(self, mock_remove, mock_run, mock_config, mock_firecrawl):
+    def test_install_claude_code_removes_native_binaries(
+        self, mock_remove, mock_run, mock_config, mock_firecrawl, mock_version
+    ):
         """install_claude_code removes native binaries before npm install."""
         from installer.steps.dependencies import install_claude_code
 
         mock_run.return_value = MagicMock(returncode=0)
 
-        install_claude_code()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_claude_code(Path(tmpdir))
 
         mock_remove.assert_called_once()
 
+    @patch("installer.steps.dependencies._get_forced_claude_version", return_value=None)
     @patch("installer.steps.dependencies._configure_firecrawl_mcp")
     @patch("installer.steps.dependencies._configure_claude_defaults")
     @patch("subprocess.run")
     @patch("installer.steps.dependencies._remove_native_claude_binaries")
-    def test_install_claude_code_always_runs_npm_install(self, mock_remove, mock_run, mock_config, mock_firecrawl):
+    def test_install_claude_code_always_runs_npm_install(
+        self, mock_remove, mock_run, mock_config, mock_firecrawl, mock_version
+    ):
         """install_claude_code always runs npm install (upgrades if exists)."""
         from installer.steps.dependencies import install_claude_code
 
         mock_run.return_value = MagicMock(returncode=0)
 
-        result = install_claude_code()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            success, version = install_claude_code(Path(tmpdir))
 
-        assert result is True
+        assert success is True
+        assert version == "latest"
         # Verify npm install was called
         npm_calls = [c for c in mock_run.call_args_list if "npm install" in str(c)]
         assert len(npm_calls) >= 1
 
+    @patch("installer.steps.dependencies._get_forced_claude_version", return_value=None)
     @patch("installer.steps.dependencies._configure_firecrawl_mcp")
     @patch("installer.steps.dependencies._configure_claude_defaults")
     @patch("subprocess.run")
     @patch("installer.steps.dependencies._remove_native_claude_binaries")
-    def test_install_claude_code_configures_defaults(self, mock_remove, mock_run, mock_config, mock_firecrawl):
+    def test_install_claude_code_configures_defaults(
+        self, mock_remove, mock_run, mock_config, mock_firecrawl, mock_version
+    ):
         """install_claude_code configures Claude defaults after npm install."""
         from installer.steps.dependencies import install_claude_code
 
         mock_run.return_value = MagicMock(returncode=0)
 
-        install_claude_code()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_claude_code(Path(tmpdir))
 
         mock_config.assert_called_once()
 
+    @patch("installer.steps.dependencies._get_forced_claude_version", return_value=None)
     @patch("installer.steps.dependencies._configure_firecrawl_mcp")
     @patch("installer.steps.dependencies._configure_claude_defaults")
     @patch("subprocess.run")
     @patch("installer.steps.dependencies._remove_native_claude_binaries")
-    def test_install_claude_code_configures_firecrawl_mcp(self, mock_remove, mock_run, mock_config, mock_firecrawl):
+    def test_install_claude_code_configures_firecrawl_mcp(
+        self, mock_remove, mock_run, mock_config, mock_firecrawl, mock_version
+    ):
         """install_claude_code configures Firecrawl MCP after npm install."""
         from installer.steps.dependencies import install_claude_code
 
         mock_run.return_value = MagicMock(returncode=0)
 
-        install_claude_code()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_claude_code(Path(tmpdir))
 
         mock_firecrawl.assert_called_once()
 

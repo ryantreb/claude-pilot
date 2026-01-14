@@ -76,6 +76,7 @@ curl -fsSL https://raw.githubusercontent.com/maxritter/claude-codepro/v4.2.4/ins
 - **Vexor** - Local vector store based semantic code search for token-efficient retrieval
 - **Context7 / Firecrawl** - External context retrieval for code and web search / scraping
 - **mcp-cli** - Command-line access to custom MCP servers for extended integrations
+- **agent-browser** - Headless browser automation and testing within the Dev Container
 
 ### 🛠️ Quality Hooks Automation
 
@@ -240,6 +241,7 @@ I'm **Max Ritter**, a senior IT freelancer based near **Munich, Germany**, speci
 - **[sirmalloc/ccstatusline](https://github.com/sirmalloc/ccstatusline)** - CC Status line integration
 - **[scarletkc/vexor](https://github.com/scarletkc/vexor)** - CC Semantic code search capabilities
 - **[philschmid/mcp-cli](https://github.com/philschmid/mcp-cli)** - CC MCP Servers lazy loading
+- **[vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser)** - Headless browser automation CLI
 - **[ManuelKugelmann/BitBot](https://github.com/ManuelKugelmann/BitBot)** - CC Wrapper control inspirations
 - **[upstash/context7](https://github.com/upstash/context7)** - Library code context retrieval
 - **[firecrawl/firecrawl](https://github.com/firecrawl/firecrawl)** - Web search and scraping tool
