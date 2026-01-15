@@ -55,7 +55,7 @@ def find_qlty_bin() -> str | None:
     except Exception:
         pass
 
-    qlty_path = Path("/root/.qlty/bin/qlty")
+    qlty_path = Path.home() / ".qlty" / "bin" / "qlty"
     if qlty_path.exists() and os.access(qlty_path, os.X_OK):
         return str(qlty_path)
 

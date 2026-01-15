@@ -50,7 +50,6 @@ Update counts:
 3. **Identify dependencies** - List files, functions, classes that need modification
 4. **Check current state:**
    - Git status: `git status --short` and `git diff --name-only`
-   - Diagnostics: `mcp__ide__getDiagnostics()`
    - Plan progress: Check for `[x]` completed tasks
 
 ### 🔧 Tools for Implementation
@@ -145,20 +144,19 @@ If you notice ANY of these, STOP and report to user:
    - **Trace Downwards (Callees):** Identify what the modified code calls
    - **Side Effects:** Check for database, cache, external system impacts
 3. **Mark task as in_progress** in TodoWrite
-4. **Check diagnostics** - `mcp__ide__getDiagnostics()`
-5. **Execute TDD Flow (RED → GREEN → REFACTOR):**
+4. **Execute TDD Flow (RED → GREEN → REFACTOR):**
    - Write failing test first, **verify it fails**
    - Implement minimal code to pass
    - Refactor if needed (keep tests green)
-6. **Verify tests pass** - `uv run pytest tests/path/to/test.py -v`
-7. **Run actual program** - Show real output with sample data
-8. **Check diagnostics again** - Must be zero errors
-9. **Validate Definition of Done** - Check all criteria from plan
-10. **Mark task completed** in TodoWrite
+5. **Verify tests pass** - `uv run pytest tests/path/to/test.py -v`
+6. **Run actual program** - Show real output with sample data
+7. **Check diagnostics** - Must be zero errors - `mcp__ide__getDiagnostics()`
+8. **Validate Definition of Done** - Check all criteria from plan
+9. **Mark task completed** in TodoWrite
 
-### ⛔ STEP 11 IS MANDATORY - DO NOT SKIP
+### ⛔ STEP 10 IS MANDATORY - DO NOT SKIP
 
-11. **UPDATE PLAN FILE IMMEDIATELY:**
+10. **UPDATE PLAN FILE IMMEDIATELY:**
     ```
     Use Edit tool to change in the plan file:
     - [ ] Task N: ...  →  - [x] Task N: ...
@@ -169,7 +167,7 @@ If you notice ANY of these, STOP and report to user:
     **You MUST do this BEFORE proceeding to the next task.**
     **Failure to update = incomplete implementation.**
 
-12. **Check context usage**
+11. **Check context usage** - Use check-context function of helper.py
 
 ## Critical Task Rules
 

@@ -16,7 +16,6 @@ uv pip show package-name
 # Running Python
 uv run python script.py
 uv run pytest
-uv run mypy src
 ```
 
 **Why uv:** Project standard, faster resolution, better lock files, consistency across team.
@@ -35,8 +34,7 @@ uv run pytest --cov=src --cov-fail-under=80        # With coverage (80% minimum)
 # Code quality
 ruff format .                                       # Format code
 ruff check . --fix                                  # Fix linting
-mypy src --strict                                   # Type checking
-basedpyright src                                    # Alternative type checker
+basedpyright src                                    # Type checker
 ```
 
 ### Code Style Essentials
@@ -74,7 +72,7 @@ Before completing Python work:
 - [ ] Tests pass: `uv run pytest`
 - [ ] Code formatted: `ruff format .`
 - [ ] Linting clean: `ruff check .`
-- [ ] Type checking: `mypy src --strict` or `basedpyright src`
+- [ ] Type checking: `basedpyright src`
 - [ ] Coverage ≥ 80%
 - [ ] No unused imports (check with `getDiagnostics`)
 
@@ -87,5 +85,5 @@ Before completing Python work:
 | Coverage          | `uv run pytest --cov=src`     |
 | Format            | `ruff format .`               |
 | Lint              | `ruff check . --fix`          |
-| Type check        | `mypy src --strict`           |
+| Type check        | `basedpyright src`           |
 | Run script        | `uv run python script.py`     |

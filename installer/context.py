@@ -22,6 +22,7 @@ class InstallContext:
     skip_env: bool = False
     local_mode: bool = False
     local_repo_dir: Path | None = None
+    is_local_install: bool = False
     completed_steps: list[str] = field(default_factory=list)
     config: dict[str, Any] = field(default_factory=dict)
     ui: Console | None = None

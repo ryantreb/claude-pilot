@@ -101,6 +101,7 @@ def install(
     local_repo_dir: Optional[Path] = typer.Option(None, "--local-repo-dir", help="Local repository directory"),
     skip_python: bool = typer.Option(False, "--skip-python", help="Skip Python support installation"),
     skip_typescript: bool = typer.Option(False, "--skip-typescript", help="Skip TypeScript support installation"),
+    local_system: bool = typer.Option(False, "--local-system", help="Local installation (not in container)"),
 ) -> None:
     """Install Claude CodePro."""
     console = Console(non_interactive=non_interactive)
@@ -244,7 +245,7 @@ def install(
         else:
             console.print()
             console.print("  [bold]Do you want to install advanced Python features?[/bold]")
-            console.print("  This includes: uv, ruff, mypy, basedpyright, and Python quality hooks")
+            console.print("  This includes: uv, ruff, basedpyright, and Python quality hooks")
             install_python = console.confirm("Install Python support?", default=True)
 
     install_typescript = not skip_typescript
@@ -285,6 +286,7 @@ def install(
         skip_env=skip_env,
         local_mode=local,
         local_repo_dir=effective_local_repo_dir,
+        is_local_install=local_system,
         ui=console,
     )
 

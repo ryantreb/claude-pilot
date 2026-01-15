@@ -84,7 +84,7 @@ def install_uv() -> bool:
 
 def install_python_tools() -> bool:
     """Install Python development tools."""
-    tools = ["ruff", "mypy", "basedpyright"]
+    tools = ["ruff", "basedpyright"]
 
     try:
         for tool in tools:
@@ -376,11 +376,6 @@ def install_vexor() -> bool:
         return True
 
     try:
-        subprocess.run(
-            ["uv", "tool", "install", "vexor"],
-            check=True,
-            capture_output=True,
-        )
         _configure_vexor_defaults()
         return True
     except subprocess.CalledProcessError:

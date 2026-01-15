@@ -16,6 +16,7 @@ dependencies = [
 dev = [
     "basedpyright>=1.32.1",
     "ruff>=0.12.3",
+    "vexor>=0.22.0",
     "pytest>=8.3.3",
     "pytest-cov>=7.0.0",
     "vulture>=2.14",
@@ -95,9 +96,6 @@ ignore = [
 exclude = [".venv/**", "target/**", "**/.tox/**", "**/build/**"]
 min_confidence = 80
 paths = ["installer"]
-
-[tool.mypy]
-ignore_missing_imports = true
 
 [tool.basedpyright]
 include = ["installer"]

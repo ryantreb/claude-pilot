@@ -579,25 +579,6 @@ class TestVexorInstall:
         assert result is True
         mock_config.assert_called_once()
 
-    @patch("installer.steps.dependencies._configure_vexor_defaults")
-    @patch("subprocess.run")
-    @patch("installer.steps.dependencies.command_exists")
-    def test_install_vexor_uses_uv_tool(self, mock_cmd_exists, mock_run, mock_config):
-        """install_vexor uses uv tool install."""
-        from installer.steps.dependencies import install_vexor
-
-        mock_cmd_exists.return_value = False
-        mock_run.return_value = MagicMock(returncode=0)
-        mock_config.return_value = True
-
-        result = install_vexor()
-
-        assert result is True
-        mock_run.assert_called_once()
-        call_args = mock_run.call_args[0][0]
-        assert call_args == ["uv", "tool", "install", "vexor"]
-        mock_config.assert_called_once()
-
     def test_configure_vexor_defaults_creates_config(self):
         """_configure_vexor_defaults creates config file."""
         import json
