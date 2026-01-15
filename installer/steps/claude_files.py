@@ -36,23 +36,23 @@ def patch_hook_paths(content: str, project_dir: Path) -> str:
     return content
 
 
-def process_settings(settings_content: str, install_python: bool, install_typescript: bool) -> str:
+def process_settings(settings_content: str, enable_python: bool, enable_typescript: bool) -> str:
     """Process settings JSON, optionally removing Python/TypeScript-specific hooks.
 
     Args:
         settings_content: Raw JSON content of the settings file
-        install_python: Whether Python support is being installed
-        install_typescript: Whether TypeScript support is being installed
+        enable_python: Whether Python support is enabled
+        enable_typescript: Whether TypeScript support is enabled
 
     Returns:
-        Processed JSON string with hooks removed based on install flags
+        Processed JSON string with hooks removed based on enable flags
     """
     config: dict[str, Any] = json.loads(settings_content)
 
     files_to_remove: list[str] = []
-    if not install_python:
+    if not enable_python:
         files_to_remove.append("file_checker_python.py")
-    if not install_typescript:
+    if not enable_typescript:
         files_to_remove.append("file_checker_ts.py")
 
     if files_to_remove:
@@ -142,24 +142,24 @@ class ClaudeFilesStep(BaseStep):
             if "/rules/custom/" in file_path:
                 continue
 
-            if not ctx.install_python:
+            if not ctx.enable_python:
                 if "file_checker_python.py" in file_path:
                     continue
                 if "python-rules.md" in file_path:
                     continue
 
-            if not ctx.install_typescript:
+            if not ctx.enable_typescript:
                 if "file_checker_ts.py" in file_path:
                     continue
                 if "typescript-rules.md" in file_path:
                     continue
 
-            if not ctx.install_agent_browser:
+            if not ctx.enable_agent_browser:
                 if "agent-browser.md" in file_path:
                     continue
 
-            if ctx.firecrawl_disabled:
-                if "web-search-scraping.md" in file_path:
+            if not ctx.enable_firecrawl:
+                if "firecrawl-search.md" in file_path:
                     continue
 
             if "/commands/" in file_path:
@@ -223,8 +223,8 @@ class ClaudeFilesStep(BaseStep):
                                 file_path,
                                 dest_file,
                                 config,
-                                ctx.install_python,
-                                ctx.install_typescript,
+                                ctx.enable_python,
+                                ctx.enable_typescript,
                                 ctx.project_dir,
                             )
                             if success:
@@ -249,7 +249,7 @@ class ClaudeFilesStep(BaseStep):
                     dest_file = ctx.project_dir / file_path
                     if Path(file_path).name == SETTINGS_FILE:
                         success = self._install_settings(
-                            file_path, dest_file, config, ctx.install_python, ctx.install_typescript, ctx.project_dir
+                            file_path, dest_file, config, ctx.enable_python, ctx.enable_typescript, ctx.project_dir
                         )
                         if success:
                             file_count += 1

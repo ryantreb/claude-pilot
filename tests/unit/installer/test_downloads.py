@@ -4,9 +4,6 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
 
 
 class TestDownloadConfig:
@@ -100,17 +97,6 @@ class TestDownloadFile:
 
             result = download_file("nonexistent.txt", dest, config)
             assert result is False
-
-
-class TestVerifyNetwork:
-    """Test verify_network function."""
-
-    def test_verify_network_returns_bool(self):
-        """verify_network returns a boolean."""
-        from installer.downloads import verify_network
-
-        result = verify_network()
-        assert isinstance(result, bool)
 
 
 class TestGetRepoFiles:

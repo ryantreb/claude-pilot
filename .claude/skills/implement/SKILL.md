@@ -61,7 +61,7 @@ Update counts:
 | **Context7** | Library API lookup | `resolve-library-id(query="how to use fixtures", libraryName="pytest")` then `query-docs(libraryId, query)` |
 | **mcp-cli** | Custom MCP servers | Use `mcp-cli <server>/<tool> '<json>'` for servers in `mcp_servers.json` |
 
-**Context7 requires descriptive queries for both tools - see `library-docs.md` for full docs.**
+**Context7 requires descriptive queries for both tools - see `context7-docs.md` for full docs.**
 
 **Before starting, verify Vexor is available for semantic search:**
 ```bash

@@ -76,10 +76,10 @@ class FinalizeStep(BaseStep):
         if ctx.config.get("installed_extensions"):
             installed_items.append(f"VS Code Extensions ({ctx.config['installed_extensions']})")
 
-        if ctx.install_python:
+        if ctx.enable_python:
             installed_items.append("Python development tools")
 
-        if ctx.install_typescript:
+        if ctx.enable_typescript:
             installed_items.append("TypeScript quality hooks")
 
         ui.success_box("Installation Complete!", installed_items)

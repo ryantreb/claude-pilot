@@ -36,18 +36,6 @@ def remove_env_key(key: str, env_file: Path) -> bool:
     return False
 
 
-def set_env_key(key: str, value: str, env_file: Path) -> None:
-    """Set an environment key in .env file, replacing if it exists."""
-    if not env_file.exists():
-        env_file.write_text(f"{key}={value}\n")
-        return
-
-    lines = env_file.read_text().splitlines()
-    new_lines = [line for line in lines if not line.strip().startswith(f"{key}=")]
-    new_lines.append(f"{key}={value}")
-    env_file.write_text("\n".join(new_lines) + "\n")
-
-
 def cleanup_obsolete_env_keys(env_file: Path) -> list[str]:
     """Remove obsolete environment keys from .env file. Returns list of removed keys."""
     removed = []
@@ -88,113 +76,26 @@ def add_env_key(key: str, value: str, env_file: Path) -> None:
 
 
 class EnvironmentStep(BaseStep):
-    """Step that sets up the .env file for API keys."""
+    """Step that cleans up .env file (API keys are collected earlier in CLI)."""
 
     name = "environment"
 
     def check(self, ctx: InstallContext) -> bool:
-        """Always returns False - environment step should always run to check for missing keys."""
+        """Always returns False - environment step should always run for cleanup."""
         return False
 
     def run(self, ctx: InstallContext) -> None:
-        """Set up .env file with API keys."""
+        """Clean up .env file - remove obsolete keys."""
         ui = ctx.ui
         env_file = ctx.project_dir / ".env"
 
         if ctx.skip_env or ctx.non_interactive:
-            if ui:
-                ui.status("Skipping .env setup")
             return
 
-        if ui:
-            ui.section("API Keys Setup")
-
-        append_mode = env_file.exists()
-
-        if append_mode:
+        if env_file.exists():
             removed_keys = cleanup_obsolete_env_keys(env_file)
             if removed_keys and ui:
-                ui.print(f"  [dim]Removed obsolete keys: {', '.join(removed_keys)}[/dim]")
-
-        if append_mode:
-            if ui:
-                ui.success("Found existing .env file")
-                ui.print("  We'll append Claude CodePro configuration to your existing file.")
-                ui.print()
-        else:
-            if ui:
-                ui.print("  Let's set up your API keys. I'll guide you through each one.")
-                ui.print()
-
-        openai_api_key = ""
-
-        if not key_is_set("OPENAI_API_KEY", env_file):
-            if ui:
-                ui.print()
-                ui.rule("OpenAI API Key - Semantic Code Search")
-                ui.print()
-                ui.print("  [bold]Used for:[/bold] Generating embeddings for Vexor semantic search")
-                ui.print("  [bold]Why:[/bold] Powers fast, intelligent code search across your codebase")
-                ui.print("  [bold]Create at:[/bold] [cyan]https://platform.openai.com/api-keys[/cyan]")
-                ui.print()
-                ui.print("  [dim]You can skip this to use local embeddings instead (slower, CPU-intensive)[/dim]")
-                ui.print()
-
-                openai_choices = [
-                    "Enter API key (recommended - faster, better quality)",
-                    "Skip - use local embeddings (slower, no API needed)",
-                ]
-                choice = ui.select("OpenAI API Key", openai_choices)
-
-                if choice == openai_choices[0]:
-                    openai_api_key = ui.input("OPENAI_API_KEY", default="")
-                    if openai_api_key:
-                        add_env_key("OPENAI_API_KEY", openai_api_key, env_file)
-                else:
-                    ctx.use_local_vexor = True
-                    ui.info("Using local embeddings for Vexor (will download model during setup)")
-        else:
-            if ui:
-                ui.success("OPENAI_API_KEY already set, skipping")
-
-        firecrawl_api_key = ""
-
-        if not key_is_set("FIRECRAWL_API_KEY", env_file):
-            if ui:
-                ui.print()
-                ui.rule("Firecrawl API Key - Web Scraping & Search")
-                ui.print()
-                ui.print("  [bold]Used for:[/bold] Web scraping, search, and content extraction")
-                ui.print("  [bold]Why:[/bold] Powers intelligent web research and documentation fetching")
-                ui.print(
-                    "  [bold]Create at:[/bold] [cyan]https://www.firecrawl.dev/app/api-keys[/cyan] (free tier available)"
-                )
-                ui.print()
-                ui.print("  [dim]Skip if your company policy doesn't allow external API keys[/dim]")
-                ui.print()
-
-                firecrawl_choices = [
-                    "Enter API key (recommended - enables web scraping)",
-                    "Skip - disable Firecrawl web scraping",
-                ]
-                choice = ui.select("Firecrawl API Key", firecrawl_choices)
-
-                if choice == firecrawl_choices[0]:
-                    firecrawl_api_key = ui.input("FIRECRAWL_API_KEY", default="")
-                    if firecrawl_api_key:
-                        add_env_key("FIRECRAWL_API_KEY", firecrawl_api_key, env_file)
-                else:
-                    ctx.firecrawl_disabled = True
-                    ui.info("Firecrawl disabled - web scraping features will not be available")
-        else:
-            if ui:
-                ui.success("FIRECRAWL_API_KEY already set, skipping")
-
-        if ui:
-            if append_mode:
-                ui.success("Updated .env file with Claude CodePro configuration")
-            else:
-                ui.success("Created .env file with your API keys")
+                ui.print(f"  [dim]Cleaned up obsolete keys: {', '.join(removed_keys)}[/dim]")
 
     def rollback(self, ctx: InstallContext) -> None:
         """No rollback for environment setup."""

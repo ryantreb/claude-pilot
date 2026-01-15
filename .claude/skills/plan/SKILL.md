@@ -183,7 +183,7 @@ Questions:
 | **Context7** | Library/framework docs | `resolve-library-id(query="your question", libraryName="lib")` then `query-docs(libraryId, query)` |
 | **mcp-cli** | Custom MCP servers | Use `mcp-cli <server>/<tool> '<json>'` for servers in `mcp_servers.json` |
 
-**Context7 requires descriptive queries for both tools - see `library-docs.md` for full docs.**
+**Context7 requires descriptive queries for both tools - see `context7-docs.md` for full docs.**
 
 **Before exploring, verify Vexor is available:**
 ```bash

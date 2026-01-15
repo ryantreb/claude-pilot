@@ -9,7 +9,7 @@ description: Run tests and fix issues end-to-end with Claude CodePro
 > Sub-agents lose context and make verification inconsistent.
 
 **Available MCP Tools:**
-- **Context7** - Library documentation lookup: `resolve-library-id(query, libraryName)` then `query-docs(libraryId, query)` - descriptive queries required (see `library-docs.md`)
+- **Context7** - Library documentation lookup: `resolve-library-id(query, libraryName)` then `query-docs(libraryId, query)` - descriptive queries required (see `context7-docs.md`)
 - **mcp-cli** - Custom MCP servers via `mcp-cli <server>/<tool> '<json>'` for servers in `mcp_servers.json`
 
 ## The Process
