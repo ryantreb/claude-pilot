@@ -32,6 +32,7 @@ CONTAINER_EXTENSIONS = [
     "redhat.vscode-xml",
     "redhat.vscode-yaml",
     "tamasfe.even-better-toml",
+    "kaleidoscope-app.vscode-ksdiff",
 ]
 
 LOCAL_EXTENSIONS = [

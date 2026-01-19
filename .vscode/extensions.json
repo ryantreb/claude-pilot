@@ -15,6 +15,7 @@
         "redhat.vscode-xml",
         "redhat.vscode-yaml",
         "tamasfe.even-better-toml",
-        "dkodr.claudeboard"
+        "dkodr.claudeboard",
+        "kaleidoscope-app.vscode-ksdiff"
     ]
 }

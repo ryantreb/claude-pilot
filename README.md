@@ -141,27 +141,25 @@ Same task. Different results.
 
 ## ⚡ Usage
 
-### First Time Setup
+### 🔧 First Time Setup
 
-Run `/setup` once to initialize project context and semantic search:
+Run `/setup` once per project to initialize context and semantic search:
 
 ```bash
 ccp
 > /setup
 ```
 
-This is independent of which development mode you use - both modes benefit from the initialized context.
+### 📋 Spec-Driven Mode
 
-### Spec-Driven Mode (`/spec`)
-
-Use this mode when you want a spec to review before implementation, or when the task is complex enough to benefit from structured planning:
+Best for complex features, refactoring, or when you want to review a plan before implementation:
 
 ```bash
 ccp
-> /spec "Describe your feature as detailed as possible"
+> /spec "Add user authentication with OAuth and JWT tokens"
 ```
 
-**The workflow:**
+**How it works:**
 
 ```
 📋 Plan  →  ✅ Approve  →  🔨 Implement  →  🔍 Verify
@@ -169,14 +167,16 @@ ccp
                                 └── 🔄 Loop ───┘
 ```
 
-1. **📋 Plan** - Explores codebase, asks questions, generates detailed spec in `docs/plans/`
-2. **✅ Approve** - You review, edit if needed, and approve the plan
-3. **🔨 Implement** - Executes tasks with TDD enforcement and quality hooks
-4. **🔍 Verify** - Runs tests, quality checks, validates completion (loops back if issues found)
+1. **📋 Plan** — Explores codebase, asks clarifying questions, writes spec to `docs/plans/`
+2. **✅ Approve** — You review and edit the plan, then approve
+3. **🔨 Implement** — Executes each task with TDD and quality hooks
+4. **🔍 Verify** — Runs tests and checks; loops back if issues found
 
-#### Quick Mode
+### 💬 Quick Mode
 
-Just describe what you need - no plan file, no approval gate. Claude CodePro still provides all the quality hooks, TDD enforcement, and context capabilities. Perfect for bug fixes, small improvements, and exploratory work:
+Just chat. No plan file, no approval gate. All quality hooks and TDD enforcement still apply.
+
+Best for bug fixes, small improvements, and exploratory work:
 
 ```bash
 ccp

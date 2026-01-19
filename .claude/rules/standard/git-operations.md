@@ -1,6 +1,16 @@
-## Git Operations - Read-Only Mode
+## Git Operations - Read-Only by Default
 
-**Rule:** You may READ git state but NEVER WRITE to git. User controls all version control decisions.
+**Rule:** You may READ git state freely, but NEVER WRITE to git without EXPLICIT user permission.
+
+### ⛔ CRITICAL: User Approval Required
+
+**NEVER perform these operations without the user explicitly saying "commit", "push", etc.:**
+- `git add` / `git commit` / `git commit --amend`
+- `git push` / `git push --force`
+- `git pull` / `git fetch` / `git merge` / `git rebase`
+- `git reset` / `git revert` / `git stash`
+
+**"Fix this bug" does NOT mean "commit it". Wait for explicit git instructions.**
 
 ### What You Can Do
 
@@ -27,9 +37,9 @@ Use these to:
 - Identify merge conflicts
 - Verify repository state before suggesting actions
 
-### What You Cannot Do
+### Write Operations - Only With Explicit Permission
 
-**NEVER execute these commands under any circumstances:**
+These commands require the user to explicitly say "commit", "push", etc.:
 
 ```bash
 git add                 # Staging
@@ -51,24 +61,21 @@ git remote add/remove   # Remote management
 git submodule           # Submodule operations
 ```
 
-### When User Asks for Git Operations
+### When User Gives Explicit Permission
 
-If user requests git write operations:
+When user explicitly says "commit", "push", "commit and push", etc.:
+1. **Execute the command** - don't ask for confirmation again
+2. **Use appropriate commit message format** (see custom/git-commits.md)
 
-1. **Acknowledge** the request
-2. **Provide exact command** they should run
-3. **Explain what it does** if complex
-4. **Do not execute** the command yourself
+### When User Hasn't Mentioned Git
 
-Example response:
-```
-I can't execute git commits, but here's what you should run:
+If user asks you to fix/change code but doesn't mention committing:
+1. **Make the code changes**
+2. **Run tests to verify**
+3. **STOP and report completion**
+4. **Wait for user to say "commit" or "push"**
 
-git add .
-git commit -m "feat: add user authentication"
-
-This stages all changes and creates a commit with a conventional commit message.
-```
+**Do NOT assume the user wants you to commit.**
 
 ### Suggesting Commit Messages
 
