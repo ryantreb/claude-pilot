@@ -69,7 +69,7 @@ class FinalizeStep(BaseStep):
             [
                 "Claude CodePro rules",
                 "Shell alias (ccp)",
-                "Endless Mode (unlimited context)",
+                "Endless Mode (session continuity)",
             ]
         )
 

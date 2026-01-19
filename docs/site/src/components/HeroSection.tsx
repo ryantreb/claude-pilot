@@ -26,8 +26,8 @@ const HeroSection = () => {
         {/* Badge */}
         <div className="animate-fade-in mb-4 xs:mb-6">
           <Badge variant="outline" className="px-2 xs:px-3 sm:px-4 py-1 xs:py-1.5 text-[10px] xs:text-xs sm:text-sm border-primary/50 text-primary">
-            <span className="hidden xs:inline">Professional Development Environment for Claude Code</span>
-            <span className="xs:hidden">Pro Dev Environment for Claude Code</span>
+            <span className="hidden xs:inline">Production-Grade Development Environment for Claude Code</span>
+            <span className="xs:hidden">Production-Grade Dev for Claude Code</span>
           </Badge>
         </div>
 
@@ -38,17 +38,17 @@ const HeroSection = () => {
 
         {/* Subtitle */}
         <p className="text-muted-foreground text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl max-w-[90%] xs:max-w-xl sm:max-w-2xl mx-auto mb-6 xs:mb-8 animate-fade-in animation-delay-200 leading-relaxed px-1">
-          Spec-Driven Development with TDD Enforcement, Semantic Search, Persistent Memory, Quality Hooks, Endless Mode, and more.
+          TDD enforced. Quality automated. Ship with confidence.
         </p>
 
         {/* Feature badges */}
         <div className="flex flex-wrap justify-center gap-1.5 xs:gap-2 mb-6 xs:mb-8 animate-fade-in animation-delay-300 px-2">
-          <Badge variant="secondary" className="text-[10px] xs:text-xs">Opus 4.5</Badge>
-          <Badge variant="secondary" className="text-[10px] xs:text-xs">Endless Mode</Badge>
+          <Badge variant="secondary" className="text-[10px] xs:text-xs">TDD Enforced</Badge>
+          <Badge variant="secondary" className="text-[10px] xs:text-xs">Quality Hooks</Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">Spec-Driven</Badge>
-          <Badge variant="secondary" className="text-[10px] xs:text-xs">TDD</Badge>
+          <Badge variant="secondary" className="text-[10px] xs:text-xs">Opus 4.5</Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">LSP</Badge>
-          <Badge variant="secondary" className="text-[10px] xs:text-xs">Semantic Search</Badge>
+          <Badge variant="secondary" className="text-[10px] xs:text-xs">Persistent Memory</Badge>
         </div>
 
         {/* CTA Buttons */}

@@ -110,7 +110,7 @@ class Console:
 
         tagline = Text()
         tagline.append("  ✨ ", style="yellow")
-        tagline.append("Professional Development Environment for Claude Code", style="bold white")
+        tagline.append("Production-Grade Development Environment for Claude Code", style="bold white")
         tagline.append(" ✨", style="yellow")
         self._console.print(tagline)
         self._console.print()
@@ -118,7 +118,7 @@ class Console:
         features = Text()
         features.append("  ♾️  ", style="yellow")
         features.append("Endless Mode", style="bold green")
-        features.append(" — Unlimited context across sessions, zero manual intervention\n", style="white")
+        features.append(" — Seamless continuity across sessions, zero manual intervention\n", style="white")
         features.append("  📋 ", style="yellow")
         features.append("Two Development Modes", style="bold green")
         features.append(" — /spec for planning, Quick Mode for fast fixes\n", style="white")

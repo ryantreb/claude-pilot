@@ -1,7 +1,7 @@
 {
   "name": "Claude CodePro",
   "short_name": "CodePro",
-  "description": "Professional Development Environment for Claude Code",
+  "description": "Production-Grade Development Environment for Claude Code",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

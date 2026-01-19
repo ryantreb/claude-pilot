@@ -17,7 +17,7 @@ const ComparisonSection = () => {
             The Difference
           </h2>
           <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-            Same task. Different experience.
+            Same task. Different results.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ const ComparisonSection = () => {
                 {/* Context injection */}
                 <div className="text-green-400/80 flex items-center gap-2 text-xs">
                   <Brain className="h-3 w-3 flex-shrink-0" />
-                  <span>Claude Mem: Context injected</span>
+                  <span>Persistent memory: Context injected</span>
                 </div>
                 <div className="text-green-400/80 flex items-center gap-2 text-xs">
                   <FileCode2 className="h-3 w-3 flex-shrink-0" />
@@ -157,9 +157,8 @@ const ComparisonSection = () => {
         {/* Bottom highlight */}
         <div className="mt-12 text-center">
           <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
-            Claude CodePro transforms AI-assisted development from Quick Mode prompting
-            into a <span className="text-primary font-medium">structured, repeatable process</span> with
-            persistent memory, semantic search, enforced best practices, and automatic quality checks.
+            <span className="text-primary font-medium">Production-grade code you can ship with confidence.</span>
+            {" "}Systematic. Tested. Verified.
           </p>
         </div>
       </div>

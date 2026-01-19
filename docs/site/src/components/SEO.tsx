@@ -11,9 +11,9 @@ interface SEOProps {
 }
 
 const SEO = ({
-  title = "Claude CodePro - Professional Development Environment for Claude Code",
-  description = "Start shipping systematically with Spec-Driven Development, TDD, Semantic Search, Persistent Memory, Context Management, Quality Hooks, and Modular Rules System. Free for personal use, students, and nonprofits.",
-  keywords = "Claude CodePro, Claude Code, AI-assisted development, Spec-Driven Development, TDD, Test-Driven Development, Context Engineering, professional developers, dev containers, plugins, modular rules, semantic search, persistent memory",
+  title = "Claude CodePro - Production-Grade Development Environment for Claude Code",
+  description = "Ship production-ready code with Claude Code. Enforced TDD, automated quality hooks, spec-driven workflows, and persistent memory. Free for personal use.",
+  keywords = "Claude CodePro, Claude Code, AI coding assistant, AI pair programming, TDD enforcement, Test-Driven Development, code quality automation, linting, formatting, type checking, spec-driven development, dev containers, VS Code, Cursor, Windsurf, Claude API, Anthropic, AI development tools, automated testing, code review, persistent memory, semantic code search",
   canonicalUrl = "https://www.claude-code.pro",
   ogImage = "https://storage.googleapis.com/gpt-engineer-file-uploads/qmjt5RyHpNP9GFnerZmcYYkrVd13/social-images/social-1762415471953-share.png",
   type = "website",

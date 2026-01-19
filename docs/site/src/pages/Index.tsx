@@ -14,7 +14,7 @@ const Index = () => {
     "@type": "WebSite",
     "name": "Claude CodePro",
     "url": "https://www.claude-code.pro",
-    "description": "Professional Development Environment for Claude Code",
+    "description": "Production-Grade Development Environment for Claude Code",
     "publisher": {
       "@type": "Organization",
       "name": "Claude CodePro",
@@ -46,7 +46,7 @@ const Index = () => {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Claude CodePro",
-    "description": "Professional Development Environment for Claude Code - Automated Context Management, Spec-Driven Development, Skills, TDD, LSP, Semantic Search, Persistent Memory, Quality Hooks, and Modular Rules System.",
+    "description": "Production-grade AI development for Claude Code. TDD enforced, quality automated, ship with confidence.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Linux, macOS, Windows (via Docker)",
     "offers": {
@@ -67,8 +67,8 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="Claude CodePro - Professional Development Environment for Claude Code"
-        description="Start shipping systematically with Automated Context Management, Spec-Driven Development, Skills, TDD, LSP, Semantic Search, Persistent Memory, Quality Hooks, and more. Free for personal use, students, and nonprofits."
+        title="Claude CodePro - Production-Grade Development Environment for Claude Code"
+        description="Production-grade AI development for Claude Code. TDD enforced, quality automated, ship with confidence. Free for personal use, students, and nonprofits."
         structuredData={[websiteStructuredData, breadcrumbStructuredData, softwareStructuredData]}
       />
       <NavBar />

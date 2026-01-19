@@ -22,7 +22,7 @@ const insideItems: InsideItem[] = [
     items: [
       "Spec-Driven: /spec for features with planning",
       "Quick Mode: For bug fixes and small changes",
-      "Both get unlimited context via Endless Mode",
+      "Both benefit from quality hooks and TDD",
       "Choose structured planning or fast iteration",
     ],
   },
@@ -30,8 +30,8 @@ const insideItems: InsideItem[] = [
     icon: InfinityIcon,
     title: "Endless Mode",
     items: [
-      "Removes 200K context limit entirely",
-      "Automatic session handoffs when nearing limit",
+      "Seamless continuity across sessions",
+      "Automatic handoffs when nearing context limits",
       "Works in both Spec-Driven and Quick modes",
       "Zero manual intervention required",
     ],
@@ -50,7 +50,7 @@ const insideItems: InsideItem[] = [
     icon: Plug2,
     title: "Enhanced Context",
     items: [
-      "Claude Mem - Cross-session memory",
+      "Persistent Memory - Cross-session context",
       "Vexor - Local semantic code search",
       "Context7 / Firecrawl - Library docs & web",
       "agent-browser - Headless browser automation",
