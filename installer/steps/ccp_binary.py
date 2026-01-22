@@ -150,7 +150,7 @@ def _download_file(
         progress_callback: Optional callback (downloaded_bytes, total_bytes) for progress display
     """
     try:
-        with httpx.Client(timeout=240.0, follow_redirects=True) as client:
+        with httpx.Client(timeout=600.0, follow_redirects=True) as client:
             with client.stream("GET", url) as response:
                 if response.status_code != 200:
                     return False

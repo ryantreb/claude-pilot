@@ -228,7 +228,7 @@ def _configure_claude_defaults() -> bool:
     return _patch_claude_config(
         {
             "installMethod": "native",
-            "theme": "dark-ansi",
+            "theme": "dark",
             "verbose": True,
             "autoCompactEnabled": False,
             "autoConnectIde": True,
@@ -349,7 +349,7 @@ def _download_claude_binary_with_progress(
     dest_path: Path,
     ui: Any = None,
 ) -> bool:
-    """Download Claude Code binary with progress display.
+    """Download Claude Code binary with progress display and retry logic.
 
     Args:
         version: Version to download (e.g., "1.0.33")
@@ -367,90 +367,121 @@ def _download_claude_binary_with_progress(
     if not platform_str:
         return False
 
-    try:
-        with httpx.Client(timeout=30.0) as client:
-            manifest_url = f"{GCS_BUCKET}/{version}/manifest.json"
-            response = client.get(manifest_url)
-            if response.status_code != 200:
-                return False
-
-            manifest = response.json()
-            platform_info = manifest.get("platforms", {}).get(platform_str)
-            if not platform_info:
-                return False
-
-            expected_checksum = platform_info.get("checksum", "")
-
-        binary_url = f"{GCS_BUCKET}/{version}/{platform_str}/claude"
-        dest_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with httpx.Client(timeout=240.0, follow_redirects=True) as client:
-            with client.stream("GET", binary_url) as response:
+    for attempt in range(MAX_RETRIES):
+        try:
+            with httpx.Client(timeout=30.0) as client:
+                manifest_url = f"{GCS_BUCKET}/{version}/manifest.json"
+                response = client.get(manifest_url)
                 if response.status_code != 200:
+                    if attempt < MAX_RETRIES - 1:
+                        if ui:
+                            ui.print(f"  [dim]Manifest fetch failed, retrying ({attempt + 1}/{MAX_RETRIES})...[/dim]")
+                        time.sleep(RETRY_DELAY)
+                        continue
                     return False
 
-                total = int(response.headers.get("content-length", 0))
-                downloaded = 0
-                sha256_hash = hashlib.sha256()
+                manifest = response.json()
+                platform_info = manifest.get("platforms", {}).get(platform_str)
+                if not platform_info:
+                    return False
 
-                if ui and total > 0:
-                    with ui.progress(100, "Downloading Claude Code") as progress:
+                expected_checksum = platform_info.get("checksum", "")
+
+            binary_url = f"{GCS_BUCKET}/{version}/{platform_str}/claude"
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with httpx.Client(timeout=600.0, follow_redirects=True) as client:
+                with client.stream("GET", binary_url) as response:
+                    if response.status_code != 200:
+                        if attempt < MAX_RETRIES - 1:
+                            if ui:
+                                ui.print(f"  [dim]Download failed, retrying ({attempt + 1}/{MAX_RETRIES})...[/dim]")
+                            time.sleep(RETRY_DELAY)
+                            continue
+                        return False
+
+                    total = int(response.headers.get("content-length", 0))
+                    downloaded = 0
+                    sha256_hash = hashlib.sha256()
+
+                    if ui and total > 0:
+                        with ui.progress(100, "Downloading Claude Code") as progress:
+                            with open(dest_path, "wb") as f:
+                                for chunk in response.iter_bytes(chunk_size=8192):
+                                    f.write(chunk)
+                                    sha256_hash.update(chunk)
+                                    downloaded += len(chunk)
+                                    pct = int((downloaded / total) * 100)
+                                    progress.update(pct)
+                    else:
                         with open(dest_path, "wb") as f:
                             for chunk in response.iter_bytes(chunk_size=8192):
                                 f.write(chunk)
                                 sha256_hash.update(chunk)
-                                downloaded += len(chunk)
-                                pct = int((downloaded / total) * 100)
-                                progress.update(pct)
-                else:
-                    with open(dest_path, "wb") as f:
-                        for chunk in response.iter_bytes(chunk_size=8192):
-                            f.write(chunk)
-                            sha256_hash.update(chunk)
 
-        actual_checksum = sha256_hash.hexdigest()
-        if expected_checksum and actual_checksum != expected_checksum:
+            actual_checksum = sha256_hash.hexdigest()
+            if expected_checksum and actual_checksum != expected_checksum:
+                dest_path.unlink(missing_ok=True)
+                if attempt < MAX_RETRIES - 1:
+                    if ui:
+                        ui.print(f"  [dim]Checksum mismatch, retrying ({attempt + 1}/{MAX_RETRIES})...[/dim]")
+                    time.sleep(RETRY_DELAY)
+                    continue
+                return False
+
+            dest_path.chmod(dest_path.stat().st_mode | 0o755)
+            return True
+
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             dest_path.unlink(missing_ok=True)
+            if attempt < MAX_RETRIES - 1:
+                if ui:
+                    ui.print(f"  [dim]Download error: {e}, retrying ({attempt + 1}/{MAX_RETRIES})...[/dim]")
+                time.sleep(RETRY_DELAY)
+                continue
             return False
 
-        dest_path.chmod(dest_path.stat().st_mode | 0o755)
-        return True
-
-    except (httpx.HTTPError, httpx.TimeoutException, OSError):
-        dest_path.unlink(missing_ok=True)
-        return False
+    return False
 
 
 def _run_claude_installer(binary_path: Path, version: str, ui: Any = None) -> bool:
-    """Run the Claude Code installer binary with clean output."""
+    """Run the Claude Code installer binary with spinner and captured output."""
     env = os.environ.copy()
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
 
-    process: subprocess.Popen[str] | None = None
     try:
-        process = subprocess.Popen(
-            [str(binary_path), "install", "--force", version],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            env=env,
-        )
+        if ui:
+            with ui.spinner("Running Claude Code installer (this may take 2-3 minutes)..."):
+                result = subprocess.run(
+                    [str(binary_path), "install", "--force", version],
+                    capture_output=True,
+                    text=True,
+                    env=env,
+                    timeout=300,
+                )
+        else:
+            result = subprocess.run(
+                [str(binary_path), "install", "--force", version],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=300,
+            )
 
-        if process.stdout:
-            for line in process.stdout:
+        binary_path.unlink(missing_ok=True)
+
+        output = (result.stdout or "") + (result.stderr or "")
+        if output.strip() and ui:
+            for line in output.strip().split("\n"):
                 cleaned = _strip_ansi(line)
-                if cleaned and ui:
+                if cleaned:
                     ui.print(f"  {cleaned}")
 
-        process.wait(timeout=120)
-        binary_path.unlink(missing_ok=True)
-        return process.returncode == 0
+        return result.returncode == 0
     except subprocess.TimeoutExpired:
         if ui:
             ui.warning("Installer timed out after 120s")
-        if process:
-            process.kill()
         binary_path.unlink(missing_ok=True)
     except (subprocess.SubprocessError, OSError) as e:
         if ui:
