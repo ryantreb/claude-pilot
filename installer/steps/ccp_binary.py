@@ -290,17 +290,26 @@ class CcpBinaryStep(BaseStep):
 
         action = "Updating" if ccp_path.exists() else "Downloading"
         if ui:
-            ui.status(f"{action} CCP binary to v{target_version}...")
-            success = _download_ccp_artifacts(target_version, bin_dir, ui)
-            if success:
-                ui.success(f"CCP binary updated to v{target_version}")
-                if ctx.is_local_install:
-                    _check_macos_gatekeeper(bin_dir, ui)
-            else:
-                ui.warning("Could not update CCP binary - will update on next install")
+            while True:
+                ui.status(f"{action} CCP binary to v{target_version}...")
+                success = _download_ccp_artifacts(target_version, bin_dir, ui)
+                if success:
+                    ui.success(f"CCP binary updated to v{target_version}")
+                    if ctx.is_local_install:
+                        _check_macos_gatekeeper(bin_dir, ui)
+                    break
+
+                ui.warning("Could not update CCP binary")
+                ui.info("This usually happens when CCP is still running.")
+                ui.info("Please close all instances of 'ccp' (check running terminals).")
+                ui.print()
+
+                if ui.non_interactive:
+                    ui.info("Non-interactive mode - skipping retry, will update on next install")
+                    break
+
+                if not ui.confirm("Retry the download?", default=True):
+                    ui.info("Skipping CCP binary update - will update on next install")
+                    break
         else:
             _download_ccp_artifacts(target_version, bin_dir)
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """No rollback for binary updates - old binary in memory still works."""
-        pass

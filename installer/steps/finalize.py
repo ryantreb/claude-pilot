@@ -99,7 +99,3 @@ class FinalizeStep(BaseStep):
         ui.print()
         ui.print(f"  [dim]Installed version: {__version__}[/dim]")
         ui.print()
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """Finalize has no rollback (informational only)."""
-        pass

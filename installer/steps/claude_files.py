@@ -360,15 +360,3 @@ class ClaudeFilesStep(BaseStep):
                 return True
             except (json.JSONDecodeError, OSError, IOError):
                 return False
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """Remove installed files."""
-        installed_files = ctx.config.get("installed_files", [])
-
-        for file_path in installed_files:
-            path = Path(file_path)
-            if path.exists():
-                try:
-                    path.unlink()
-                except (OSError, IOError):
-                    pass

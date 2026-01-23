@@ -92,7 +92,3 @@ class EnvironmentStep(BaseStep):
             removed_keys = cleanup_obsolete_env_keys(env_file)
             if removed_keys and ui:
                 ui.print(f"  [dim]Cleaned up obsolete keys: {', '.join(removed_keys)}[/dim]")
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """No rollback for environment setup."""
-        pass

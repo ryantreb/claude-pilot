@@ -780,34 +780,3 @@ class TestDirectoryClearing:
             assert not (dest_standard / "old-rule.md").exists()
             # New standard rule should be installed
             assert (dest_standard / "new-rule.md").exists()
-
-
-class TestClaudeFilesRollback:
-    """Test ClaudeFilesStep rollback."""
-
-    def test_rollback_removes_installed_files(self):
-        """ClaudeFilesStep.rollback removes installed files."""
-        from installer.context import InstallContext
-        from installer.steps.claude_files import ClaudeFilesStep
-        from installer.ui import Console
-
-        step = ClaudeFilesStep()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            ctx = InstallContext(
-                project_dir=Path(tmpdir),
-                ui=Console(non_interactive=True),
-            )
-
-            # Create some files
-            claude_dir = Path(tmpdir) / ".claude"
-            claude_dir.mkdir()
-            test_file = claude_dir / "test.md"
-            test_file.write_text("test")
-
-            # Track installed files
-            ctx.config["installed_files"] = [str(test_file)]
-
-            step.rollback(ctx)
-
-            # File should be removed
-            assert not test_file.exists()

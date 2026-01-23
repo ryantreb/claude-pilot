@@ -66,38 +66,6 @@ class TestRunInstallation:
             mock_step2.run.assert_called_once_with(ctx)
 
 
-class TestRollback:
-    """Test rollback functionality."""
-
-    def test_rollback_completed_steps_exists(self):
-        """rollback_completed_steps function exists."""
-        from installer.cli import rollback_completed_steps
-
-        assert callable(rollback_completed_steps)
-
-    def test_rollback_calls_step_rollback(self):
-        """rollback_completed_steps calls rollback on completed steps."""
-        from installer.cli import rollback_completed_steps
-        from installer.context import InstallContext
-        from installer.ui import Console
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            ctx = InstallContext(
-                project_dir=Path(tmpdir),
-                ui=Console(non_interactive=True),
-            )
-            ctx.mark_completed("test_step")
-
-            # Mock step
-            mock_step = MagicMock()
-            mock_step.name = "test_step"
-
-            steps = [mock_step]
-            rollback_completed_steps(ctx, steps)
-
-            mock_step.rollback.assert_called_once_with(ctx)
-
-
 class TestBackupFeature:
     """Test backup feature ignores special files."""
 

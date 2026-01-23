@@ -176,7 +176,3 @@ class PrerequisitesStep(BaseStep):
                     ui.warning(f"Could not install {package} - please install manually")
             else:
                 _install_homebrew_package(package)
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """Prerequisite packages are not rolled back (would be too disruptive)."""
-        pass

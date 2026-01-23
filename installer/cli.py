@@ -227,25 +227,6 @@ def _get_license_info(
         return _run_status()
 
 
-def rollback_completed_steps(ctx: InstallContext, steps: list[BaseStep]) -> None:
-    """Rollback all completed steps in reverse order."""
-    ui = ctx.ui
-    if ui:
-        ui.warning("Rolling back installation...")
-
-    completed_names = set(ctx.completed_steps)
-
-    for step in reversed(steps):
-        if step.name in completed_names:
-            try:
-                if ui:
-                    ui.status(f"Rolling back {step.name}...")
-                step.rollback(ctx)
-            except Exception as e:
-                if ui:
-                    ui.error(f"Rollback failed for {step.name}: {e}")
-
-
 def run_installation(ctx: InstallContext) -> None:
     """Execute all installation steps."""
     ui = ctx.ui
@@ -263,12 +244,8 @@ def run_installation(ctx: InstallContext) -> None:
                 ui.info(f"Already complete, skipping")
             continue
 
-        try:
-            step.run(ctx)
-            ctx.mark_completed(step.name)
-        except FatalInstallError:
-            rollback_completed_steps(ctx, steps)
-            raise
+        step.run(ctx)
+        ctx.mark_completed(step.name)
 
 
 @app.command()

@@ -331,7 +331,120 @@ class TestCcpBinaryStep:
         step = CcpBinaryStep()
         step.run(ctx)  # Should not raise
 
-    def test_rollback_is_noop(self, tmp_path: Path) -> None:
-        ctx = self._make_context(tmp_path)
+
+class TestCcpBinaryStepRetry:
+    """Tests for CcpBinaryStep retry logic when download fails."""
+
+    def _make_context(self, tmp_path: Path, ui: MagicMock | None = None) -> InstallContext:
+        return InstallContext(
+            project_dir=tmp_path,
+            ui=ui,
+            config={},
+        )
+
+    @patch("installer.steps.ccp_binary.INSTALLER_VERSION", "5.1.2")
+    @patch("installer.steps.ccp_binary._download_ccp_artifacts")
+    @patch("installer.steps.ccp_binary._get_installed_version")
+    def test_retries_on_failure_when_user_confirms(
+        self, mock_version: MagicMock, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """When download fails and user confirms retry, should retry."""
+        ui = MagicMock()
+        ui.non_interactive = False
+        ui.confirm.return_value = True
+        # First call fails, second succeeds
+        mock_download.side_effect = [False, True]
+        mock_version.return_value = None
+
+        ctx = self._make_context(tmp_path, ui)
         step = CcpBinaryStep()
-        step.rollback(ctx)  # Should not raise
+        step.run(ctx)
+
+        assert mock_download.call_count == 2
+        ui.warning.assert_called_with("Could not update CCP binary")
+        ui.success.assert_called_with("CCP binary updated to v5.1.2")
+
+    @patch("installer.steps.ccp_binary.INSTALLER_VERSION", "5.1.2")
+    @patch("installer.steps.ccp_binary._download_ccp_artifacts")
+    @patch("installer.steps.ccp_binary._get_installed_version")
+    def test_skips_when_user_declines_retry(
+        self, mock_version: MagicMock, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """When download fails and user declines retry, should skip."""
+        ui = MagicMock()
+        ui.non_interactive = False
+        ui.confirm.return_value = False
+        mock_download.return_value = False
+        mock_version.return_value = None
+
+        ctx = self._make_context(tmp_path, ui)
+        step = CcpBinaryStep()
+        step.run(ctx)
+
+        assert mock_download.call_count == 1
+        ui.warning.assert_called_with("Could not update CCP binary")
+        # Should show skip message
+        ui.info.assert_any_call("Skipping CCP binary update - will update on next install")
+
+    @patch("installer.steps.ccp_binary.INSTALLER_VERSION", "5.1.2")
+    @patch("installer.steps.ccp_binary._download_ccp_artifacts")
+    @patch("installer.steps.ccp_binary._get_installed_version")
+    def test_skips_retry_in_non_interactive_mode(
+        self, mock_version: MagicMock, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """When download fails in non-interactive mode, should skip without prompting."""
+        ui = MagicMock()
+        ui.non_interactive = True
+        mock_download.return_value = False
+        mock_version.return_value = None
+
+        ctx = self._make_context(tmp_path, ui)
+        step = CcpBinaryStep()
+        step.run(ctx)
+
+        assert mock_download.call_count == 1
+        ui.confirm.assert_not_called()
+        ui.info.assert_any_call("Non-interactive mode - skipping retry, will update on next install")
+
+    @patch("installer.steps.ccp_binary.INSTALLER_VERSION", "5.1.2")
+    @patch("installer.steps.ccp_binary._download_ccp_artifacts")
+    @patch("installer.steps.ccp_binary._get_installed_version")
+    def test_shows_close_ccp_message_on_failure(
+        self, mock_version: MagicMock, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """When download fails, should tell user to close CCP instances."""
+        ui = MagicMock()
+        ui.non_interactive = False
+        ui.confirm.return_value = False
+        mock_download.return_value = False
+        mock_version.return_value = None
+
+        ctx = self._make_context(tmp_path, ui)
+        step = CcpBinaryStep()
+        step.run(ctx)
+
+        # Verify the close CCP message was shown
+        ui.info.assert_any_call("This usually happens when CCP is still running.")
+        ui.info.assert_any_call("Please close all instances of 'ccp' (check running terminals).")
+
+    @patch("installer.steps.ccp_binary.INSTALLER_VERSION", "5.1.2")
+    @patch("installer.steps.ccp_binary._download_ccp_artifacts")
+    @patch("installer.steps.ccp_binary._get_installed_version")
+    def test_multiple_retries_until_success(
+        self, mock_version: MagicMock, mock_download: MagicMock, tmp_path: Path
+    ) -> None:
+        """Should allow multiple retries until download succeeds."""
+        ui = MagicMock()
+        ui.non_interactive = False
+        ui.confirm.return_value = True
+        # Fail twice, then succeed
+        mock_download.side_effect = [False, False, True]
+        mock_version.return_value = None
+
+        ctx = self._make_context(tmp_path, ui)
+        step = CcpBinaryStep()
+        step.run(ctx)
+
+        assert mock_download.call_count == 3
+        assert ui.confirm.call_count == 2
+        ui.success.assert_called_with("CCP binary updated to v5.1.2")

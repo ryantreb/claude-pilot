@@ -1202,7 +1202,3 @@ class DependenciesStep(BaseStep):
         _configure_firecrawl_if_enabled(ui, ctx.project_dir, ctx.enable_firecrawl)
 
         ctx.config["installed_dependencies"] = installed
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """Dependencies are not rolled back (would be too disruptive)."""
-        pass

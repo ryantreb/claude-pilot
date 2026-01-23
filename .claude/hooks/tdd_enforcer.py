@@ -90,19 +90,37 @@ def is_test_file(file_path: str) -> bool:
     return False
 
 
-def has_failing_python_tests(project_dir: str) -> bool:
-    """Check if there are failing tests in pytest cache."""
-    cache_file = Path(project_dir) / ".pytest_cache" / "v" / "cache" / "lastfailed"
+def get_corresponding_test_file(impl_path: str) -> Path | None:
+    """Get the corresponding test file for a Python implementation file."""
+    path = Path(impl_path)
 
-    if not cache_file.exists():
-        return False
+    parts = path.parts
+    stem = path.stem
 
-    try:
-        with cache_file.open() as f:
-            lastfailed = json.load(f)
-            return bool(lastfailed)
-    except (json.JSONDecodeError, OSError):
-        return False
+    test_patterns = [
+        path.parent / f"test_{stem}.py",
+        path.parent / f"{stem}_test.py",
+        path.parent / "tests" / f"test_{stem}.py",
+        path.parent / "tests" / "unit" / f"test_{stem}.py",
+    ]
+
+    if "steps" in parts:
+        steps_idx = parts.index("steps")
+        if steps_idx > 0:
+            base = Path(*parts[:steps_idx])
+            test_patterns.append(base / "tests" / "unit" / "steps" / f"test_{stem}.py")
+
+    for i, part in enumerate(parts):
+        if part in ("ccp", "installer", "src"):
+            base = Path(*parts[: i + 1])
+            test_patterns.append(base / "tests" / "unit" / f"test_{stem}.py")
+            break
+
+    for test_path in test_patterns:
+        if test_path.exists():
+            return test_path
+
+    return None
 
 
 def has_typescript_test_file(impl_path: str) -> bool:
@@ -158,24 +176,16 @@ def run_tdd_enforcer() -> int:
         return 0
 
     if file_path.endswith(".py"):
-        path = Path(file_path).parent
-        found_failing = False
+        test_file = get_corresponding_test_file(file_path)
 
-        for _ in range(10):
-            if has_failing_python_tests(str(path)):
-                found_failing = True
-                break
-            if path.parent == path:
-                break
-            path = path.parent
+        if test_file is None:
+            stem = Path(file_path).stem
+            return warn(
+                f"No test file found for {stem}.py",
+                f"Consider creating test_{stem}.py first.",
+            )
 
-        if found_failing:
-            return 0
-
-        return warn(
-            "No failing tests detected",
-            "Consider writing a failing test first before implementing.",
-        )
+        return 0
 
     if file_path.endswith((".ts", ".tsx")):
         if has_typescript_test_file(file_path):

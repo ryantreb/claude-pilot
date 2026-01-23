@@ -46,7 +46,3 @@ class ConfigFilesStep(BaseStep):
                 ui.success(f"Installed .qlty directory ({count} files)")
             else:
                 download_directory(".qlty", qlty_dir, config)
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """Remove generated config files."""
-        pass

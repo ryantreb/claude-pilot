@@ -338,32 +338,3 @@ class ShellConfigStep(BaseStep):
             ui.print()
             ui.status("To use the 'ccp' command, reload your shell:")
             ui.print("  source ~/.bashrc  # or ~/.zshrc")
-
-    def rollback(self, ctx: InstallContext) -> None:
-        """Remove alias from modified config files."""
-        modified_files = ctx.config.get("modified_shell_configs", [])
-
-        for file_path in modified_files:
-            config_file = Path(file_path)
-            if not config_file.exists():
-                continue
-
-            try:
-                content = config_file.read_text()
-                lines = content.split("\n")
-                new_lines = []
-                skip_next = False
-
-                for line in lines:
-                    if CCP_ALIAS_MARKER in line:
-                        skip_next = True
-                        continue
-                    if skip_next and line.startswith("alias ccp"):
-                        skip_next = False
-                        continue
-                    skip_next = False
-                    new_lines.append(line)
-
-                config_file.write_text("\n".join(new_lines))
-            except (OSError, IOError):
-                pass
