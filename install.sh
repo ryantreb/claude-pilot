@@ -51,7 +51,7 @@ get_latest_prerelease() {
 	fi
 
 	echo "$releases" | tr ',' '\n' | grep -E '"(tag_name|created_at)"' | paste - - |
-		grep 'dev-' | sed 's/.*"created_at"[^"]*"\([^"]*\)".*"tag_name"[^"]*"\([^"]*\)".*/\1|\2/' |
+		grep 'dev-' | sed 's/.*"tag_name"[^"]*"\([^"]*\)".*"created_at"[^"]*"\([^"]*\)".*/\2|\1/' |
 		sort -t'|' -k1 -r | head -1 | cut -d'|' -f2
 }
 
