@@ -114,6 +114,7 @@ You'll be asked to choose between **Dev Container** or **Local Installation**.
 
 - **TDD Enforcer** - Pre-edit hook that warns when modifying code without failing tests first
 - **Quality Hooks** - Language-specific hooks for Python, TypeScript and Go that auto-fix issues
+- **LSP Integration** - Language servers installed automatically for real-time diagnostics and go-to-definition
 - **Context Monitor** - Tracks context usage and triggers automatic session handoffs
 - **Status Line** - Live display of context usage, memory status, usage limits, and license info
 

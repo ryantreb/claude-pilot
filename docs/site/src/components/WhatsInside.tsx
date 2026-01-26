@@ -62,7 +62,7 @@ const insideItems: InsideItem[] = [
     items: [
       "TDD Enforcer - Pre-edit test requirement",
       "Quality Hooks - Python, TypeScript and Go",
-      "Context Monitor - Usage tracking and handoffs",
+      "LSP Integration - Auto-installed language servers",
       "Status Line - Live context, memory, and usage",
     ],
   },
