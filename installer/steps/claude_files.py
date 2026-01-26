@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from installer.context import InstallContext
-from installer.downloads import DownloadConfig, download_file, get_repo_files
+from installer.downloads import DownloadConfig, FileInfo, download_file, get_repo_files
 from installer.steps.base import BaseStep
 
 SETTINGS_FILE = "settings.local.json"
@@ -123,7 +123,7 @@ class ClaudeFilesStep(BaseStep):
         file_count = 0
         failed_files: list[str] = []
 
-        categories: dict[str, list[str]] = {
+        categories: dict[str, list[FileInfo]] = {
             "commands": [],
             "rules_standard": [],
             "rules": [],
@@ -131,7 +131,8 @@ class ClaudeFilesStep(BaseStep):
             "other": [],
         }
 
-        for file_path in claude_files:
+        for file_info in claude_files:
+            file_path = file_info.path
             if not file_path:
                 continue
 
@@ -195,13 +196,13 @@ class ClaudeFilesStep(BaseStep):
                     continue
 
             if "/commands/" in file_path:
-                categories["commands"].append(file_path)
+                categories["commands"].append(file_info)
             elif "/rules/standard/" in file_path:
-                categories["rules_standard"].append(file_path)
+                categories["rules_standard"].append(file_info)
             elif "/rules/" in file_path:
-                categories["rules"].append(file_path)
+                categories["rules"].append(file_info)
             elif "/plugin/" in file_path:
-                categories["plugin"].append(file_path)
+                categories["plugin"].append(file_info)
             elif "/hooks/" in file_path:
                 continue
             elif "/skills/" in file_path:
@@ -209,7 +210,7 @@ class ClaudeFilesStep(BaseStep):
             elif "/scripts/" in file_path:
                 continue
             else:
-                categories["other"].append(file_path)
+                categories["other"].append(file_info)
 
         category_names = {
             "commands": "slash commands",
@@ -253,13 +254,14 @@ class ClaudeFilesStep(BaseStep):
                     if ui:
                         ui.warning(f"Failed to remove scripts directory: {e}")
 
-        for category, files in categories.items():
-            if not files:
+        for category, file_infos in categories.items():
+            if not file_infos:
                 continue
 
             if ui:
                 with ui.spinner(f"Installing {category_names[category]}..."):
-                    for file_path in files:
+                    for file_info in file_infos:
+                        file_path = file_info.path
                         dest_file = ctx.project_dir / file_path
                         if Path(file_path).name == SETTINGS_FILE:
                             success = self._install_settings(
@@ -276,14 +278,15 @@ class ClaudeFilesStep(BaseStep):
                                 installed_files.append(str(dest_file))
                             else:
                                 failed_files.append(file_path)
-                        elif download_file(file_path, dest_file, config):
+                        elif download_file(file_info, dest_file, config):
                             file_count += 1
                             installed_files.append(str(dest_file))
                         else:
                             failed_files.append(file_path)
-                ui.success(f"Installed {len(files)} {category_names[category]}")
+                ui.success(f"Installed {len(file_infos)} {category_names[category]}")
             else:
-                for file_path in files:
+                for file_info in file_infos:
+                    file_path = file_info.path
                     dest_file = ctx.project_dir / file_path
                     if Path(file_path).name == SETTINGS_FILE:
                         success = self._install_settings(
@@ -300,7 +303,7 @@ class ClaudeFilesStep(BaseStep):
                             installed_files.append(str(dest_file))
                         else:
                             failed_files.append(file_path)
-                    elif download_file(file_path, dest_file, config):
+                    elif download_file(file_info, dest_file, config):
                         file_count += 1
                         installed_files.append(str(dest_file))
                     else:
