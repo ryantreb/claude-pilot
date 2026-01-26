@@ -325,8 +325,6 @@ def _configure_claude_mem_defaults() -> bool:
 
         settings.update(
             {
-                "ENDLESS_MODE_ENABLED": "true",
-                "ENDLESS_MODE_COMPRESSION_MODEL": "claude-haiku-4-5",
                 "PROCESSING_MODE": "normal",
                 "CLAUDEMD_ENABLED": "false",
                 "CLAUDE_MEM_FOLDER_CLAUDEMD_ENABLED": "false",
@@ -545,6 +543,38 @@ def _install_with_spinner(ui: Any, name: str, install_fn: Any, *args: Any) -> bo
         return install_fn(*args) if args else install_fn()
 
 
+def _install_plugin_dependencies(project_dir: Path, ui: Any = None) -> bool:
+    """Install plugin dependencies by running bun/npm install in the plugin folder.
+
+    This installs all Node.js dependencies defined in plugin/package.json,
+    which includes runtime dependencies for MCP servers and hooks.
+    """
+    plugin_dir = project_dir / ".claude" / "plugin"
+
+    if not plugin_dir.exists():
+        if ui:
+            ui.warning("Plugin directory not found - skipping plugin dependencies")
+        return False
+
+    package_json = plugin_dir / "package.json"
+    if not package_json.exists():
+        if ui:
+            ui.warning("No package.json in plugin directory - skipping")
+        return False
+
+    success = False
+
+    if command_exists("bun"):
+        if _run_bash_with_retry("bun install", cwd=plugin_dir):
+            success = True
+
+    if command_exists("npm"):
+        if _run_bash_with_retry("npm install", cwd=plugin_dir):
+            success = True
+
+    return success
+
+
 def _setup_claude_mem(ui: Any) -> bool:
     """Migrate legacy plugins and configure claude-mem defaults.
 
@@ -667,6 +697,9 @@ class DependenciesStep(BaseStep):
 
         if _setup_claude_mem(ui):
             installed.append("claude_mem")
+
+        if _install_with_spinner(ui, "Plugin dependencies", _install_plugin_dependencies, ctx.project_dir, ui):
+            installed.append("plugin_deps")
 
         if _install_with_spinner(ui, "mcp-cli", install_mcp_cli):
             installed.append("mcp_cli")

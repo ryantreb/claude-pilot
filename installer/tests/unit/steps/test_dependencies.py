@@ -35,6 +35,7 @@ class TestDependenciesStep:
             assert step.check(ctx) is False
 
     @patch("installer.steps.dependencies.install_vexor")
+    @patch("installer.steps.dependencies._install_plugin_dependencies")
     @patch("installer.steps.dependencies._setup_claude_mem")
     @patch("installer.steps.dependencies.install_claude_code")
     @patch("installer.steps.dependencies.install_nodejs")
@@ -43,6 +44,7 @@ class TestDependenciesStep:
         mock_nodejs,
         mock_claude,
         mock_setup_claude_mem,
+        mock_plugin_deps,
         mock_vexor,
     ):
         """DependenciesStep installs core dependencies."""
@@ -54,6 +56,7 @@ class TestDependenciesStep:
         mock_nodejs.return_value = True
         mock_claude.return_value = (True, "latest")  # Returns (success, version)
         mock_setup_claude_mem.return_value = True
+        mock_plugin_deps.return_value = True
         mock_vexor.return_value = True
 
         step = DependenciesStep()
@@ -69,8 +72,10 @@ class TestDependenciesStep:
             # Core dependencies should be installed
             mock_nodejs.assert_called_once()
             mock_claude.assert_called_once()
+            mock_plugin_deps.assert_called_once()
 
     @patch("installer.steps.dependencies.install_vexor")
+    @patch("installer.steps.dependencies._install_plugin_dependencies")
     @patch("installer.steps.dependencies._setup_claude_mem")
     @patch("installer.steps.dependencies.install_claude_code")
     @patch("installer.steps.dependencies.install_python_tools")
@@ -83,6 +88,7 @@ class TestDependenciesStep:
         mock_python_tools,
         mock_claude,
         mock_setup_claude_mem,
+        mock_plugin_deps,
         mock_vexor,
     ):
         """DependenciesStep installs Python tools when enabled."""
@@ -96,6 +102,7 @@ class TestDependenciesStep:
         mock_python_tools.return_value = True
         mock_claude.return_value = (True, "latest")  # Returns (success, version)
         mock_setup_claude_mem.return_value = True
+        mock_plugin_deps.return_value = True
         mock_vexor.return_value = True
 
         step = DependenciesStep()
@@ -478,6 +485,101 @@ class TestVexorInstall:
                 config = json.loads(config_path.read_text())
                 assert config["custom_key"] == "custom_value"
                 assert config["model"] == "text-embedding-3-small"
+
+
+class TestInstallPluginDependencies:
+    """Test plugin dependencies installation via bun/npm install."""
+
+    def test_install_plugin_dependencies_exists(self):
+        """_install_plugin_dependencies function exists."""
+        from installer.steps.dependencies import _install_plugin_dependencies
+
+        assert callable(_install_plugin_dependencies)
+
+    def test_install_plugin_dependencies_returns_false_if_no_plugin_dir(self):
+        """_install_plugin_dependencies returns False if plugin directory doesn't exist."""
+        from installer.steps.dependencies import _install_plugin_dependencies
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            assert result is False
+
+    def test_install_plugin_dependencies_returns_false_if_no_package_json(self):
+        """_install_plugin_dependencies returns False if no package.json exists."""
+        from installer.steps.dependencies import _install_plugin_dependencies
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plugin_dir = Path(tmpdir) / ".claude" / "plugin"
+            plugin_dir.mkdir(parents=True)
+
+            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            assert result is False
+
+    @patch("installer.steps.dependencies._run_bash_with_retry")
+    @patch("installer.steps.dependencies.command_exists")
+    def test_install_plugin_dependencies_runs_bun_install(
+        self, mock_cmd_exists, mock_run
+    ):
+        """_install_plugin_dependencies runs bun install when bun is available."""
+        from installer.steps.dependencies import _install_plugin_dependencies
+
+        mock_cmd_exists.side_effect = lambda cmd: cmd == "bun"
+        mock_run.return_value = True
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plugin_dir = Path(tmpdir) / ".claude" / "plugin"
+            plugin_dir.mkdir(parents=True)
+            (plugin_dir / "package.json").write_text('{"name": "test"}')
+
+            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+
+            assert result is True
+            mock_run.assert_called_with("bun install", cwd=plugin_dir)
+
+    @patch("installer.steps.dependencies._run_bash_with_retry")
+    @patch("installer.steps.dependencies.command_exists")
+    def test_install_plugin_dependencies_runs_npm_install(
+        self, mock_cmd_exists, mock_run
+    ):
+        """_install_plugin_dependencies runs npm install when npm is available."""
+        from installer.steps.dependencies import _install_plugin_dependencies
+
+        mock_cmd_exists.side_effect = lambda cmd: cmd == "npm"
+        mock_run.return_value = True
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plugin_dir = Path(tmpdir) / ".claude" / "plugin"
+            plugin_dir.mkdir(parents=True)
+            (plugin_dir / "package.json").write_text('{"name": "test"}')
+
+            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+
+            assert result is True
+            mock_run.assert_called_with("npm install", cwd=plugin_dir)
+
+    @patch("installer.steps.dependencies._run_bash_with_retry")
+    @patch("installer.steps.dependencies.command_exists")
+    def test_install_plugin_dependencies_runs_both_bun_and_npm(
+        self, mock_cmd_exists, mock_run
+    ):
+        """_install_plugin_dependencies runs both bun and npm when available."""
+        from installer.steps.dependencies import _install_plugin_dependencies
+
+        mock_cmd_exists.return_value = True
+        mock_run.return_value = True
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plugin_dir = Path(tmpdir) / ".claude" / "plugin"
+            plugin_dir.mkdir(parents=True)
+            (plugin_dir / "package.json").write_text('{"name": "test"}')
+
+            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+
+            assert result is True
+            assert mock_run.call_count == 2
+            calls = [call[0][0] for call in mock_run.call_args_list]
+            assert "bun install" in calls
+            assert "npm install" in calls
 
 
 class TestCleanMcpServersFromClaudeConfig:

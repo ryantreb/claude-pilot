@@ -559,26 +559,23 @@ class TestClaudeFilesStep:
             assert any("file_checker_go.py" in cmd for cmd in commands)
 
     def test_claude_files_skips_python_when_disabled(self):
-        """ClaudeFilesStep skips Python files when enable_python=False."""
+        """ClaudeFilesStep skips Python rules when enable_python=False."""
         from installer.context import InstallContext
         from installer.steps.claude_files import ClaudeFilesStep
         from installer.ui import Console
 
         step = ClaudeFilesStep()
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with Python file
+            # Create source with Python rules
             source_claude = Path(tmpdir) / "source" / ".claude"
-            source_hooks = source_claude / "hooks"
-            source_hooks.mkdir(parents=True)
-            (source_hooks / "file_checker_python.py").write_text("# python hook")
-            (source_hooks / "other_hook.sh").write_text("# other hook")
-            # Add settings file (required by the step)
-            (source_claude / "settings.local.json").write_text('{"hooks": {}}')
+            source_rules = source_claude / "rules" / "standard"
+            source_rules.mkdir(parents=True)
+            (source_rules / "python-rules.md").write_text("# python rules")
+            (source_rules / "other-rules.md").write_text("# other rules")
 
             dest_dir = Path(tmpdir) / "dest"
             dest_dir.mkdir()
             (dest_dir / ".claude").mkdir()
-            (dest_dir / ".claude" / "hooks").mkdir()
 
             ctx = InstallContext(
                 project_dir=dest_dir,
@@ -590,38 +587,29 @@ class TestClaudeFilesStep:
 
             step.run(ctx)
 
-            # Python hook should NOT be copied
-            assert not (dest_dir / ".claude" / "hooks" / "file_checker_python.py").exists()
-            # Other hooks should be copied
-            assert (dest_dir / ".claude" / "hooks" / "other_hook.sh").exists()
+            # Python rules should NOT be copied
+            assert not (dest_dir / ".claude" / "rules" / "standard" / "python-rules.md").exists()
+            # Other rules should be copied
+            assert (dest_dir / ".claude" / "rules" / "standard" / "other-rules.md").exists()
 
     def test_claude_files_skips_typescript_when_disabled(self):
-        """ClaudeFilesStep skips TypeScript files when enable_typescript=False."""
+        """ClaudeFilesStep skips TypeScript rules when enable_typescript=False."""
         from installer.context import InstallContext
         from installer.steps.claude_files import ClaudeFilesStep
         from installer.ui import Console
 
         step = ClaudeFilesStep()
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with TypeScript files
+            # Create source with TypeScript rules
             source_claude = Path(tmpdir) / "source" / ".claude"
-            source_hooks = source_claude / "hooks"
-            source_rules_standard = source_claude / "rules" / "standard"
-            source_hooks.mkdir(parents=True)
-            source_rules_standard.mkdir(parents=True)
-            (source_hooks / "file_checker_ts.py").write_text("# typescript hook")
-            (source_hooks / "other_hook.sh").write_text("# other hook")
-            # Python/TypeScript rules are now in standard/ folder
-            (source_rules_standard / "typescript-rules.md").write_text("# typescript rules")
-            (source_rules_standard / "python-rules.md").write_text("# python rules")
-            # Add settings file (required by the step)
-            (source_claude / "settings.local.json").write_text('{"hooks": {}}')
+            source_rules = source_claude / "rules" / "standard"
+            source_rules.mkdir(parents=True)
+            (source_rules / "typescript-rules.md").write_text("# typescript rules")
+            (source_rules / "python-rules.md").write_text("# python rules")
 
             dest_dir = Path(tmpdir) / "dest"
             dest_dir.mkdir()
             (dest_dir / ".claude").mkdir()
-            (dest_dir / ".claude" / "hooks").mkdir()
-            (dest_dir / ".claude" / "rules" / "standard").mkdir(parents=True)
 
             ctx = InstallContext(
                 project_dir=dest_dir,
@@ -633,41 +621,29 @@ class TestClaudeFilesStep:
 
             step.run(ctx)
 
-            # TypeScript hook should NOT be copied
-            assert not (dest_dir / ".claude" / "hooks" / "file_checker_ts.py").exists()
-            # TypeScript rules should NOT be copied (now in standard/)
+            # TypeScript rules should NOT be copied
             assert not (dest_dir / ".claude" / "rules" / "standard" / "typescript-rules.md").exists()
-            # Other files should be copied
-            assert (dest_dir / ".claude" / "hooks" / "other_hook.sh").exists()
-            # Python rules should be copied (now in standard/)
+            # Python rules should be copied
             assert (dest_dir / ".claude" / "rules" / "standard" / "python-rules.md").exists()
 
     def test_claude_files_skips_golang_when_disabled(self):
-        """ClaudeFilesStep skips Go files when enable_golang=False."""
+        """ClaudeFilesStep skips Go rules when enable_golang=False."""
         from installer.context import InstallContext
         from installer.steps.claude_files import ClaudeFilesStep
         from installer.ui import Console
 
         step = ClaudeFilesStep()
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with Go files
+            # Create source with Go rules
             source_claude = Path(tmpdir) / "source" / ".claude"
-            source_hooks = source_claude / "hooks"
-            source_rules_standard = source_claude / "rules" / "standard"
-            source_hooks.mkdir(parents=True)
-            source_rules_standard.mkdir(parents=True)
-            (source_hooks / "file_checker_go.py").write_text("# golang hook")
-            (source_hooks / "other_hook.sh").write_text("# other hook")
-            (source_rules_standard / "golang-rules.md").write_text("# golang rules")
-            (source_rules_standard / "python-rules.md").write_text("# python rules")
-            # Add settings file (required by the step)
-            (source_claude / "settings.local.json").write_text('{"hooks": {}}')
+            source_rules = source_claude / "rules" / "standard"
+            source_rules.mkdir(parents=True)
+            (source_rules / "golang-rules.md").write_text("# golang rules")
+            (source_rules / "python-rules.md").write_text("# python rules")
 
             dest_dir = Path(tmpdir) / "dest"
             dest_dir.mkdir()
             (dest_dir / ".claude").mkdir()
-            (dest_dir / ".claude" / "hooks").mkdir()
-            (dest_dir / ".claude" / "rules" / "standard").mkdir(parents=True)
 
             ctx = InstallContext(
                 project_dir=dest_dir,
@@ -679,12 +655,8 @@ class TestClaudeFilesStep:
 
             step.run(ctx)
 
-            # Go hook should NOT be copied
-            assert not (dest_dir / ".claude" / "hooks" / "file_checker_go.py").exists()
             # Go rules should NOT be copied
             assert not (dest_dir / ".claude" / "rules" / "standard" / "golang-rules.md").exists()
-            # Other files should be copied
-            assert (dest_dir / ".claude" / "hooks" / "other_hook.sh").exists()
             # Python rules should be copied
             assert (dest_dir / ".claude" / "rules" / "standard" / "python-rules.md").exists()
 
@@ -744,13 +716,13 @@ class TestClaudeFilesCustomRulesPreservation:
 
         step = ClaudeFilesStep()
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with __pycache__
+            # Create source with __pycache__ in rules directory
             source_claude = Path(tmpdir) / "source" / ".claude"
-            source_hooks = source_claude / "hooks"
-            source_pycache = source_hooks / "__pycache__"
+            source_rules = source_claude / "rules" / "standard"
+            source_pycache = source_rules / "__pycache__"
             source_pycache.mkdir(parents=True)
-            (source_hooks / "hook.py").write_text("# hook")
-            (source_pycache / "hook.cpython-312.pyc").write_text("bytecode")
+            (source_rules / "test-rule.md").write_text("# rule")
+            (source_pycache / "something.cpython-312.pyc").write_text("bytecode")
 
             dest_dir = Path(tmpdir) / "dest"
             (dest_dir / ".claude").mkdir(parents=True)
@@ -764,37 +736,37 @@ class TestClaudeFilesCustomRulesPreservation:
 
             step.run(ctx)
 
-            # Regular hook should be copied
-            assert (dest_dir / ".claude" / "hooks" / "hook.py").exists()
+            # Regular rule should be copied
+            assert (dest_dir / ".claude" / "rules" / "standard" / "test-rule.md").exists()
 
             # __pycache__ should NOT be copied
-            assert not (dest_dir / ".claude" / "hooks" / "__pycache__").exists()
+            assert not (dest_dir / ".claude" / "rules" / "standard" / "__pycache__").exists()
 
 
 class TestDirectoryClearing:
     """Test directory clearing behavior in local and normal mode."""
 
     def test_clears_directories_in_normal_local_mode(self):
-        """Directories are cleared when source != destination in local mode."""
+        """Standard rules directory is cleared when source != destination in local mode."""
         from installer.context import InstallContext
         from installer.steps.claude_files import ClaudeFilesStep
         from installer.ui import Console
 
         step = ClaudeFilesStep()
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with standard skill (standards-* is a standard skill name)
+            # Create source with standard rules
             source_dir = Path(tmpdir) / "source"
             source_claude = source_dir / ".claude"
-            source_skills = source_claude / "skills" / "standards-testing"
-            source_skills.mkdir(parents=True)
-            (source_skills / "SKILL.md").write_text("new standards-testing skill")
+            source_rules = source_claude / "rules" / "standard"
+            source_rules.mkdir(parents=True)
+            (source_rules / "new-rule.md").write_text("new rule content")
 
-            # Create destination with OLD standard skill (should be cleared)
+            # Create destination with OLD standard rule (should be cleared)
             dest_dir = Path(tmpdir) / "dest"
             dest_claude = dest_dir / ".claude"
-            dest_skills = dest_claude / "skills" / "standards-testing"
-            dest_skills.mkdir(parents=True)
-            (dest_skills / "SKILL.md").write_text("old standards-testing skill to be removed")
+            dest_rules = dest_claude / "rules" / "standard"
+            dest_rules.mkdir(parents=True)
+            (dest_rules / "old-rule.md").write_text("old rule to be removed")
 
             ctx = InstallContext(
                 project_dir=dest_dir,
@@ -805,9 +777,11 @@ class TestDirectoryClearing:
 
             step.run(ctx)
 
-            # New standard skill should be installed (old was cleared)
-            assert (dest_claude / "skills" / "standards-testing" / "SKILL.md").exists()
-            assert (dest_claude / "skills" / "standards-testing" / "SKILL.md").read_text() == "new standards-testing skill"
+            # New rule should be installed
+            assert (dest_rules / "new-rule.md").exists()
+            assert (dest_rules / "new-rule.md").read_text() == "new rule content"
+            # Old rule should have been removed (directory was cleared)
+            assert not (dest_rules / "old-rule.md").exists()
 
     def test_skips_clearing_when_source_equals_destination(self):
         """Directories are NOT cleared when source == destination (same dir)."""
@@ -819,9 +793,9 @@ class TestDirectoryClearing:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create .claude directory (source AND destination are same)
             claude_dir = Path(tmpdir) / ".claude"
-            skills_dir = claude_dir / "skills" / "standards-testing"
-            skills_dir.mkdir(parents=True)
-            (skills_dir / "SKILL.md").write_text("existing skill content")
+            rules_dir = claude_dir / "rules" / "standard"
+            rules_dir.mkdir(parents=True)
+            (rules_dir / "existing-rule.md").write_text("existing rule content")
 
             ctx = InstallContext(
                 project_dir=Path(tmpdir),
@@ -832,9 +806,9 @@ class TestDirectoryClearing:
 
             step.run(ctx)
 
-            # Skill should still exist (NOT cleared because source==dest)
-            assert (skills_dir / "SKILL.md").exists()
-            assert (skills_dir / "SKILL.md").read_text() == "existing skill content"
+            # Rules should still exist (NOT cleared because source==dest)
+            assert (rules_dir / "existing-rule.md").exists()
+            assert (rules_dir / "existing-rule.md").read_text() == "existing rule content"
 
     def test_custom_rules_never_cleared(self):
         """Custom rules directory is NEVER cleared, only standard rules."""
@@ -878,85 +852,6 @@ class TestDirectoryClearing:
             assert not (dest_standard / "old-rule.md").exists()
             # New standard rule should be installed
             assert (dest_standard / "new-rule.md").exists()
-
-    def test_custom_skills_never_cleared(self):
-        """Custom skills (non-standard names) are NEVER cleared, only standard skills."""
-        from installer.context import InstallContext
-        from installer.steps.claude_files import ClaudeFilesStep
-        from installer.ui import Console
-
-        step = ClaudeFilesStep()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with standard skill (standards-testing)
-            source_dir = Path(tmpdir) / "source"
-            source_claude = source_dir / ".claude"
-            source_standard = source_claude / "skills" / "standards-testing"
-            source_standard.mkdir(parents=True)
-            (source_standard / "SKILL.md").write_text("new standards-testing skill")
-
-            # Create destination with custom skill AND old standard skill
-            dest_dir = Path(tmpdir) / "dest"
-            dest_claude = dest_dir / ".claude"
-            dest_custom = dest_claude / "skills" / "my-custom-skill"  # Custom name
-            dest_standard = dest_claude / "skills" / "standards-testing"  # Standard name (standards-* prefix)
-            dest_custom.mkdir(parents=True)
-            dest_standard.mkdir(parents=True)
-            (dest_custom / "SKILL.md").write_text("USER CUSTOM SKILL")
-            (dest_standard / "SKILL.md").write_text("old standards-testing skill")
-
-            ctx = InstallContext(
-                project_dir=dest_dir,
-                ui=Console(non_interactive=True),
-                local_mode=True,
-                local_repo_dir=source_dir,
-            )
-
-            step.run(ctx)
-
-            # Custom skill should be PRESERVED (not a standard name)
-            assert (dest_custom / "SKILL.md").exists()
-            assert (dest_custom / "SKILL.md").read_text() == "USER CUSTOM SKILL"
-
-            # Standard skill should be updated
-            assert (dest_standard / "SKILL.md").exists()
-            assert (dest_standard / "SKILL.md").read_text() == "new standards-testing skill"
-
-    def test_migrated_skills_are_removed(self):
-        """Skills that were migrated to commands (plan, implement, verify) are removed."""
-        from installer.context import InstallContext
-        from installer.steps.claude_files import ClaudeFilesStep
-        from installer.ui import Console
-
-        step = ClaudeFilesStep()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create source with some files (so clearing logic runs - early return if no files)
-            source_dir = Path(tmpdir) / "source"
-            source_claude = source_dir / ".claude"
-            source_rules = source_claude / "rules" / "standard"
-            source_rules.mkdir(parents=True)
-            (source_rules / "test-rule.md").write_text("# test rule")
-
-            # Create destination with old plan/implement/verify skills (should be migrated/removed)
-            dest_dir = Path(tmpdir) / "dest"
-            dest_claude = dest_dir / ".claude"
-            for skill_name in ["plan", "implement", "verify"]:
-                skill_dir = dest_claude / "skills" / skill_name
-                skill_dir.mkdir(parents=True)
-                (skill_dir / "SKILL.md").write_text(f"old {skill_name} skill")
-
-            ctx = InstallContext(
-                project_dir=dest_dir,
-                ui=Console(non_interactive=True),
-                local_mode=True,
-                local_repo_dir=source_dir,
-            )
-
-            step.run(ctx)
-
-            # Migrated skill directories should be REMOVED
-            for skill_name in ["plan", "implement", "verify"]:
-                skill_dir = dest_claude / "skills" / skill_name
-                assert not skill_dir.exists(), f"Skill '{skill_name}' should have been removed (migrated to command)"
 
     def test_standard_commands_are_cleared(self):
         """Standard commands (spec, sync, plan, implement, verify) are cleared and replaced."""
@@ -1033,3 +928,125 @@ class TestDirectoryClearing:
             # Standard command should be updated
             assert (dest_commands / "spec.md").exists()
             assert (dest_commands / "spec.md").read_text() == "new spec command"
+
+    def test_plugin_folder_is_installed(self):
+        """ClaudeFilesStep installs plugin folder from repo."""
+        from installer.context import InstallContext
+        from installer.steps.claude_files import ClaudeFilesStep
+        from installer.ui import Console
+
+        step = ClaudeFilesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create source with plugin directory
+            source_dir = Path(tmpdir) / "source"
+            source_claude = source_dir / ".claude"
+            source_plugin = source_claude / "plugin"
+            source_plugin.mkdir(parents=True)
+            (source_plugin / "package.json").write_text('{"name": "test"}')
+            (source_plugin / "scripts").mkdir()
+            (source_plugin / "scripts" / "mcp-server.cjs").write_text("// mcp server")
+            (source_plugin / "hooks").mkdir()
+            (source_plugin / "hooks" / "hook.py").write_text("# hook")
+
+            dest_dir = Path(tmpdir) / "dest"
+            dest_claude = dest_dir / ".claude"
+            dest_claude.mkdir(parents=True)
+
+            ctx = InstallContext(
+                project_dir=dest_dir,
+                ui=Console(non_interactive=True),
+                local_mode=True,
+                local_repo_dir=source_dir,
+            )
+
+            step.run(ctx)
+
+            # Plugin files SHOULD be installed
+            assert (dest_claude / "plugin" / "package.json").exists()
+            assert (dest_claude / "plugin" / "scripts" / "mcp-server.cjs").exists()
+            assert (dest_claude / "plugin" / "hooks" / "hook.py").exists()
+
+    def test_hooks_are_not_installed_from_repo(self):
+        """ClaudeFilesStep does NOT install hooks from repo (hooks come from plugin)."""
+        from installer.context import InstallContext
+        from installer.steps.claude_files import ClaudeFilesStep
+        from installer.ui import Console
+
+        step = ClaudeFilesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create source with hooks directory
+            source_dir = Path(tmpdir) / "source"
+            source_claude = source_dir / ".claude"
+            source_hooks = source_claude / "hooks"
+            source_hooks.mkdir(parents=True)
+            (source_hooks / "my_hook.py").write_text("# hook code")
+            (source_hooks / "another_hook.sh").write_text("# shell hook")
+
+            # Also add a command and rule to verify those ARE installed
+            source_commands = source_claude / "commands"
+            source_commands.mkdir(parents=True)
+            (source_commands / "test.md").write_text("test command")
+
+            source_rules = source_claude / "rules" / "standard"
+            source_rules.mkdir(parents=True)
+            (source_rules / "test-rule.md").write_text("test rule")
+
+            dest_dir = Path(tmpdir) / "dest"
+            dest_claude = dest_dir / ".claude"
+            dest_claude.mkdir(parents=True)
+
+            ctx = InstallContext(
+                project_dir=dest_dir,
+                ui=Console(non_interactive=True),
+                local_mode=True,
+                local_repo_dir=source_dir,
+            )
+
+            step.run(ctx)
+
+            # Hooks should NOT be installed
+            assert not (dest_claude / "hooks" / "my_hook.py").exists()
+            assert not (dest_claude / "hooks" / "another_hook.sh").exists()
+
+            # Commands and rules SHOULD be installed
+            assert (dest_claude / "commands" / "test.md").exists()
+            assert (dest_claude / "rules" / "standard" / "test-rule.md").exists()
+
+    def test_skills_are_not_installed_from_repo(self):
+        """ClaudeFilesStep does NOT install skills from repo (skills come from plugin)."""
+        from installer.context import InstallContext
+        from installer.steps.claude_files import ClaudeFilesStep
+        from installer.ui import Console
+
+        step = ClaudeFilesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create source with skills directory
+            source_dir = Path(tmpdir) / "source"
+            source_claude = source_dir / ".claude"
+            source_skills = source_claude / "skills" / "standards-testing"
+            source_skills.mkdir(parents=True)
+            (source_skills / "SKILL.md").write_text("# skill content")
+
+            # Also add a command to verify those ARE installed
+            source_commands = source_claude / "commands"
+            source_commands.mkdir(parents=True)
+            (source_commands / "test.md").write_text("test command")
+
+            dest_dir = Path(tmpdir) / "dest"
+            dest_claude = dest_dir / ".claude"
+            dest_claude.mkdir(parents=True)
+
+            ctx = InstallContext(
+                project_dir=dest_dir,
+                ui=Console(non_interactive=True),
+                local_mode=True,
+                local_repo_dir=source_dir,
+            )
+
+            step.run(ctx)
+
+            # Skills should NOT be installed
+            assert not (dest_claude / "skills" / "standards-testing" / "SKILL.md").exists()
+
+            # Commands SHOULD be installed
+            assert (dest_claude / "commands" / "test.md").exists()

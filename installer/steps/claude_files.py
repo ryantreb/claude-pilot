@@ -127,8 +127,7 @@ class ClaudeFilesStep(BaseStep):
             "commands": [],
             "rules_standard": [],
             "rules": [],
-            "hooks": [],
-            "skills": [],
+            "plugin": [],
             "other": [],
         }
 
@@ -186,12 +185,12 @@ class ClaudeFilesStep(BaseStep):
                 categories["rules_standard"].append(file_path)
             elif "/rules/" in file_path:
                 categories["rules"].append(file_path)
+            elif "/plugin/" in file_path:
+                categories["plugin"].append(file_path)
             elif "/hooks/" in file_path:
-                categories["hooks"].append(file_path)
+                continue
             elif "/skills/" in file_path:
-                skill_name = Path(file_path).parent.name
-                if skill_name.startswith("standards-"):
-                    categories["skills"].append(file_path)
+                continue
             elif "/scripts/" in file_path:
                 continue
             else:
@@ -201,8 +200,7 @@ class ClaudeFilesStep(BaseStep):
             "commands": "slash commands",
             "rules_standard": "standard rules",
             "rules": "custom rules",
-            "hooks": "hooks",
-            "skills": "skills",
+            "plugin": "plugin files",
             "other": "config files",
         }
 
@@ -211,18 +209,13 @@ class ClaudeFilesStep(BaseStep):
         )
 
         if not source_is_destination:
-            dirs_to_clear = [
-                ("hooks", categories["hooks"], ctx.project_dir / ".claude" / "hooks"),
-                ("standard rules", categories["rules_standard"], ctx.project_dir / ".claude" / "rules" / "standard"),
-            ]
-
-            for name, has_files, dir_path in dirs_to_clear:
-                if dir_path.exists() and has_files:
-                    try:
-                        shutil.rmtree(dir_path)
-                    except (OSError, IOError) as e:
-                        if ui:
-                            ui.warning(f"Failed to clear {name} directory: {e}")
+            rules_standard_dir = ctx.project_dir / ".claude" / "rules" / "standard"
+            if rules_standard_dir.exists() and categories["rules_standard"]:
+                try:
+                    shutil.rmtree(rules_standard_dir)
+                except (OSError, IOError) as e:
+                    if ui:
+                        ui.warning(f"Failed to clear standard rules directory: {e}")
 
             commands_dir = ctx.project_dir / ".claude" / "commands"
             if commands_dir.exists() and categories["commands"]:
@@ -236,19 +229,6 @@ class ClaudeFilesStep(BaseStep):
                             except (OSError, IOError) as e:
                                 if ui:
                                     ui.warning(f"Failed to clear command {name}: {e}")
-
-            skills_dir = ctx.project_dir / ".claude" / "skills"
-            if skills_dir.exists():
-                migrated_to_commands = {"plan", "implement", "verify"}
-                for skill_subdir in skills_dir.iterdir():
-                    if skill_subdir.is_dir():
-                        name = skill_subdir.name
-                        if name in migrated_to_commands or name.startswith("standards-"):
-                            try:
-                                shutil.rmtree(skill_subdir)
-                            except (OSError, IOError) as e:
-                                if ui:
-                                    ui.warning(f"Failed to clear skill {name}: {e}")
 
             scripts_dir = ctx.project_dir / ".claude" / "scripts"
             if scripts_dir.exists():
@@ -287,12 +267,9 @@ class ClaudeFilesStep(BaseStep):
                         else:
                             failed_files.append(file_path)
                 ui.success(f"Installed {len(files)} {category_names[category]}")
-                if not ui.quiet:
+                if not ui.quiet and category != "plugin":
                     for file_path in files:
-                        if category == "skills":
-                            file_name = Path(file_path).parent.name
-                        else:
-                            file_name = Path(file_path).stem
+                        file_name = Path(file_path).stem
                         ui.print(f"    [dim]✓ {file_name}[/dim]")
             else:
                 for file_path in files:
@@ -320,21 +297,10 @@ class ClaudeFilesStep(BaseStep):
 
         ctx.config["installed_files"] = installed_files
 
-        hooks_dir = ctx.project_dir / ".claude" / "hooks"
-        if hooks_dir.exists():
-            for hook_file in hooks_dir.glob("*.sh"):
-                hook_file.chmod(0o755)
-            for hook_file in hooks_dir.glob("*.py"):
-                hook_file.chmod(0o755)
-
         custom_dir = ctx.project_dir / ".claude" / "rules" / "custom"
         if not custom_dir.exists():
             custom_dir.mkdir(parents=True, exist_ok=True)
             (custom_dir / ".gitkeep").touch()
-
-        skills_dir = ctx.project_dir / ".claude" / "skills"
-        if not skills_dir.exists():
-            skills_dir.mkdir(parents=True, exist_ok=True)
 
         if ui:
             if file_count > 0:
