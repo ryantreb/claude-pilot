@@ -98,7 +98,7 @@ You'll be asked to choose between **Dev Container** or **Local Installation**.
 ### 📚 Modular Rules, Commands & Skills
 
 - **Rules** - Best practices for TDD, debugging, context management, and more
-- **Commands** - `/spec` for Spec-Driven Development and `/sync` for updating rules
+- **Commands** - `/spec` for SDD, `/sync` for updating rules, `/learn` for online learning
 - **Skills** - Coding standards for Python, TypeScript, Go, testing, and components
 - **Online Learning** - Automatically extracts reusable workflows and solutions into skills
 - **Customizable** - Add your own rules, commands, and skills that survive updates
@@ -185,6 +185,15 @@ Best for bug fixes, small improvements, and exploratory work:
 ```bash
 ccp
 > Fix the null pointer bug in user.py
+```
+
+### 🧠 Online Learning
+
+Capture non-obvious discoveries as reusable skills. Automatically prompted by the context monitor, or invoke manually:
+
+```bash
+ccp
+> /learn "Extract the debugging workflow we used for the race condition"
 ```
 
 ### 📐 Rules, Commands & Skills
