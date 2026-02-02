@@ -76,9 +76,7 @@ Pre-configured, isolated environment with all tools ready. No system conflicts a
 curl -fsSL https://raw.githubusercontent.com/maxritter/claude-pilot/main/install.sh | bash
 ```
 
-You'll be asked to choose between **Dev Container** or **Local Installation**.
-
-After installation, run `pilot` in your project folder to start Claude Pilot.
+After installation, run `pilot` or `ccp` in your project folder to start Claude Pilot.
 
 ### 📌 Installing a Specific Version
 

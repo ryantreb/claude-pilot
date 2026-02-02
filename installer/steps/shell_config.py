@@ -166,8 +166,4 @@ class ShellConfigStep(BaseStep):
                     ui.warning(f"Could not modify {config_file.name}: {e}")
 
         ctx.config["modified_shell_configs"] = modified_files
-
-        if ui and needs_reload and not ui.quiet:
-            ui.print()
-            ui.status("To use the 'pilot' command, reload your shell:")
-            ui.print("  source ~/.bashrc  # or ~/.zshrc")
+        ctx.config["shell_needs_reload"] = needs_reload

@@ -57,13 +57,25 @@ class FinalizeStep(BaseStep):
 
         steps: list[tuple[str, str]] = []
 
-        if ctx.is_local_install:
-            steps.append(
-                (
-                    "Reload your shell",
-                    "Run: source ~/.zshrc (or ~/.bashrc, or restart terminal)",
+        if ctx.is_local_install and ctx.config.get("shell_needs_reload"):
+            modified = ctx.config.get("modified_shell_configs", [])
+            reload_cmds = []
+            for f in modified:
+                if ".zshrc" in f:
+                    reload_cmds.append("source ~/.zshrc")
+                elif ".bashrc" in f:
+                    reload_cmds.append("source ~/.bashrc")
+                elif "fish" in f:
+                    reload_cmds.append("source ~/.config/fish/config.fish")
+
+            if reload_cmds:
+                cmd_str = " or ".join(reload_cmds)
+                steps.append(
+                    (
+                        "Reload your shell",
+                        f"Run: {cmd_str} (or restart terminal)",
+                    )
                 )
-            )
         else:
             project_slug = ctx.project_dir.name.lower().replace(" ", "-").replace("_", "-")
             steps.append(

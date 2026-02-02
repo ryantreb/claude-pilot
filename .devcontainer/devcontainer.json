@@ -66,10 +66,7 @@
     },
     /* https://github.com/devcontainers/features/blob/main/src/docker-outside-of-docker/ */
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "moby": "false",
-      "dockerDashComposeVersion": "v1",
-      "installDockerBuildx": "false",
-      "installDockerComposeSwitch": "false"
+      "moby": "false"
     },
     /* https://github.com/va-h/devcontainers-features/tree/main/src/uv */
     "ghcr.io/va-h/devcontainers-features/uv:1": {

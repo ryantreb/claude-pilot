@@ -8,7 +8,6 @@ from contextlib import contextmanager
 from typing import Any, Iterator, TextIO
 
 from rich.console import Console as RichConsole
-from rich.panel import Panel
 from rich.progress import (
     BarColumn,
     Progress,
@@ -127,12 +126,12 @@ class Console:
             return
 
         logo = """
-[bold blue]   ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗[/bold blue]    [bold cyan]██████╗ ██╗██╗      ██████╗ ████████╗[/bold cyan]
-[bold blue]  ██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝[/bold blue]    [bold cyan]██╔══██╗██║██║     ██╔═══██╗╚══██╔══╝[/bold cyan]
-[bold blue]  ██║     ██║     ███████║██║   ██║██║  ██║█████╗  [/bold blue]    [bold cyan]██████╔╝██║██║     ██║   ██║   ██║[/bold cyan]
-[bold blue]  ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝  [/bold blue]    [bold cyan]██╔═══╝ ██║██║     ██║   ██║   ██║[/bold cyan]
-[bold blue]  ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗[/bold blue]    [bold cyan]██║     ██║███████╗╚██████╔╝   ██║[/bold cyan]
-[bold blue]   ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝[/bold blue]    [bold cyan]╚═╝     ╚═╝╚══════╝ ╚═════╝    ╚═╝[/bold cyan]
+[bold blue]   ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗    ██████╗ ██╗██╗      ██████╗ ████████╗[/bold blue]
+[bold blue]  ██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝    ██╔══██╗██║██║     ██╔═══██╗╚══██╔══╝[/bold blue]
+[bold blue]  ██║     ██║     ███████║██║   ██║██║  ██║█████╗      ██████╔╝██║██║     ██║   ██║   ██║[/bold blue]
+[bold blue]  ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝      ██╔═══╝ ██║██║     ██║   ██║   ██║[/bold blue]
+[bold blue]  ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗    ██║     ██║███████╗╚██████╔╝   ██║[/bold blue]
+[bold blue]   ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝    ╚═╝     ╚═╝╚══════╝ ╚═════╝    ╚═╝[/bold blue]
 """
         self._console.print(logo)
 
@@ -142,31 +141,13 @@ class Console:
         self._console.print(tagline)
         self._console.print()
 
-        features = Text()
-        features.append("  ♾️  ", style="yellow")
-        features.append("Endless Mode", style="bold green")
-        features.append(" — Seamless continuity across sessions, zero manual intervention\n", style="white")
-        features.append("  📋 ", style="yellow")
-        features.append("Two Development Modes", style="bold green")
-        features.append(" — /spec for planning, Quick Mode for fast fixes\n", style="white")
-        features.append("  💡 ", style="yellow")
-        features.append("Modular Rules System", style="bold green")
-        features.append(" — Standards + custom rules loaded as project memory\n", style="white")
-        features.append("  🛠️ ", style="yellow")
-        features.append("Quality Hooks", style="bold green")
-        features.append(" — TDD enforcer, linting, type checking, context monitor\n", style="white")
-        features.append("  🔌 ", style="yellow")
-        features.append("Enhanced Capabilities", style="bold green")
-        features.append(" — Vexor, Context7, web-search, mcp-cli, agent-browser", style="white")
-
-        panel = Panel(
-            features,
-            border_style="cyan",
-            padding=(1, 2),
-            title="[bold white]What You're Getting[/bold white]",
-            title_align="left",
-        )
-        self._console.print(panel)
+        self._console.print("  [bold white]What You're Getting[/bold white]")
+        self._console.print()
+        self._console.print("    [yellow]♾️[/yellow]  [bold green]Endless Mode[/bold green] [white]— Seamless continuity across sessions[/white]")
+        self._console.print("    [yellow]📋[/yellow] [bold green]Two Dev Modes[/bold green] [white]— /spec for planning, Quick Mode for fixes[/white]")
+        self._console.print("    [yellow]💡[/yellow] [bold green]Rules System[/bold green] [white]— Standards + custom rules as project memory[/white]")
+        self._console.print("    [yellow]🛠️[/yellow]  [bold green]Quality Hooks[/bold green] [white]— TDD, linting, type checking, context monitor[/white]")
+        self._console.print("    [yellow]🔌[/yellow] [bold green]Capabilities[/bold green] [white]— Vexor, Context7, web-search, mcp-cli[/white]")
         self._console.print()
 
         tier = license_info.get("tier") if license_info else None
