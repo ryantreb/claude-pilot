@@ -32,7 +32,7 @@ const InstallSection = () => {
           <div className="flex items-center gap-2 mb-2">
             <Terminal className="h-4 w-4 text-primary" />
             <span className="text-foreground font-medium text-sm">
-              cd /path/to/your/project && run:
+              In your project folder, run:
             </span>
           </div>
 

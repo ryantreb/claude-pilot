@@ -20,12 +20,13 @@ Claude is powerful but inconsistent. Pilot adds the structure it needs:</br>
 
 ## TL;DR
 
+First, `cd` into your project folder, then run:
+
 ```bash
-cd /path/to/your/project  # Run inside your project folder!
 curl -fsSL https://raw.githubusercontent.com/maxritter/claude-pilot/main/install.sh | bash
 ```
 
-After installation, run `claude` in your project folder to launch Claude Pilot. Use `/sync` to load rules, `/spec` for planned features, or just chat for quick fixes.
+After installation, run `claude` to launch Claude Pilot. Use `/sync` to load rules and `/spec` for planned features.
 
 ---
 
@@ -69,10 +70,9 @@ Pre-configured, isolated environment with all tools ready. No system conflicts a
 
 ### 🔧 Installation
 
-> ⚠️ **Important:** Run this command inside your project folder, not your home directory.
+`cd` into your project folder, then run:
 
 ```bash
-cd /path/to/your/project
 curl -fsSL https://raw.githubusercontent.com/maxritter/claude-pilot/main/install.sh | bash
 ```
 
