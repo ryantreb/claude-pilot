@@ -479,13 +479,6 @@ jobs:
           echo "${{ github.event.inputs.changelog }}" > CHANGELOG.md
           echo "Using custom changelog content"
 
-      - name: Sync with remote before release
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-
       - name: Create release with semantic-release
         if: github.event_name != 'workflow_dispatch'
         id: semantic
