@@ -14,6 +14,10 @@ Claude Code ships fast but breaks things — Pilot fixes that:</br>
 
 ⭐ [Star this repo](https://github.com/maxritter/claude-pilot) · 🌐 [Website](https://claude-pilot.com) · 🔔 [Follow for updates](https://www.linkedin.com/in/rittermax/)
 
+<br>
+
+<img src="docs/img/demo.gif" alt="Claude Pilot Demo" width="800">
+
 </div>
 
 ---

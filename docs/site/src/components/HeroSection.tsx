@@ -26,7 +26,7 @@ const HeroSection = () => {
         {/* Badge */}
         <div className="animate-fade-in mb-4 xs:mb-6">
           <Badge variant="outline" className="px-2 xs:px-3 sm:px-4 py-1 xs:py-1.5 text-[10px] xs:text-xs sm:text-sm border-primary/50 text-primary">
-            <span className="hidden xs:inline">Production-Grade Development</span>
+            <span className="hidden xs:inline">Production-Grade Development with Claude Code</span>
             <span className="xs:hidden">Production-Grade</span>
           </Badge>
         </div>
@@ -51,7 +51,6 @@ const HeroSection = () => {
           <Badge variant="secondary" className="text-[10px] xs:text-xs">TDD Enforced</Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">Quality Hooks</Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">Spec-Driven</Badge>
-          <Badge variant="secondary" className="text-[10px] xs:text-xs">Opus 4.5</Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">Persistent Memory</Badge>
         </div>
 
