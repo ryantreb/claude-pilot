@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Github, Menu, X } from "lucide-react";
+import { Github, Menu, X, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoPng from "@/assets/logo.png";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Workflow", href: "#workflow" },
-  { label: "Installation", href: "#installation" },
+  { label: "Getting Started", href: "#installation" },
+  { label: "The Problem", href: "#problem" },
+  { label: "Usage", href: "#workflow" },
+  { label: "What's Inside", href: "#features" },
   { label: "Pricing", href: "#pricing" },
 ];
 
@@ -46,16 +47,26 @@ const NavBar = () => {
         {/* Right side */}
         <div className="flex items-center gap-3 sm:gap-4">
           <a
+            href="https://pilot.openchangelog.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="Changelog"
+          >
+            <ScrollText className="h-5 w-5" />
+          </a>
+          <a
             href="https://github.com/maxritter/claude-pilot"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground text-lg sm:text-xl transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="GitHub"
           >
             <Github className="h-5 w-5" />
           </a>
           <Button
             onClick={() => scrollToSection("#installation")}
-            className="hidden sm:inline-flex bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+            className="hidden sm:inline-flex"
             size="sm"
           >
             Get Started
@@ -83,7 +94,7 @@ const NavBar = () => {
           ))}
           <Button
             onClick={() => scrollToSection("#installation")}
-            className="mt-4 w-full bg-gradient-to-r from-primary to-primary/80"
+            className="mt-4 w-full"
           >
             Get Started
           </Button>

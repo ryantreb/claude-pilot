@@ -1,26 +1,36 @@
-import { Clock, Zap, AlertTriangle, CheckCircle2, Brain, FileCode2, ShieldCheck } from "lucide-react";
+import { Clock, Zap, AlertTriangle, CheckCircle2, Brain, FileCode2, ShieldCheck, X, Check } from "lucide-react";
 import { useInView } from "@/hooks/use-in-view";
 
 const ComparisonSection = () => {
   const [headerRef, headerInView] = useInView<HTMLDivElement>();
   const [cardsRef, cardsInView] = useInView<HTMLDivElement>();
+  const [tableRef, tableInView] = useInView<HTMLDivElement>();
+
+  const comparison = [
+    { without: "Writes code, skips tests", with: "TDD enforced — tests first" },
+    { without: "No quality checks", with: "Auto-linted, formatted, type-checked" },
+    { without: "Context degrades mid-task", with: "Endless Mode preserves context" },
+    { without: "Every session starts fresh", with: "Persistent memory across sessions" },
+    { without: "Hope it works", with: "Verified before marked complete" },
+  ];
 
   return (
-    <section className="py-12 lg:py-16 px-4 sm:px-6 relative">
+    <section id="problem" className="py-16 lg:py-24 px-4 sm:px-6 relative">
       <div className="max-w-6xl mx-auto">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
         {/* Section Header */}
         <div
           ref={headerRef}
-          className={`text-center mb-12 animate-on-scroll ${headerInView ? "in-view" : ""}`}
+          className={`text-center mb-12 ${headerInView ? "animate-fade-in-up" : "opacity-0"}`}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Before & After
-          </h2>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-            Same prompt. Different outcome. Structure makes the difference.
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">The Problem</h2>
+          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto">
+            Claude Code ships fast but breaks things — no tests, lost context, inconsistent results.
           </p>
         </div>
 
+        {/* Before & After Terminal Comparison */}
         <div
           ref={cardsRef}
           className={`grid md:grid-cols-2 gap-6 sm:gap-8 stagger-children ${cardsInView ? "in-view" : ""}`}
@@ -86,8 +96,8 @@ const ComparisonSection = () => {
           </div>
 
           {/* With Claude Pilot */}
-          <div className="glass rounded-2xl p-5 sm:p-6 relative border-blue-500/20 hover:border-blue-500/30 transition-colors">
-            <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-blue-500/20 text-blue-400 px-2 sm:px-3 py-1 rounded-full text-xs font-medium">
+          <div className="glass rounded-2xl p-5 sm:p-6 relative border-primary/20 hover:border-primary/30 transition-colors">
+            <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-primary/20 text-primary px-2 sm:px-3 py-1 rounded-full text-xs font-medium">
               With Claude Pilot
             </div>
 
@@ -111,35 +121,35 @@ const ComparisonSection = () => {
                   <span className="text-muted-foreground ml-2">"Add user authentication"</span>
                 </div>
                 {/* Context injection */}
-                <div className="text-blue-400/80 flex items-center gap-2 text-xs">
+                <div className="text-primary/80 flex items-center gap-2 text-xs">
                   <Brain className="h-3 w-3 flex-shrink-0" />
                   <span>Persistent memory: Context injected</span>
                 </div>
-                <div className="text-blue-400/80 flex items-center gap-2 text-xs">
+                <div className="text-primary/80 flex items-center gap-2 text-xs">
                   <FileCode2 className="h-3 w-3 flex-shrink-0" />
                   <span>Rules + Skills loaded</span>
                 </div>
                 <div className="border-t border-border/50 pt-2.5 text-xs">
-                  <span className="text-blue-400">→ Planning:</span>
+                  <span className="text-primary">→ Planning:</span>
                   <span className="text-muted-foreground ml-1">Exploring codebase...</span>
                 </div>
-                <div className="text-blue-400/80 flex items-center gap-2 text-xs">
+                <div className="text-primary/80 flex items-center gap-2 text-xs">
                   <CheckCircle2 className="h-3 w-3 flex-shrink-0" />
                   <span>Plan created → Waiting for approval</span>
                 </div>
                 <div className="border-t border-border/50 pt-2.5 text-xs">
-                  <span className="text-blue-400">→ Implementing:</span>
+                  <span className="text-primary">→ Implementing:</span>
                   <span className="text-muted-foreground ml-1">TDD enforced</span>
                 </div>
-                <div className="text-blue-400/80 flex items-center gap-2 text-xs">
+                <div className="text-primary/80 flex items-center gap-2 text-xs">
                   <ShieldCheck className="h-3 w-3 flex-shrink-0" />
                   <span>Quality hooks: linted, formatted, typed</span>
                 </div>
                 <div className="border-t border-border/50 pt-2.5 text-xs">
-                  <span className="text-blue-400">→ Verifying:</span>
-                  <span className="text-blue-400 ml-1">All checks passed ✓</span>
+                  <span className="text-primary">→ Verifying:</span>
+                  <span className="text-primary ml-1">All checks passed ✓</span>
                 </div>
-                <div className="text-blue-400/80 flex items-center gap-2 text-xs">
+                <div className="text-primary/80 flex items-center gap-2 text-xs">
                   <Zap className="h-3 w-3 flex-shrink-0" />
                   <span>Complete! Anything else?</span>
                 </div>
@@ -147,18 +157,53 @@ const ComparisonSection = () => {
             </div>
 
             {/* Result */}
-            <div className="mt-4 flex items-center justify-center gap-2 text-blue-400 text-sm">
+            <div className="mt-4 flex items-center justify-center gap-2 text-primary text-sm">
               <Zap className="h-4 w-4" />
               <span>Systematic. Tested. Confident.</span>
             </div>
           </div>
         </div>
 
+        {/* Before & After Table */}
+        <div
+          ref={tableRef}
+          className={`mt-12 glass rounded-2xl p-6 animate-on-scroll ${tableInView ? "in-view" : ""}`}
+        >
+          <h3 className="text-xl font-bold text-foreground mb-6 text-center">Before & After</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-4 text-muted-foreground font-medium">Without Pilot</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground font-medium">With Pilot</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparison.map((row, i) => (
+                  <tr key={i} className="border-b border-border/50 last:border-0">
+                    <td className="py-3 px-4 text-slate-400">
+                      <span className="flex items-center gap-2">
+                        <X className="h-4 w-4 text-destructive flex-shrink-0" />
+                        {row.without}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-foreground">
+                      <span className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                        {row.with}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Bottom highlight */}
-        <div className="mt-12 text-center">
+        <div className="mt-10 text-center">
           <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
-            <span className="text-primary font-medium">Code you can actually ship.</span>
-            {" "}Tested. Verified. Done.
+            <span className="text-primary font-medium">Code you can actually ship.</span> Tested. Verified. Done.
           </p>
         </div>
       </div>

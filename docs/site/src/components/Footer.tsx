@@ -2,10 +2,17 @@ import { Github, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import { smoothScrollTo } from "@/utils/smoothScroll";
+import { useInView } from "@/hooks/use-in-view";
 
 const Footer = () => {
+  const [footerRef, footerInView] = useInView<HTMLElement>();
+
   return (
-    <footer className="py-16 px-6 bg-background border-t border-border" role="contentinfo">
+    <footer
+      ref={footerRef}
+      className={`py-16 px-6 bg-background border-t border-border ${footerInView ? "animate-fade-in-up" : "opacity-0"}`}
+      role="contentinfo"
+    >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
           <div className="flex flex-col gap-3">
@@ -20,10 +27,18 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => smoothScrollTo('features')}
+                  onClick={() => smoothScrollTo('installation')}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Features
+                  Getting Started
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => smoothScrollTo('problem')}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  The Problem
                 </button>
               </li>
               <li>
@@ -31,15 +46,15 @@ const Footer = () => {
                   onClick={() => smoothScrollTo('workflow')}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Workflow
+                  Usage
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => smoothScrollTo('installation')}
+                  onClick={() => smoothScrollTo('features')}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Installation
+                  What's Inside
                 </button>
               </li>
               <li>

@@ -12,7 +12,7 @@ Claude Code ships fast but breaks things — Pilot fixes that:</br>
 [![Last Commit](https://img.shields.io/github/last-commit/maxritter/claude-pilot?color=blue)](https://github.com/maxritter/claude-pilot/commits/main)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/maxritter/claude-pilot/pulls)
 
-⭐ [Star this repo](https://github.com/maxritter/claude-pilot) · 🌐 [Website](https://claude-pilot.com) · 🔔 [Follow for updates](https://www.linkedin.com/in/rittermax/)
+⭐ [Star this repo](https://github.com/maxritter/claude-pilot) · 🌐 [Website](https://claude-pilot.com) · 📋 [Changelog](https://pilot.openchangelog.com/) · 🔔 [Follow for updates](https://www.linkedin.com/in/rittermax/)
 
 <br>
 
@@ -89,64 +89,6 @@ If the current version has issues, you can install a specific stable version (se
 ```bash
 VERSION=6.0.6 curl -fsSL https://raw.githubusercontent.com/maxritter/claude-pilot/main/install.sh | bash
 ```
-
----
-
-## 📦 What's Inside
-
-### ♾️ Endless Mode
-
-- **Seamless Continuity** - Work on complex features across multiple sessions without losing progress
-- **Automatic Handoffs** - Context Monitor detects limits and continues seamlessly in new sessions
-- **Persistent Memory** - Relevant observations automatically carry across all sessions
-- **Works Everywhere** - Both `/spec` workflow and Quick Mode benefit from session continuity
-
-### 📋 Spec-Driven Development
-
-- **Planning** - Creates a detailed implementation plan for your review as markdown in `docs/plans/`
-- **Approval** - You review, edit if needed, and approve the plan before implementation
-- **Implementation** - Executes the plan with TDD enforcement and context management
-- **Verification** - Runs tests, quality checks, and validates completion based on the plan
-
-### 📚 Modular Rules, Commands & Skills
-
-- **Rules** - Best practices for TDD, debugging, context management, and more
-- **Commands** - `/spec` for SDD, `/sync` for updating rules, `/learn` for online learning
-- **Skills** - Coding standards for Python, TypeScript, Go, testing, and components
-- **Customizable** - Add your own rules, commands, and skills that survive updates
-
-### 🧠 Enhanced Context Capabilities
-
-- **Persistent Memory** - Cross-session memory system that automatically ingests context
-- **Semantic Search** - Local vector store based semantic code search for token-efficient retrieval
-- **External Context** - Library docs via Context7, web search and scraping via MCP tools
-- **Browser Automation** - E2E UI testing with headless browser for frontend verification
-
-### ✅ Quality Automation
-
-- **TDD Enforcer** - Pre-edit hook that warns when modifying code without failing tests first
-- **Quality Hooks** - Language-specific hooks for Python, TypeScript and Go that auto-fix issues
-- **LSP Integration** - Language servers installed for real-time diagnostics and go-to-definitions
-- **Status Line** - Live display of context usage, memory status, usage limits, and license info
-
-### 🛠️ One-Command Installer
-
-- **Automated Container Setup** - Isolated Linux environment with pre-configured tools and extensions
-- **Extended Language Support** - Optionally install extended support for Python, TypeScript & Go
-- **Automated Updater** - Updates Pilot to the latest version when launched over the binary
-- **Shell Integration** - Auto-configures bash, fish and zsh with `pilot` alias (and `ccp` for migration)
-
----
-
-## 🔄 Before & After
-
-| Without Pilot | With Pilot |
-| ------------- | ---------- |
-| Writes code, skips tests | TDD enforced — tests first |
-| No quality checks | Auto-linted, formatted, type-checked |
-| Context degrades mid-task | Endless Mode preserves context |
-| Every session starts fresh | Persistent memory across sessions |
-| Hope it works | Verified before marked complete |
 
 ---
 
@@ -239,6 +181,64 @@ Add your own MCP servers in two locations:
 | `mcp_servers.json` | Called via mcp-cli; instructions never enter context | Heavy servers (many tools) |
 
 Run `/sync` after adding servers to generate documentation.
+
+---
+
+## 📦 What's Inside
+
+### ♾️ Endless Mode
+
+- **Seamless Continuity** - Work on complex features across multiple sessions without losing progress
+- **Automatic Handoffs** - Context Monitor detects limits and continues seamlessly in new sessions
+- **Persistent Memory** - Relevant observations automatically carry across all sessions
+- **Works Everywhere** - Both `/spec` workflow and Quick Mode benefit from session continuity
+
+### 📋 Spec-Driven Development
+
+- **Planning** - Creates a detailed implementation plan for your review as markdown in `docs/plans/`
+- **Approval** - You review, edit if needed, and approve the plan before implementation
+- **Implementation** - Executes the plan with TDD enforcement and context management
+- **Verification** - Runs tests, quality checks, and validates completion based on the plan
+
+### 📚 Modular Rules, Commands & Skills
+
+- **Rules** - Best practices for TDD, debugging, context management, and more
+- **Commands** - `/spec` for SDD, `/sync` for updating rules, `/learn` for online learning
+- **Skills** - Coding standards for Python, TypeScript, Go, testing, and components
+- **Customizable** - Add your own rules, commands, and skills that survive updates
+
+### 🧠 Enhanced Context Capabilities
+
+- **Persistent Memory** - Cross-session memory system that automatically ingests context
+- **Semantic Search** - Local vector store based semantic code search for token-efficient retrieval
+- **External Context** - Library docs via Context7, web search and scraping via MCP tools
+- **Browser Automation** - E2E UI testing with headless browser for frontend verification
+
+### ✅ Quality Automation
+
+- **TDD Enforcer** - Pre-edit hook that warns when modifying code without failing tests first
+- **Quality Hooks** - Language-specific hooks for Python, TypeScript and Go that auto-fix issues
+- **LSP Integration** - Language servers installed for real-time diagnostics and go-to-definitions
+- **Status Line** - Live display of context usage, memory status, usage limits, and license info
+
+### 🛠️ One-Command Installer
+
+- **Automated Container Setup** - Isolated Linux environment with pre-configured tools and extensions
+- **Extended Language Support** - Optionally install extended support for Python, TypeScript & Go
+- **Automated Updater** - Updates Pilot to the latest version when launched over the binary
+- **Shell Integration** - Auto-configures bash, fish and zsh with `pilot` alias (and `ccp` for migration)
+
+---
+
+## 🔄 Before & After
+
+| Without Pilot | With Pilot |
+| ------------- | ---------- |
+| Writes code, skips tests | TDD enforced — tests first |
+| No quality checks | Auto-linted, formatted, type-checked |
+| Context degrades mid-task | Endless Mode preserves context |
+| Every session starts fresh | Persistent memory across sessions |
+| Hope it works | Verified before marked complete |
 
 ---
 

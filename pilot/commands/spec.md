@@ -7,26 +7,75 @@ model: opus
 
 **For new features, major changes, and complex work.** Creates a spec, gets your approval, implements with TDD, and verifies completion - all in one continuous flow.
 
-## Arguments
+---
+
+## 📋 TABLE OF CONTENTS
+
+| Section | What Happens |
+|---------|--------------|
+| [PHASE 0: WORKFLOW CONTROL](#phase-0-workflow-control) | Dispatcher, context handoff, rules summary |
+| [PHASE 1: PLANNING](#phase-1-planning) (1.1–1.8) | Explore → Design → Write plan → Verify → Approve |
+| [PHASE 2: IMPLEMENTATION](#phase-2-implementation) (2.1–2.4) | TDD loop for each task |
+| [PHASE 3: VERIFICATION](#phase-3-verification) (3.1–3.11) | Tests → Execution → Rules → Code Review → E2E |
+
+### Quick Step Reference
+
+**Phase 0 (Workflow Control):**
+- 0.1 Parse arguments, determine current state
+- 0.2 Dispatch to appropriate phase
+- 0.3 Context handoff (when >= 90%)
+- 0.4 Rules reference (12 rules)
+
+**Phase 1 (Planning):**
+- 1.1 Create plan file header
+- 1.2 Clarify requirements (Question Batch 1)
+- 1.3 Explore codebase
+- 1.4 Design decisions (Question Batch 2)
+- 1.5 Write implementation tasks
+- 1.6 Write full plan
+- 1.7 **Plan verification** ⚠️ MANDATORY
+- 1.8 Get user approval → PHASE 2
+
+**Phase 2 (Implementation):**
+- 2.1 Read plan, gather context
+- 2.2 Per-task TDD loop (RED→GREEN→REFACTOR)
+- 2.3 Update plan checkboxes after EACH task
+- 2.4 All tasks done → set COMPLETE → PHASE 3
+
+**Phase 3 (Verification):**
+- 3.1 Unit tests
+- 3.2 Integration tests
+- 3.3 Execute actual program
+- 3.4 Rules compliance audit
+- 3.5 Call chain analysis
+- 3.6 Coverage check
+- 3.7 Quality checks
+- 3.8 **Code review verification** ⚠️ MANDATORY
+- 3.9 E2E tests
+- 3.10 Final verification
+- 3.11 Update plan status → VERIFIED or loop back
+
+---
+
+# PHASE 0: WORKFLOW CONTROL
+
+This phase handles argument parsing, state dispatch, context management, and enforces workflow rules.
+
+**⛔ KEY CONSTRAINTS (see 0.4 for full rules):**
+- NO sub-agents during Phase 1/2 (except verification steps 1.7 and 3.8)
+- NO stopping between phases - flow continuously
+- NO built-in plan mode (EnterPlanMode/ExitPlanMode)
+- Quality over speed - never rush
+
+---
+
+## 0.1 Parse Arguments
 
 ```
 /spec <task-description>           # Start new workflow from task
 /spec <path/to/plan.md>            # Continue existing plan
 /spec --continue <path/to/plan.md> # Resume after session clear
 ```
-
-## ⛔ CRITICAL RULES
-
-1. **NO sub-agents during planning/implementation** - Never use `Task` tool to spawn sub-agents during Phase 1 or Phase 2 (loses context). Use Read, Grep, Glob, Bash directly.
-   - **Exception:** Plan verification (Step 7) and Code verification (Step 8) each use a single verifier sub-agent
-   - Note: Task MANAGEMENT tools (TaskCreate, TaskList, TaskUpdate, TaskGet) ARE allowed for tracking progress
-2. **NO stopping between phases** - Flow continuously from planning → implementation → verification
-3. **NO built-in plan mode** - Never use EnterPlanMode or ExitPlanMode tools
-4. **Quality over speed** - Never rush due to context pressure
-
----
-
-## WORKFLOW DISPATCHER
 
 Parse the arguments: $ARGUMENTS
 
@@ -50,7 +99,7 @@ ELSE:
     → Go to PHASE 1: PLANNING
 ```
 
-### Status-Based Dispatch
+## 0.2 Status-Based Dispatch
 
 | Status | Approved | Action |
 |--------|----------|--------|
@@ -74,6 +123,79 @@ LOOP until VERIFIED or context >= 90%:
 🔄 Starting Iteration 1 implementation...  (after first verify failure)
 ✅ Iteration 1: All checks passed - VERIFIED
 ```
+
+---
+
+## 0.3 Context Management (90% Handoff)
+
+After each major operation, check context:
+
+```bash
+~/.pilot/bin/pilot check-context --json
+```
+
+**Between iterations:**
+1. If context >= 90%: hand off cleanly (don't rush!)
+2. If context 80-89%: continue but wrap up current task with quality
+3. If context < 80%: continue the loop freely
+
+If response shows `"status": "CLEAR_NEEDED"` (context >= 90%):
+
+**⚠️ CRITICAL: Execute ALL steps below in a SINGLE turn. DO NOT stop or wait for user response between steps.**
+
+**Step 1: Write continuation file (GUARANTEED BACKUP)**
+
+Write to `/tmp/claude-continuation.md`:
+
+```markdown
+# Session Continuation (/spec)
+
+**Plan:** <plan-path>
+**Phase:** [planning|implementation|verification]
+**Current Task:** Task N - [description]
+
+**Completed This Session:**
+- [x] [What was finished]
+
+**Next Steps:**
+1. [What to do immediately when resuming]
+
+**Context:**
+- [Key decisions or blockers]
+```
+
+**Step 2: Trigger session clear**
+
+```bash
+~/.pilot/bin/pilot send-clear <plan-path>
+```
+
+Pilot will restart with `/spec --continue <plan-path>`
+
+### Error Handling
+
+**No Active Session:** If `send-clear` fails, tell user: "Context at X%. Please run `/clear` manually, then `/spec --continue <plan-path>`"
+
+**Plan File Not Found:** Tell user: "Plan file not found: <path>" and ask if they want to create a new plan.
+
+---
+
+## 0.4 Rules Summary (Quick Reference)
+
+| # | Rule |
+|---|------|
+| 1 | **NO sub-agents during planning/implementation** - Phase 1 and 2 use direct tools only. Verification steps (Step 1.7, Step 3.8) each use a single verifier sub-agent. |
+| 2 | **NEVER SKIP verification** - Plan verification (Step 1.7) and Code verification (Step 3.8) are mandatory. No exceptions. |
+| 3 | **ONLY stopping point is plan approval** - Everything else is automatic. Never ask "Should I fix these?" |
+| 4 | **Batch questions together** - Don't interrupt user flow |
+| 5 | **Run explorations sequentially** - One at a time, never in parallel |
+| 6 | **NEVER write code during planning** - Separate phases |
+| 7 | **NEVER assume - verify by reading files** |
+| 8 | **Re-read plan after user edits** - Before asking for approval again |
+| 9 | **TDD is MANDATORY** - No production code without failing test first |
+| 10 | **Update plan checkboxes after EACH task** - Not at the end |
+| 11 | **Quality over speed** - Never rush due to context pressure |
+| 12 | **Plan file is source of truth** - Survives session clears |
 
 ---
 
@@ -181,7 +303,7 @@ LOOP until VERIFIED or context >= 90%:
 
 ## Creating New Plans
 
-### Step 1: Early Plan File Creation (FIRST)
+### Step 1.1: Create Plan File Header (FIRST)
 
 **Immediately upon starting planning, create the plan file header for status bar detection.**
 
@@ -219,7 +341,7 @@ LOOP until VERIFIED or context >= 90%:
 
 ---
 
-### Step 2: Task Understanding & Clarification
+### Step 1.2: Task Understanding & Clarification
 
 **First, clearly state your understanding of the task.**
 
@@ -234,7 +356,7 @@ Use AskUserQuestion to ask everything upfront in a single interaction.
 
 **Don't proceed to exploration until clarifications are complete.**
 
-### Step 3: Exploration
+### Step 1.3: Exploration
 
 **Explore the codebase systematically.** Run explorations **one at a time** (sequentially, not in parallel).
 
@@ -264,7 +386,7 @@ Use AskUserQuestion to ask everything upfront in a single interaction.
 3. Identify integration points and potential risks
 4. Note reusable patterns
 
-### Step 4: Design Decisions
+### Step 1.4: Design Decisions
 
 **Present findings and gather all design decisions (Question Batch 2).**
 
@@ -275,7 +397,7 @@ Summarize what you found, then use AskUserQuestion with all decisions at once.
 - Confirm: "Does this design work for your needs?"
 - Don't proceed until design is validated
 
-### Step 5: Implementation Planning
+### Step 1.5: Implementation Planning
 
 **Task Count Guidance**
 - Avoid bloating plans with unnecessary or overly granular tasks
@@ -314,7 +436,7 @@ Summarize what you found, then use AskUserQuestion with all decisions at once.
 - List integration points
 - Reference similar patterns in codebase
 
-### Step 6: Write Full Plan
+### Step 1.6: Write Full Plan
 
 **Save plan to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
@@ -417,15 +539,13 @@ Iterations: 0
 - [Decisions deferred to implementation]
 ```
 
-### Step 7: Plan Verification (MANDATORY - NEVER SKIP)
+### Step 1.7: Plan Verification (⚠️ MANDATORY)
 
 **⛔ THIS STEP IS NON-NEGOTIABLE. You MUST run plan verification before asking for approval.**
 
-**⚠️ SKIPPING THIS STEP IS FORBIDDEN.** Even if context is high, even if the plan seems simple, even if you're confident - YOU MUST VERIFY. No exceptions.
-
 Before presenting the plan to the user, verify it with a dedicated verifier agent. This catches missing requirements, scope issues, and misalignments BEFORE the user sees the plan.
 
-#### 7a: Launch Plan Verification
+#### Launch Plan Verification
 
 Spawn 1 `plan-verifier` agent using the Task tool:
 
@@ -449,12 +569,9 @@ The verifier:
 - Identifies missing requirements or scope issues
 - Returns structured JSON findings
 
-#### 7b: Fix All Findings
+#### Fix All Findings
 
-After verification completes:
-
-1. **Collect** all JSON findings from the verifier
-2. **Fix all issues by severity:**
+After verification completes, fix all issues by severity:
 
 | Severity | Action |
 |----------|--------|
@@ -462,19 +579,9 @@ After verification completes:
 | **should_fix** | Fix immediately - update plan before proceeding |
 | **suggestion** | Incorporate if reasonable, or note in Open Questions |
 
-**After fixing all issues:**
+**Only proceed to Step 1.8 after all must_fix and should_fix issues are resolved.**
 
-```
-## Plan Verification Complete
-
-**Issues Found:** X | **Fixed:** Y
-
-Plan has been updated to address findings. Proceeding to approval...
-```
-
-**Only proceed to Step 8 (approval) after all must_fix and should_fix issues are resolved.**
-
-### Step 8: Get User Approval
+### Step 1.8: Get User Approval
 
 **⛔ MANDATORY APPROVAL GATE - This is NON-NEGOTIABLE**
 
@@ -546,7 +653,70 @@ PHASE 2 → PHASE 3 → issues found → PHASE 2 → PHASE 3 → ... → VERIFIE
 4. Focus on uncompleted tasks `[ ]` - these are the fixes needed
 5. Complete all fix tasks, then set status to COMPLETE as normal
 
-## ⛔ CRITICAL: Task Completion Tracking is MANDATORY
+---
+
+### Step 2.1: Read Plan & Gather Context
+
+**Before ANY implementation, you MUST:**
+
+1. **Read the COMPLETE plan** - Understanding overall architecture and design
+2. **Verify comprehension** - Summarize what you learned to demonstrate understanding
+3. **Identify dependencies** - List files, functions, classes that need modification
+4. **Check current state:**
+   - Git status: `git status --short` and `git diff --name-only`
+   - Plan progress: Check for `[x]` completed tasks
+
+#### 🔧 Tools for Implementation
+
+| Tool | When to Use | Example |
+|------|-------------|---------|
+| **Context7** | Library API lookup | `resolve-library-id(query="how to use fixtures", libraryName="pytest")` then `query-docs(libraryId, query)` |
+| **Vexor** | Find similar patterns | `vexor search "query" --mode code` |
+
+---
+
+### Step 2.2: Per-Task TDD Loop
+
+**TDD is MANDATORY. No production code without a failing test first.**
+
+| Requires TDD | Skip TDD |
+|--------------|----------|
+| New functions/methods | Documentation changes |
+| API endpoints | Config file updates |
+| Business logic | IaC code (CDK, Terraform, Pulumi) |
+| Bug fixes | Formatting/style changes |
+
+**For EVERY task, follow this exact sequence:**
+
+1. **READ PLAN'S IMPLEMENTATION STEPS** - List all files to create/modify/delete
+2. **Perform Call Chain Analysis:**
+   - **Trace Upwards (Callers):** Identify what calls the code you're modifying
+   - **Trace Downwards (Callees):** Identify what the modified code calls
+   - **Side Effects:** Check for database, cache, external system impacts
+3. **Mark task as in_progress** in TodoWrite
+4. **Execute TDD Flow (RED → GREEN → REFACTOR):**
+   - Write failing test first, **verify it fails**
+   - Implement minimal code to pass
+   - Refactor if needed (keep tests green)
+5. **Verify tests pass** - `uv run pytest tests/path/to/test.py -q`
+6. **Run actual program** - Show real output with sample data
+7. **Check diagnostics** - Must be zero errors
+8. **Validate Definition of Done** - Check all criteria from plan
+9. **Mark task completed** in TodoWrite
+10. **UPDATE PLAN FILE IMMEDIATELY** (see Step 2.3)
+11. **Check context usage** - Run `~/.pilot/bin/pilot check-context --json`
+
+**⚠️ NEVER SKIP TASKS:**
+- EVERY task MUST be fully implemented
+- NO exceptions for "MVP scope" or complexity
+- If blocked: STOP and report specific blockers
+- NEVER mark complete without doing the work
+
+---
+
+### Step 2.3: Update Plan After EACH Task
+
+**⛔ CRITICAL: Task Completion Tracking is MANDATORY**
 
 **After completing EACH task, you MUST:**
 
@@ -564,25 +734,28 @@ Update counts:
 **Completed:** 4 | **Remaining:** 8  →  **Completed:** 5 | **Remaining:** 7
 ```
 
-## Mandatory Context Gathering Phase (REQUIRED)
+---
 
-**Before ANY implementation, you MUST:**
+### Step 2.4: All Tasks Complete → PHASE 3
 
-1. **Read the COMPLETE plan** - Understanding overall architecture and design
-2. **Verify comprehension** - Summarize what you learned to demonstrate understanding
-3. **Identify dependencies** - List files, functions, classes that need modification
-4. **Check current state:**
-   - Git status: `git status --short` and `git diff --name-only`
-   - Plan progress: Check for `[x]` completed tasks
+**⚠️ CRITICAL: Follow these steps exactly:**
 
-### 🔧 Tools for Implementation
+1. Quick verification: Check diagnostics and run `uv run pytest -q`
+2. **FOR MIGRATIONS ONLY - Feature Parity Check:**
+   - Run the NEW code and verify it produces expected output
+   - Compare behavior with OLD code (if still available)
+   - Check Feature Inventory - every feature should now be implemented
+   - If ANY feature is missing: **DO NOT mark complete** - add tasks for missing features
+3. **MANDATORY: Update plan status to COMPLETE**
+   ```
+   Edit the plan file and change the Status line:
+   Status: PENDING  →  Status: COMPLETE
+   ```
+4. **Continue immediately to PHASE 3: VERIFICATION**
 
-| Tool | When to Use | Example |
-|------|-------------|---------|
-| **Context7** | Library API lookup | `resolve-library-id(query="how to use fixtures", libraryName="pytest")` then `query-docs(libraryId, query)` |
-| **Vexor** | Find similar patterns | `vexor search "query" --mode code` |
+---
 
-## ⚠️ CRITICAL: Migration/Refactoring Tasks
+## ⚠️ Migration/Refactoring Tasks (Phase 2 Additions)
 
 **When the plan involves replacing existing code, perform these ADDITIONAL checks:**
 
@@ -619,72 +792,6 @@ If you notice ANY of these, STOP and report to user:
 - "Out of Scope" items that should actually be migrated
 - Tests pass but functionality is missing compared to old code
 
-## TDD is MANDATORY
-
-**No production code without a failing test first.**
-
-| Requires TDD | Skip TDD |
-|--------------|----------|
-| New functions/methods | Documentation changes |
-| API endpoints | Config file updates |
-| Business logic | IaC code (CDK, Terraform, Pulumi) |
-| Bug fixes | Formatting/style changes |
-
-## Per-Task Execution Flow
-
-**For EVERY task, follow this exact sequence:**
-
-1. **READ PLAN'S IMPLEMENTATION STEPS** - List all files to create/modify/delete
-2. **Perform Call Chain Analysis:**
-   - **Trace Upwards (Callers):** Identify what calls the code you're modifying
-   - **Trace Downwards (Callees):** Identify what the modified code calls
-   - **Side Effects:** Check for database, cache, external system impacts
-3. **Mark task as in_progress** in TodoWrite
-4. **Execute TDD Flow (RED → GREEN → REFACTOR):**
-   - Write failing test first, **verify it fails**
-   - Implement minimal code to pass
-   - Refactor if needed (keep tests green)
-5. **Verify tests pass** - `uv run pytest tests/path/to/test.py -v`
-6. **Run actual program** - Show real output with sample data
-7. **Check diagnostics** - Must be zero errors
-8. **Validate Definition of Done** - Check all criteria from plan
-9. **Mark task completed** in TodoWrite
-10. **UPDATE PLAN FILE IMMEDIATELY:**
-    ```
-    Use Edit tool to change in the plan file:
-    - [ ] Task N: ...  →  - [x] Task N: ...
-
-    Also update Progress Tracking section:
-    **Completed:** X | **Remaining:** Y
-    ```
-    **You MUST do this BEFORE proceeding to the next task.**
-11. **Check context usage** - Run `~/.pilot/bin/pilot check-context --json`
-
-## Critical Task Rules
-
-**⚠️ NEVER SKIP TASKS:**
-- EVERY task MUST be fully implemented
-- NO exceptions for "MVP scope" or complexity
-- If blocked: STOP and report specific blockers
-- NEVER mark complete without doing the work
-
-## When All Tasks Complete
-
-**⚠️ CRITICAL: Follow these steps exactly:**
-
-1. Quick verification: Check diagnostics and run `uv run pytest`
-2. **FOR MIGRATIONS ONLY - Feature Parity Check:**
-   - Run the NEW code and verify it produces expected output
-   - Compare behavior with OLD code (if still available)
-   - Check Feature Inventory - every feature should now be implemented
-   - If ANY feature is missing: **DO NOT mark complete** - add tasks for missing features
-3. **MANDATORY: Update plan status to COMPLETE**
-   ```
-   Edit the plan file and change the Status line:
-   Status: PENDING  →  Status: COMPLETE
-   ```
-4. **Continue immediately to PHASE 3: VERIFICATION**
-
 ---
 
 # PHASE 3: VERIFICATION
@@ -695,19 +802,19 @@ If you notice ANY of these, STOP and report to user:
 
 **All test levels are MANDATORY:** Unit tests alone are insufficient. You must run integration tests AND E2E tests AND execute the actual program with real data.
 
-### Step 1: Run & Fix Unit Tests
+### Step 3.1: Run & Fix Unit Tests
 
 Run unit tests and fix any failures immediately.
 
 **If failures:** Identify → Read test → Fix implementation → Re-run → Continue until all pass
 
-### Step 2: Run & Fix Integration Tests
+### Step 3.2: Run & Fix Integration Tests
 
 Run integration tests and fix any failures immediately.
 
 **Common issues:** Database connections, mock configuration, missing test data
 
-### Step 3: Build and Execute the Actual Program (MANDATORY)
+### Step 3.3: Build and Execute the Actual Program (MANDATORY)
 
 **⚠️ CRITICAL: Tests passing ≠ Program works**
 
@@ -739,7 +846,7 @@ aws <service> get-<resource> --output json
 
 **Rule of thumb:** If you can fix it in < 5 minutes without writing new tests, fix inline. Otherwise, add a task.
 
-### Step 3a: Feature Parity Check (if applicable)
+### Step 3.3a: Feature Parity Check (if applicable)
 
 **For refactoring/migration tasks:** Verify ALL original functionality is preserved.
 
@@ -780,7 +887,7 @@ This is a serious issue - the implementation is incomplete.
 
 4. **Go back to PHASE 2** - Continue the loop
 
-### Step 4: Rules Compliance Audit
+### Step 3.4: Rules Compliance Audit
 
 **⚠️ MANDATORY: Actually READ every rule file and verify compliance. Don't skip this.**
 
@@ -788,7 +895,7 @@ This step exists because we often forget our own rules. By re-reading each rule 
 
 #### Process
 
-**Step 4a: Discover and read ALL rules (BOTH standard AND custom)**
+**Step 3.4a: Discover and read ALL rules (BOTH standard AND custom)**
 
 **⛔ CRITICAL: You MUST check BOTH directories. Checking only custom rules is NOT sufficient.**
 
@@ -807,7 +914,7 @@ Then use `Read` tool to read EACH file completely from BOTH directories:
 
 **DO NOT skip standard rules. They contain critical requirements like TDD enforcement, execution verification, and testing standards.**
 
-**Step 4b: For EACH rule file, create a compliance checklist**
+**Step 3.4b: For EACH rule file, create a compliance checklist**
 
 After reading each rule file, extract the key requirements and check each one:
 
@@ -835,7 +942,7 @@ After reading each rule file, extract the key requirements and check each one:
 | `typescript-rules.md` | Did you detect the package manager? Run `tsc --noEmit`? |
 | `git-commits.md` | Using `fix:` prefix? No AI attribution footers? |
 
-**Step 4c: Fix ALL violations immediately**
+**Step 3.4c: Fix ALL violations immediately**
 
 For each violation found:
 
@@ -848,7 +955,7 @@ For each violation found:
    - Document the violation
    - If critical, add fix task to plan and loop back
 
-**Step 4d: Output brief compliance report**
+**Step 3.4d: Output brief compliance report**
 
 ```
 ## Rules Compliance Audit
@@ -859,7 +966,7 @@ For each violation found:
 
 **⛔ DO NOT proceed until BOTH directories are checked and all fixable violations are fixed.**
 
-### Step 5: Call Chain Analysis
+### Step 3.5: Call Chain Analysis
 
 **Perform deep impact analysis for all changes:**
 
@@ -879,17 +986,17 @@ For each violation found:
    - External system impacts
    - Global state modifications
 
-### Step 6: Check Coverage
+### Step 3.6: Check Coverage
 
 Verify test coverage meets requirements.
 
 **If insufficient:** Identify uncovered lines → Write tests for critical paths → Verify improvement
 
-### Step 7: Run Quality Checks
+### Step 3.7: Run Quality Checks
 
 Run automated quality tools and fix any issues found.
 
-### Step 8: Code Review Verification (MANDATORY - NEVER SKIP)
+### Step 3.8: Code Review Verification (⚠️ MANDATORY)
 
 **⛔ THIS STEP IS NON-NEGOTIABLE. You MUST run code verification.**
 
@@ -901,14 +1008,14 @@ Run automated quality tools and fix any issues found.
 
 **None of these are valid reasons to skip. ALWAYS VERIFY.**
 
-#### 8a: Identify Changed Files
+#### 3.8a: Identify Changed Files
 
 Get list of files changed in this implementation:
 ```bash
 git status --short  # Shows staged and unstaged changes
 ```
 
-#### 8b: Launch Code Verification
+#### 3.8b: Launch Code Verification
 
 Spawn 1 `spec-verifier` agent using the Task tool:
 
@@ -933,7 +1040,7 @@ The verifier:
 - Runs with fresh context (no anchoring bias)
 - Returns structured JSON findings
 
-#### 8c: Report Findings
+#### 3.8c: Report Findings
 
 Present findings briefly:
 
@@ -947,7 +1054,7 @@ Present findings briefly:
 Implementing fixes automatically...
 ```
 
-#### 8d: Automatically Implement ALL Findings
+#### 3.8d: Automatically Implement ALL Findings
 
 **⛔ DO NOT ask user for permission. Fix everything automatically.**
 
@@ -971,7 +1078,7 @@ This is part of the automated /spec workflow. The user approved the plan - verif
 
 **The only stopping point in /spec is plan approval. Everything else is automatic.**
 
-### Step 9: E2E Verification (MANDATORY for apps with UI/API)
+### Step 3.9: E2E Verification (MANDATORY for apps with UI/API)
 
 **⚠️ Unit + Integration tests are NOT enough. You MUST also run E2E tests.**
 
@@ -983,7 +1090,7 @@ Test endpoints with curl. Verify status codes, response content, and error handl
 #### For Frontend/UI
 Use `agent-browser` to verify UI renders and workflows complete. See `~/.claude/rules/agent-browser.md`.
 
-### Step 10: Final Verification
+### Step 3.10: Final Verification
 
 **Run everything one more time:**
 - All tests
@@ -1000,7 +1107,7 @@ Use `agent-browser` to verify UI renders and workflows complete. See `~/.claude/
 - Code review checklist complete
 - No breaking changes in call chains
 
-### Step 11: Update Plan Status
+### Step 3.11: Update Plan Status
 
 **Status Lifecycle:** `PENDING` → `COMPLETE` → `VERIFIED`
 
@@ -1035,82 +1142,5 @@ Use `agent-browser` to verify UI renders and workflows complete. See `~/.claude/
    ```
 3. Inform user: "🔄 Iteration N+1: Issues found, fixing and re-verifying..."
 4. **Go back to PHASE 2** - Continue the loop
-
----
-
-# CONTEXT MANAGEMENT
-
-After each major operation, check context:
-
-```bash
-~/.pilot/bin/pilot check-context --json
-```
-
-**Between iterations:**
-1. If context >= 90%: hand off cleanly (don't rush!)
-2. If context 80-89%: continue but wrap up current task with quality
-3. If context < 80%: continue the loop freely
-
-If response shows `"status": "CLEAR_NEEDED"` (context >= 90%):
-
-**⚠️ CRITICAL: Execute ALL steps below in a SINGLE turn. DO NOT stop or wait for user response between steps.**
-
-**Step 1: Write continuation file (GUARANTEED BACKUP)**
-
-Write to `/tmp/claude-continuation.md`:
-
-```markdown
-# Session Continuation (/spec)
-
-**Plan:** <plan-path>
-**Phase:** [planning|implementation|verification]
-**Current Task:** Task N - [description]
-
-**Completed This Session:**
-- [x] [What was finished]
-
-**Next Steps:**
-1. [What to do immediately when resuming]
-
-**Context:**
-- [Key decisions or blockers]
-```
-
-**Step 2: Trigger session clear**
-
-```bash
-~/.pilot/bin/pilot send-clear <plan-path>
-```
-
-Pilot will restart with `/spec --continue <plan-path>`
-
-## Error Handling
-
-### No Active Session
-
-If `send-clear` fails:
-- Tell user: "Context at X%. Please run `/clear` manually, then `/spec --continue <plan-path>`"
-
-### Plan File Not Found
-
-- Tell user: "Plan file not found: <path>"
-- Ask if they want to create a new plan
-
----
-
-# CRITICAL RULES SUMMARY
-
-1. **NO sub-agents during planning/implementation** - Phase 1 and 2 use direct tools only. Verification steps (Plan Step 7, Code Step 8) each use a single verifier sub-agent.
-2. **NEVER SKIP verification** - Plan verification (Step 7) and Code verification (Step 8) are mandatory. No exceptions.
-3. **ONLY stopping point is plan approval** - Everything else is automatic. Never ask "Should I fix these?"
-4. **Batch questions together** - Don't interrupt user flow
-5. **Run explorations sequentially** - One at a time, never in parallel
-6. **NEVER write code during planning** - Separate phases
-7. **NEVER assume - verify by reading files**
-8. **Re-read plan after user edits** - Before asking for approval again
-9. **TDD is MANDATORY** - No production code without failing test first
-10. **Update plan checkboxes after EACH task** - Not at the end
-11. **Quality over speed** - Never rush due to context pressure
-12. **Plan file is source of truth** - Survives session clears
 
 ARGUMENTS: $ARGUMENTS

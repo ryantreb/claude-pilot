@@ -116,6 +116,17 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"${CLAUDE_PLUGIN_ROOT}/scripts/worker-service.cjs\" stop",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   }
 }

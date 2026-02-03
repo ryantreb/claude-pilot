@@ -1,5 +1,5 @@
 import {
-  Terminal,
+  Workflow,
   FileCode2,
   Plug2,
   ShieldCheck,
@@ -11,142 +11,158 @@ import { useInView } from "@/hooks/use-in-view";
 interface InsideItem {
   icon: React.ElementType;
   title: string;
+  description: string;
   items: string[];
-  highlight?: boolean;
 }
 
 const insideItems: InsideItem[] = [
   {
-    icon: Terminal,
-    title: "Two Development Modes",
+    icon: InfinityIcon,
+    title: "Endless Mode",
+    description: "Never lose context mid-task",
     items: [
-      "Spec-Driven: /spec for features with planning",
-      "Quick Mode: For bug fixes and small changes",
-      "Both benefit from quality hooks and TDD",
-      "Choose structured planning or fast iteration",
+      "Seamless continuity across sessions",
+      "Automatic handoffs at context limits",
+      "Persistent memory bridges sessions",
+      "Zero manual intervention required",
     ],
   },
   {
-    icon: InfinityIcon,
-    title: "Endless Mode",
+    icon: Workflow,
+    title: "Spec-Driven Development",
+    description: "Structured planning with verification",
     items: [
-      "Seamless continuity across sessions",
-      "Automatic handoffs when nearing context limits",
-      "Works in both Spec-Driven and Quick modes",
-      "Zero manual intervention required",
+      "Plan → Approve → Implement → Verify",
+      "Automatic TDD enforcement",
+      "Code review before completion",
+      "Loop until verified correct",
     ],
   },
   {
     icon: FileCode2,
     title: "Rules, Commands & Skills",
+    description: "Best practices, customizable",
     items: [
-      "Rules: Best practices for TDD and workflows",
-      "Commands: /spec and /sync workflows",
-      "Online Learning: Auto-extracts reusable patterns",
-      "Team Vault: Share via private Git repository",
+      "12+ standard rules for quality",
+      "/spec, /sync, /learn commands",
+      "Online learning extracts patterns",
+      "Team Vault via private Git repo",
     ],
   },
   {
     icon: Plug2,
     title: "Enhanced Context",
+    description: "Zero API keys required",
     items: [
-      "Zero API Keys - Everything works out of the box",
-      "Persistent Memory - Cross-session context",
-      "Semantic Search - Local vector store",
-      "Browser Automation - E2E UI testing",
+      "Persistent memory across sessions",
+      "Semantic search (local embeddings)",
+      "Context7 library documentation",
+      "Browser automation for E2E tests",
     ],
   },
   {
     icon: ShieldCheck,
     title: "Quality Automation",
+    description: "Enforced standards on every edit",
     items: [
-      "TDD Enforcer - Pre-edit test requirement",
-      "Quality Hooks - Python, TypeScript and Go",
-      "LSP Integration - Auto-installed language servers",
-      "Status Line - Live context, memory, and usage",
+      "TDD enforcer - tests before code",
+      "Quality hooks for Python/TS/Go",
+      "LSP integration (auto-installed)",
+      "Status line with live metrics",
     ],
   },
   {
     icon: Container,
     title: "One-Command Installer",
+    description: "Ready in minutes",
     items: [
-      "Automated Dev Container setup",
-      "Optional Python, TypeScript & Go support",
-      "Shell integration via claude command",
+      "Dev Container auto-setup",
+      "Python, TypeScript & Go support",
+      "Auto-updater included",
       "macOS, Linux, Windows (WSL2)",
     ],
   },
 ];
 
-const SectionHeader = ({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) => (
-  <div className="text-center mb-12">
-    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-      {title}
-    </h2>
-    {subtitle && (
-      <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-        {subtitle}
-      </p>
-    )}
-  </div>
-);
-
 const WhatsInside = () => {
   const [headerRef, headerInView] = useInView<HTMLDivElement>();
   const [gridRef, gridInView] = useInView<HTMLDivElement>();
 
+  const animationDelays = [
+    "animation-delay-0",
+    "animation-delay-100",
+    "animation-delay-200",
+    "animation-delay-300",
+    "animation-delay-400",
+    "animation-delay-500",
+  ];
+
   return (
-    <section id="features" className="py-12 lg:py-16 px-4 sm:px-6 relative">
+    <section id="features" className="py-16 lg:py-24 px-4 sm:px-6 relative">
       <div className="max-w-6xl mx-auto">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+        {/* Header */}
         <div
           ref={headerRef}
-          className={`animate-on-scroll ${headerInView ? "in-view" : ""}`}
+          className={`text-center mb-16 ${headerInView ? "animate-fade-in-up" : "opacity-0"}`}
         >
-          <SectionHeader
-            title="What's Inside"
-            subtitle="The tools that make Claude Code reliable"
-          />
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+            What's Inside
+          </h2>
+          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto">
+            Everything you need to make Claude Code production-ready
+          </p>
         </div>
 
+        {/* Feature Grid */}
         <div
           ref={gridRef}
-          className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children ${gridInView ? "in-view" : ""}`}
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {insideItems.map((item) => {
+          {insideItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.title}
-                className={`glass rounded-2xl p-6 hover:border-primary/50 transition-all duration-300 ${
-                  item.highlight ? "border-red-500/50 bg-red-500/5" : ""
-                }`}
+                className={`group relative rounded-2xl p-6 border border-border/50 bg-card/30 backdrop-blur-sm
+                  hover:border-primary/50 hover:bg-card/50 hover:shadow-lg hover:shadow-primary/5
+                  hover:-translate-y-1 transition-all duration-300
+                  ${gridInView ? `animate-fade-in-up ${animationDelays[index]}` : "opacity-0"}`}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                {/* Icon and Title */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center
+                    group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                     <Icon className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {item.title}
-                  </h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-                <ul className="space-y-2">
+
+                {/* Feature List */}
+                <ul className="space-y-2 mt-4">
                   {item.items.map((listItem, i) => (
                     <li
                       key={i}
                       className="text-muted-foreground text-sm flex items-start gap-2"
                     >
-                      <span className="text-primary mt-1.5 text-xs">•</span>
-                      <span>{listItem}</span>
+                      <span className="text-primary mt-1 text-xs">▸</span>
+                      <span className="group-hover:text-foreground/80 transition-colors duration-200">
+                        {listItem}
+                      </span>
                     </li>
                   ))}
                 </ul>
+
+                {/* Subtle gradient overlay on hover */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </div>
             );
           })}

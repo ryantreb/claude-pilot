@@ -4,36 +4,113 @@ model: opus
 ---
 # /sync - Sync Project Rules & Skills
 
-**Sync custom rules and skills with the current state of the codebase.** Reads existing rules/skills, explores code patterns, identifies gaps, updates documentation, and creates new skills when workflows are discovered. Run anytime to keep rules and skills current.
-
-## What It Does
-
-1. **Read existing rules & skills** - Load all `.claude/rules/*.md` and `.claude/skills/` to understand current state
-2. **Build search index** - Initialize/update Vexor for semantic code search
-3. **Explore codebase** - Use Vexor, Grep, and file analysis to discover patterns
-4. **Compare & sync** - Update outdated rules and skills, add missing patterns
-5. **Discover new rules** - Find and document undocumented patterns
-6. **Create new skills** - When reusable workflows are discovered, use `/learn` command
-7. **Team vault** - Pull team assets and share your discoveries via sx
-
-All files in `.claude/rules/` are project-specific rules loaded into every session.
-Custom skills in `.claude/skills/` (non-standard names) are preserved during updates.
+**Sync custom rules and skills with the current state of the codebase.** Reads existing rules/skills, explores code patterns, identifies gaps, updates documentation, and creates new skills when workflows are discovered.
 
 ---
 
-## Important Guidelines
+## 📋 TABLE OF CONTENTS
+
+| Phase | What Happens |
+|-------|--------------|
+| [0. Reference](#phase-0-reference) | Guidelines, output locations, error handling |
+| [1. Read Existing](#phase-1-read-existing-rules--skills) | Load rules & skills, build inventory |
+| [2. Build Index](#phase-2-initialize-vexor-index) | Initialize Vexor for semantic search |
+| [3. Explore](#phase-3-explore-codebase) | Discover patterns with Vexor/Grep |
+| [4. Compare](#phase-4-compare--identify-gaps) | Find outdated/missing documentation |
+| [5. Sync Project](#phase-5-sync-project-rule) | Update project.md |
+| [6. Sync MCP](#phase-6-sync-mcp-rules) | Document user MCP servers |
+| [7. Sync Skills](#phase-7-sync-existing-skills) | Update existing skills |
+| [8. New Rules](#phase-8-discover-new-rules) | Document undocumented patterns |
+| [9. New Skills](#phase-9-discover--create-skills) | Create skills via /learn |
+| [10. Team Vault](#phase-10-team-vault-sx) | Share via sx |
+| [11. Summary](#phase-11-summary) | Report changes |
+
+### Quick Reference
+
+- **Phase 0:** Guidelines, output locations, error handling
+- **Phases 1-4:** Discovery (read, index, explore, compare)
+- **Phases 5-7:** Sync existing (project, MCP, skills)
+- **Phases 8-9:** Create new (rules, skills)
+- **Phases 10-11:** Share & report
+
+---
+
+# PHASE 0: REFERENCE
+
+## 0.1 Guidelines
 
 - **Always use AskUserQuestion tool** when asking the user anything
 - **Read before writing** — Always check existing rules before creating new ones
 - **Write concise rules** — Every word costs tokens in the context window
-- **Offer suggestions** — Present options the user can confirm or correct
 - **Idempotent** — Running multiple times produces consistent results
+
+## 0.2 Output Locations
+
+**Custom rules** in `.claude/rules/`:
+
+| Rule Type | File | Purpose |
+|-----------|------|---------|
+| Project context | `project.md` | Tech stack, structure, commands |
+| MCP servers | `mcp-servers.md` | Custom MCP server documentation |
+| Discovered standards | `[pattern-name].md` | Tribal knowledge, conventions |
+
+**Custom skills** in `.claude/skills/`:
+
+| Skill Type | Directory | Purpose |
+|------------|-----------|---------|
+| Workflows | `[workflow-name]/` | Multi-step procedures |
+| Tool integrations | `[tool-name]/` | File format or API handling |
+| Domain expertise | `[domain-name]/` | Specialized knowledge with references |
+
+**Note:** Use unique names (not `plan`, `implement`, `verify`, `standards-*`) for custom skills.
+
+## 0.3 Error Handling
+
+| Issue | Action |
+|-------|--------|
+| Vexor not installed | Use Grep/Glob for exploration, skip indexing |
+| mcp-cli not available | Skip MCP documentation |
+| No README.md | Ask user for project description |
+| No package.json/pyproject.toml | Infer tech stack from file extensions |
+
+## 0.4 Writing Concise Rules
+
+Rules are loaded into every session. Every word costs tokens.
+
+- **Lead with the rule** — What to do first, why second
+- **Use code examples** — Show, don't tell
+- **Skip the obvious** — Don't document standard framework behavior
+- **One concept per rule** — Don't combine unrelated patterns
+- **Bullet points > paragraphs** — Scannable beats readable
+- **Max ~100 lines per file** — Split large topics
+
+<details>
+<summary>Good vs Bad Example</summary>
+
+**Good:**
+```markdown
+## API Response Envelope
+
+All responses use `{ success, data, error }`.
+
+- Always include `code` and `message` in errors
+- Never return raw data without envelope
+```
+
+**Bad:**
+```markdown
+## Error Handling Guidelines
+
+When an error occurs in our application, we have established a consistent pattern...
+[3 more paragraphs]
+```
+</details>
 
 ---
 
-## Execution Sequence
+# EXECUTION SEQUENCE
 
-### Phase 1: Read Existing Rules & Skills
+## Phase 1: Read Existing Rules & Skills
 
 **MANDATORY FIRST STEP: Understand what's already documented.**
 
@@ -71,7 +148,7 @@ Custom skills in `.claude/skills/` (non-standard names) are preserved during upd
    Possibly outdated: [rules/skills with old content or changed workflows]
    ```
 
-### Phase 2: Initialize Vexor Index
+## Phase 2: Initialize Vexor Index
 
 **Build/update the semantic search index before exploration.**
 
@@ -95,7 +172,7 @@ Custom skills in `.claude/skills/` (non-standard names) are preserved during upd
    vexor search "main entry point" --top 3
    ```
 
-### Phase 3: Explore Codebase
+## Phase 3: Explore Codebase
 
 **Discover current patterns using Vexor, Grep, and file analysis.**
 
@@ -130,7 +207,7 @@ Custom skills in `.claude/skills/` (non-standard names) are preserved during upd
 
 5. **Read representative files** (5-10) in key areas to understand actual patterns
 
-### Phase 4: Compare & Identify Gaps
+## Phase 4: Compare & Identify Gaps
 
 **Compare discovered patterns against existing documentation.**
 
@@ -157,7 +234,7 @@ Custom skills in `.claude/skills/` (non-standard names) are preserved during upd
    - "Skip updates" - Keep existing rules as-is
    ```
 
-### Phase 5: Sync Project Rule
+## Phase 5: Sync Project Rule
 
 **Update `project.md` with current project state.**
 
@@ -212,7 +289,7 @@ Custom skills in `.claude/skills/` (non-standard names) are preserved during upd
 [Brief description of patterns]
 ```
 
-### Phase 6: Sync MCP Rules
+## Phase 6: Sync MCP Rules
 
 **Update MCP server documentation for user-configured servers.**
 
@@ -310,7 +387,7 @@ Skip MCP documentation if:
 - Only Pilot core servers are configured (no user servers)
 - User declines documentation update
 
-### Phase 7: Sync Existing Skills
+## Phase 7: Sync Existing Skills
 
 **Update custom skills in `.claude/skills/` to reflect current codebase.**
 
@@ -382,7 +459,7 @@ If a skill is no longer relevant:
 
 2. **If removing:** Delete the skill directory
 
-### Phase 8: Discover New Rules
+## Phase 8: Discover New Rules
 
 **Find and document undocumented tribal knowledge.**
 
@@ -471,7 +548,7 @@ For each selected pattern:
 ```
 ```
 
-### Phase 9: Discover & Create Skills
+## Phase 9: Discover & Create Skills
 
 **Identify patterns that would be better as skills than rules.**
 
@@ -526,7 +603,7 @@ After `/learn` completes:
 2. Confirm SKILL.md has proper frontmatter (name, description with triggers)
 3. Test skill is recognized: mention it in conversation to trigger
 
-### Phase 10: Team Vault (sx)
+## Phase 10: Team Vault (sx)
 
 **Share rules and skills with your team via sx.**
 
@@ -610,7 +687,7 @@ sx add .claude/rules/rule-name.md --yes --type rule --name "rule-name" --no-inst
 
 ---
 
-### Phase 11: Summary
+## Phase 11: Summary
 
 **Report what was synced:**
 
@@ -651,84 +728,3 @@ Options:
 - "Done" - Finish sync
 ```
 
----
-
-## Writing Concise Rules
-
-Rules are loaded into every session. Every word costs tokens.
-
-- **Lead with the rule** — What to do first, why second
-- **Use code examples** — Show, don't tell
-- **Skip the obvious** — Don't document standard framework behavior
-- **One concept per rule** — Don't combine unrelated patterns
-- **Bullet points > paragraphs** — Scannable beats readable
-- **Max ~100 lines per file** — Split large topics
-
-**Good:**
-```markdown
-## API Response Envelope
-
-All responses use `{ success, data, error }`.
-
-```python
-{"success": True, "data": {"id": 1}}
-{"success": False, "error": {"code": "AUTH_001", "message": "..."}}
-```
-
-- Always include `code` and `message` in errors
-- Never return raw data without envelope
-```
-
-**Bad:**
-```markdown
-## Error Handling Guidelines
-
-When an error occurs in our application, we have established a consistent pattern...
-[3 more paragraphs]
-```
-
----
-
-## Error Handling
-
-| Issue | Action |
-|-------|--------|
-| Vexor not installed | Use Grep/Glob for exploration, skip indexing |
-| mcp-cli not available | Skip MCP documentation |
-| No README.md | Ask user for project description |
-| No package.json/pyproject.toml | Infer tech stack from file extensions |
-
----
-
-## Output Locations
-
-**Custom rules** in `.claude/rules/`:
-
-| Rule Type | File | Purpose |
-|-----------|------|---------|
-| Project context | `project.md` | Tech stack, structure, commands |
-| MCP servers | `mcp-servers.md` | Custom MCP server documentation |
-| Discovered standards | `[pattern-name].md` | Tribal knowledge, conventions |
-
-**Custom skills** in `.claude/skills/`:
-
-| Skill Type | Directory | Purpose |
-|------------|-----------|---------|
-| Workflows | `[workflow-name]/` | Multi-step procedures |
-| Tool integrations | `[tool-name]/` | File format or API handling |
-| Domain expertise | `[domain-name]/` | Specialized knowledge with references |
-
-**Note:** Use unique names (not `plan`, `implement`, `verify`, `standards-*`) for custom skills.
-
-Vexor index: `.vexor/` (auto-managed)
-
----
-
-## Important Notes
-
-- **Read existing rules first** — Never create duplicates or conflicts
-- **All custom rules load every session** — Keep them concise
-- **Standard rules in `~/.claude/rules/`** — Global framework/tooling rules
-- **Custom rules in `.claude/rules/`** — Project-specific rules
-- **Run `/sync` anytime** — After major changes, new patterns emerge, or periodically
-- **Use sx for team sharing** — Share rules/skills across projects and teams
