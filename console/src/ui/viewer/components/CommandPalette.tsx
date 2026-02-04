@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Icon } from './ui';
-import { SHORTCUTS, getShortcutDisplay, type Command } from '../constants/shortcuts';
+import { SHORTCUTS, getShortcutDisplay } from '../constants/shortcuts';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -54,14 +54,6 @@ export function CommandPalette({
         category: 'navigation',
         icon: 'lucide:brain',
         action: () => onNavigate('/memories'),
-      },
-      {
-        id: 'nav-live',
-        label: 'Go to Live View',
-        shortcut: 'G L',
-        category: 'navigation',
-        icon: 'lucide:radio',
-        action: () => onNavigate('/live'),
       },
       {
         id: 'nav-search',

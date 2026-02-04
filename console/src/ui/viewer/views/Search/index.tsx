@@ -13,7 +13,6 @@ interface SearchResult {
   timestamp: string;
   score: number;
   obsType?: string;
-  tags?: string[];
 }
 
 interface SearchResponse {
@@ -32,7 +31,6 @@ export function SearchView() {
     type?: string;
     project?: string;
     dateRange?: string;
-    tags?: string[];
   }>({});
 
   const handleSearch = async (query: string) => {
@@ -43,33 +41,14 @@ export function SearchView() {
       if (filters.type) params.set('type', filters.type === 'observation' ? 'observations' : filters.type === 'summary' ? 'sessions' : 'prompts');
       if (filters.project) params.set('project', filters.project);
 
-      if (filters.tags && filters.tags.length > 0) {
-        params.set('tags', filters.tags.join(','));
-        const response = await fetch(`/api/search/by-tags?${params}`);
-        const data = await response.json();
-        const mapped = (data.observations || []).map((obs: any) => ({
-          id: obs.id,
-          type: 'observation',
-          title: obs.title || 'Untitled',
-          content: obs.narrative || obs.text || '',
-          project: obs.project || '',
-          timestamp: obs.created_at,
-          score: 0,
-          obsType: obs.type,
-          tags: obs.tags ? JSON.parse(obs.tags) : []
-        }));
-        setResults(mapped);
-        setSearchMeta({ usedSemantic: false, vectorDbAvailable: true });
-      } else {
-        const response = await fetch(`/api/search/semantic?${params}`);
-        const data: SearchResponse = await response.json();
+      const response = await fetch(`/api/search/semantic?${params}`);
+      const data: SearchResponse = await response.json();
 
-        setResults(data.results || []);
-        setSearchMeta({
-          usedSemantic: data.usedSemantic,
-          vectorDbAvailable: data.vectorDbAvailable
-        });
-      }
+      setResults(data.results || []);
+      setSearchMeta({
+        usedSemantic: data.usedSemantic,
+        vectorDbAvailable: data.vectorDbAvailable
+      });
     } catch (error) {
       console.error('Search failed:', error);
       setResults([]);
@@ -79,7 +58,7 @@ export function SearchView() {
     }
   };
 
-  const handleFilterChange = (key: string, value: string | string[] | undefined) => {
+  const handleFilterChange = (key: string, value: string | undefined) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -96,12 +75,7 @@ export function SearchView() {
       {/* Search mode indicator */}
       {searchMeta && (
         <div className="flex items-center gap-2 text-sm">
-          {filters.tags && filters.tags.length > 0 ? (
-            <Badge variant="info" outline size="sm">
-              <Icon icon="lucide:tags" size={14} className="mr-1" />
-              Tag Filter Active
-            </Badge>
-          ) : searchMeta.vectorDbAvailable ? (
+          {searchMeta.vectorDbAvailable ? (
             searchMeta.usedSemantic ? (
               <Badge variant="success" outline size="sm">
                 <Icon icon="lucide:brain" size={14} className="mr-1" />
@@ -120,13 +94,11 @@ export function SearchView() {
             </Badge>
           )}
           <span className="text-base-content/50">
-            {filters.tags && filters.tags.length > 0
-              ? 'Results filtered by tags'
-              : searchMeta.usedSemantic
-                ? 'Results ranked by semantic similarity'
-                : searchMeta.vectorDbAvailable
-                  ? 'Enter a query for semantic ranking'
-                  : 'Install Chroma for semantic search'}
+            {searchMeta.usedSemantic
+              ? 'Results ranked by semantic similarity'
+              : searchMeta.vectorDbAvailable
+                ? 'Enter a query for semantic ranking'
+                : 'Install Chroma for semantic search'}
           </span>
         </div>
       )}

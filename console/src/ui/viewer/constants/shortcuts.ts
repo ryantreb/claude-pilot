@@ -51,7 +51,6 @@ export const SHORTCUTS: Record<string, Shortcut> = {
 export const SEQUENCE_SHORTCUTS: SequenceShortcut[] = [
   { sequence: ['g', 'd'], description: 'Go to Dashboard', action: 'navigate:/' },
   { sequence: ['g', 'm'], description: 'Go to Memories', action: 'navigate:/memories' },
-  { sequence: ['g', 'l'], description: 'Go to Live', action: 'navigate:/live' },
   { sequence: ['g', 'r'], description: 'Go to Search', action: 'navigate:/search' },
 ];
 
