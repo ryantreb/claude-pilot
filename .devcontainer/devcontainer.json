@@ -31,11 +31,11 @@
     }
   },
   "forwardPorts": [
-    37777 // claude-mem
+    41777 // pilot-console
   ],
   "portsAttributes": {
-    "37777": {
-      "label": "claude-mem"
+    "41777": {
+      "label": "Pilot Console"
     }
   },
   /* GET FROM: https://containers.dev/features */
