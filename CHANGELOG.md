@@ -2,6 +2,16 @@
 
 All notable changes to Claude Pilot will be documented in this file.
 
+## [6.1.1] - 2026-02-05
+
+### Bug Fixes
+
+- Add console branding and update settings defaults
+
+### Miscellaneous
+
+- Add pricing to website
+
 ## [6.1.0] - 2026-02-05
 
 ### Bug Fixes
