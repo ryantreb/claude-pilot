@@ -26,18 +26,14 @@ describe('SessionStore', () => {
     const claudeId = 'claude-session-1';
     store.createSDKSession(claudeId, 'test-project', 'initial prompt');
     
-    // Should be 0 initially
     expect(store.getPromptNumberFromUserPrompts(claudeId)).toBe(0);
 
-    // Save prompt 1
     store.saveUserPrompt(claudeId, 1, 'First prompt');
     expect(store.getPromptNumberFromUserPrompts(claudeId)).toBe(1);
 
-    // Save prompt 2
     store.saveUserPrompt(claudeId, 2, 'Second prompt');
     expect(store.getPromptNumberFromUserPrompts(claudeId)).toBe(2);
 
-    // Save prompt for another session
     store.createSDKSession('claude-session-2', 'test-project', 'initial prompt');
     store.saveUserPrompt('claude-session-2', 1, 'Other prompt');
     expect(store.getPromptNumberFromUserPrompts(claudeId)).toBe(2);
@@ -48,8 +44,6 @@ describe('SessionStore', () => {
     const memoryId = 'memory-sess-obs';
     const sdkId = store.createSDKSession(claudeId, 'test-project', 'initial prompt');
 
-    // Set the memory_session_id before storing observations
-    // createSDKSession now initializes memory_session_id = NULL
     store.updateMemorySessionId(sdkId, memoryId);
 
     const obs = {
@@ -63,10 +57,10 @@ describe('SessionStore', () => {
       files_modified: []
     };
 
-    const pastTimestamp = 1600000000000; // Some time in the past
+    const pastTimestamp = 1600000000000;
 
     const result = store.storeObservation(
-      memoryId, // Use memorySessionId for FK reference
+      memoryId,
       'test-project',
       obs,
       1,
@@ -80,7 +74,6 @@ describe('SessionStore', () => {
     expect(stored).not.toBeNull();
     expect(stored?.created_at_epoch).toBe(pastTimestamp);
 
-    // Verify ISO string matches
     expect(new Date(stored!.created_at).getTime()).toBe(pastTimestamp);
   });
 
@@ -89,7 +82,6 @@ describe('SessionStore', () => {
     const memoryId = 'memory-sess-sum';
     const sdkId = store.createSDKSession(claudeId, 'test-project', 'initial prompt');
 
-    // Set the memory_session_id before storing summaries
     store.updateMemorySessionId(sdkId, memoryId);
 
     const summary = {
@@ -104,7 +96,7 @@ describe('SessionStore', () => {
     const pastTimestamp = 1650000000000;
 
     const result = store.storeSummary(
-      memoryId, // Use memorySessionId for FK reference
+      memoryId,
       'test-project',
       summary,
       1,
@@ -117,5 +109,50 @@ describe('SessionStore', () => {
     const stored = store.getSummaryForSession(memoryId);
     expect(stored).not.toBeNull();
     expect(stored?.created_at_epoch).toBe(pastTimestamp);
+  });
+
+  it('should mark session as completed', () => {
+    const claudeId = 'claude-sess-complete';
+    const sdkId = store.createSDKSession(claudeId, 'test-project', 'initial prompt');
+
+    const beforeComplete = store.db.prepare(
+      'SELECT status, completed_at, completed_at_epoch FROM sdk_sessions WHERE id = ?'
+    ).get(sdkId) as { status: string; completed_at: string | null; completed_at_epoch: number | null };
+
+    expect(beforeComplete.status).toBe('active');
+    expect(beforeComplete.completed_at).toBeNull();
+    expect(beforeComplete.completed_at_epoch).toBeNull();
+
+    store.markSessionCompleted(sdkId);
+
+    const afterComplete = store.db.prepare(
+      'SELECT status, completed_at, completed_at_epoch FROM sdk_sessions WHERE id = ?'
+    ).get(sdkId) as { status: string; completed_at: string | null; completed_at_epoch: number | null };
+
+    expect(afterComplete.status).toBe('completed');
+    expect(afterComplete.completed_at).not.toBeNull();
+    expect(afterComplete.completed_at_epoch).not.toBeNull();
+    expect(afterComplete.completed_at_epoch).toBeGreaterThan(0);
+  });
+
+  it('should not update already completed sessions', () => {
+    const claudeId = 'claude-sess-double-complete';
+    const sdkId = store.createSDKSession(claudeId, 'test-project', 'initial prompt');
+
+    store.markSessionCompleted(sdkId);
+
+    const firstComplete = store.db.prepare(
+      'SELECT completed_at_epoch FROM sdk_sessions WHERE id = ?'
+    ).get(sdkId) as { completed_at_epoch: number };
+
+    const originalEpoch = firstComplete.completed_at_epoch;
+
+    store.markSessionCompleted(sdkId);
+
+    const secondComplete = store.db.prepare(
+      'SELECT completed_at_epoch FROM sdk_sessions WHERE id = ?'
+    ).get(sdkId) as { completed_at_epoch: number };
+
+    expect(secondComplete.completed_at_epoch).toBe(originalEpoch);
   });
 });

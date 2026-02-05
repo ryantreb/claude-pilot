@@ -128,6 +128,8 @@ export async function processAgentResponse(
     agentName
   );
 
+  // Note: Don't mark session as completed here - summaries are generated during
+
   cleanupProcessedMessages(session, worker);
 }
 

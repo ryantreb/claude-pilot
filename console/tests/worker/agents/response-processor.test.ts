@@ -64,6 +64,7 @@ describe('ResponseProcessor', () => {
     mockDbManager = {
       getSessionStore: () => ({
         storeObservations: mockStoreObservations,
+        markSessionCompleted: () => {},
       }),
       getChromaSync: () => ({
         syncObservation: mockChromaSyncObservation,

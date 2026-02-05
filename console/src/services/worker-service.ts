@@ -429,14 +429,30 @@ export class WorkerService {
       if (staleSessionIds.length > 0) {
         const ids = staleSessionIds.map(r => r.id);
         const placeholders = ids.map(() => '?').join(',');
+        const now = Date.now();
 
-        sessionStore.db.prepare(`
-          UPDATE sdk_sessions
-          SET status = 'failed', completed_at_epoch = ?
-          WHERE id IN (${placeholders})
-        `).run(Date.now(), ...ids);
+        const sessionsWithSummaries = sessionStore.db.prepare(`
+          SELECT DISTINCT s.id FROM sdk_sessions s
+          INNER JOIN summaries sm ON sm.session_db_id = s.id
+          WHERE s.id IN (${placeholders})
+        `).all(...ids) as { id: number }[];
+        const completedIds = new Set(sessionsWithSummaries.map(r => r.id));
 
-        logger.info('SYSTEM', `Marked ${ids.length} stale sessions as failed`);
+        for (const id of ids) {
+          const status = completedIds.has(id) ? 'completed' : 'failed';
+          sessionStore.db.prepare(`
+            UPDATE sdk_sessions SET status = ?, completed_at_epoch = ? WHERE id = ?
+          `).run(status, now, id);
+        }
+
+        const completedCount = completedIds.size;
+        const failedCount = ids.length - completedCount;
+        if (completedCount > 0) {
+          logger.info('SYSTEM', `Marked ${completedCount} stale sessions as completed (had summaries)`);
+        }
+        if (failedCount > 0) {
+          logger.info('SYSTEM', `Marked ${failedCount} stale sessions as failed (no summaries)`);
+        }
 
         const msgResult = sessionStore.db.prepare(`
           UPDATE pending_messages

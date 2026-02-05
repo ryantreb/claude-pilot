@@ -8,7 +8,7 @@ interface SidebarNavProps {
 
 const navItems = [
   { icon: 'lucide:layout-dashboard', label: 'Dashboard', href: '#/' },
-  { icon: 'lucide:scroll', label: 'Spec', href: '#/spec' },
+  { icon: 'lucide:scroll', label: 'Specification', href: '#/spec' },
   { icon: 'lucide:brain', label: 'Memories', href: '#/memories' },
   { icon: 'lucide:history', label: 'Sessions', href: '#/sessions' },
   { icon: 'lucide:search', label: 'Search', href: '#/search' },

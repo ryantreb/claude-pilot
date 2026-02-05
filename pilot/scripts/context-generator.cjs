@@ -314,7 +314,13 @@ ${o.stack}`:` ${o.message}`:this.getLevel()===0&&typeof o=="object"?l=`
       FROM sdk_sessions
       WHERE memory_session_id IN (${t})
       ORDER BY started_at_epoch DESC
-    `).all(...e)}getPromptNumberFromUserPrompts(e){return this.db.prepare(`
+    `).all(...e)}markSessionCompleted(e){let t=new Date,s=t.getTime();this.db.prepare(`
+      UPDATE sdk_sessions
+      SET status = 'completed',
+          completed_at = ?,
+          completed_at_epoch = ?
+      WHERE id = ? AND status = 'active'
+    `).run(t.toISOString(),s,e)}getPromptNumberFromUserPrompts(e){return this.db.prepare(`
       SELECT COUNT(*) as count FROM user_prompts WHERE content_session_id = ?
     `).get(e).count}createSDKSession(e,t,s){let r=new Date,o=r.getTime(),i=crypto.randomUUID();return this.db.prepare(`
       INSERT OR IGNORE INTO sdk_sessions

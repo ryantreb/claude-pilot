@@ -1149,8 +1149,22 @@ export class SessionStore {
     return stmt.all(...memorySessionIds) as any[];
   }
 
+  /**
+   * Mark a session as completed
+   * Called after a summary is stored (Stop hook processing complete)
+   */
+  markSessionCompleted(sessionDbId: number): void {
+    const now = new Date();
+    const nowEpoch = now.getTime();
 
-
+    this.db.prepare(`
+      UPDATE sdk_sessions
+      SET status = 'completed',
+          completed_at = ?,
+          completed_at_epoch = ?
+      WHERE id = ? AND status = 'active'
+    `).run(now.toISOString(), nowEpoch, sessionDbId);
+  }
 
 
 

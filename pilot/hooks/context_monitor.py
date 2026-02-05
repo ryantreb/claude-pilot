@@ -224,15 +224,31 @@ def run_context_monitor() -> int:
         if percentage >= threshold and threshold not in shown_learn:
             print("", file=sys.stderr)
             print(
-                f"{CYAN}💡 Context {percentage:.0f}% - Online Learning reminder:{NC}",
+                f"{CYAN}💡 Context {percentage:.0f}% - Pattern Recognition Check:{NC}",
                 file=sys.stderr,
             )
             print(
-                f"{CYAN}   Did you discover a non-obvious solution or repeatable workflow?{NC}",
+                f"{CYAN}   Did this session involve any of these?{NC}",
                 file=sys.stderr,
             )
             print(
-                f"{CYAN}   If yes, invoke Skill(learn) to extract it for future sessions.{NC}",
+                f"{CYAN}   • Undocumented API/tool integration figured out{NC}",
+                file=sys.stderr,
+            )
+            print(
+                f"{CYAN}   • Multi-step workflow that will recur{NC}",
+                file=sys.stderr,
+            )
+            print(
+                f"{CYAN}   • Workaround for a common limitation{NC}",
+                file=sys.stderr,
+            )
+            print(
+                f"{CYAN}   • Non-obvious debugging solution{NC}",
+                file=sys.stderr,
+            )
+            print(
+                f"{CYAN}   If yes → Invoke Skill(learn) now. It will evaluate if worth capturing.{NC}",
                 file=sys.stderr,
             )
             new_learn_shown.append(threshold)
@@ -256,7 +272,7 @@ def run_context_monitor() -> int:
         )
         print(f"{RED}2. Write /tmp/claude-continuation.md (include Active Plan path if found){NC}", file=sys.stderr)
         print(
-            f"{RED}3. /learn check: Non-obvious solution or repeatable workflow? If yes, invoke Skill(learn) before handoff.{NC}",
+            f"{RED}3. /learn check: Reusable pattern discovered? Invoke Skill(learn) automatically.{NC}",
             file=sys.stderr,
         )
         print(

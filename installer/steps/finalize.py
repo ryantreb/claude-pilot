@@ -115,7 +115,7 @@ class FinalizeStep(BaseStep):
                 (
                     "Claude Pilot Console",
                     "Open http://localhost:41777 → Browse memories, sessions, tags, and live activity\n"
-                    "     (Check VS Code Ports tab if 41777 is unavailable - may be 37778)",
+                    "     (Check VS Code Ports tab if 41777 is unavailable - may be another port)",
                 )
             )
 

@@ -83,12 +83,11 @@ export function useStats(): UseStatsResult {
 
   const loadStats = useCallback(async () => {
     try {
-      const [statsRes, healthRes, activityRes, projectsRes, settingsRes, planRes, gitRes] = await Promise.all([
+      const [statsRes, healthRes, activityRes, projectsRes, planRes, gitRes] = await Promise.all([
         fetch('/api/stats'),
         fetch('/health'),
         fetch('/api/observations?limit=5'),
         fetch('/api/projects'),
-        fetch('/api/settings'),
         fetch('/api/plan'),
         fetch('/api/git'),
       ]);
@@ -97,7 +96,6 @@ export function useStats(): UseStatsResult {
       const healthData = await healthRes.json();
       const activityData = await activityRes.json();
       const projectsData = await projectsRes.json();
-      const settingsData = await settingsRes.json();
       const planData = await planRes.json();
       const gitData = await gitRes.json();
 
@@ -117,9 +115,8 @@ export function useStats(): UseStatsResult {
         queueDepth: healthData.queueDepth || 0,
       });
 
-      const vectorDbType = settingsData.CLAUDE_PILOT_VECTOR_DB || 'none';
       setVectorDbStatus({
-        type: vectorDbType as 'chroma' | 'none',
+        type: 'chroma',
         status: healthData.status === 'ok' ? 'connected' : 'disconnected',
         documentCount: 0,
         collectionCount: projectsData.projects?.length || 0,

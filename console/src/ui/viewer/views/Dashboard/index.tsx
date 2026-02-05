@@ -22,7 +22,7 @@ export function DashboardView() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-base-content/60">Overview of your Claude Pilot memory instance</p>
+        <p className="text-base-content/60">Overview of your Pilot Console</p>
       </div>
 
       <StatsGrid stats={stats} />
