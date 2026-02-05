@@ -48,7 +48,7 @@ export function getWorkerEndpointConfig(): WorkerEndpointConfig {
     if (remoteConfig.token) {
       authHeaders['Authorization'] = `Bearer ${remoteConfig.token}`;
     }
-    authHeaders['X-Pilot Memory-Client'] = 'local-hooks';
+    authHeaders['X-Pilot-Memory-Client'] = 'local-hooks';
 
     cachedEndpoint = {
       mode: 'remote',

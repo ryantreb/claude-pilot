@@ -102,13 +102,17 @@ export class PlanRoutes extends BaseRouteHandler {
         return;
       }
       const firstSpec = specs[0];
-      const content = readFileSync(firstSpec.filePath, 'utf-8');
-      res.json({
-        content,
-        name: firstSpec.name,
-        status: firstSpec.status,
-        filePath: firstSpec.filePath,
-      });
+      try {
+        const content = readFileSync(firstSpec.filePath, 'utf-8');
+        res.json({
+          content,
+          name: firstSpec.name,
+          status: firstSpec.status,
+          filePath: firstSpec.filePath,
+        });
+      } catch {
+        res.status(404).json({ error: 'Plan file not found' });
+      }
       return;
     }
 

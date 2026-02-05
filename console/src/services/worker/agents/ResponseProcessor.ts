@@ -128,7 +128,7 @@ export async function processAgentResponse(
     agentName
   );
 
-  // Note: Don't mark session as completed here - summaries are generated during
+  // Note: Session completion is handled by stale cleanup, not here (summaries are generated during handoffs)
 
   cleanupProcessedMessages(session, worker);
 }
