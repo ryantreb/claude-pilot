@@ -433,7 +433,7 @@ export class WorkerService {
 
         const sessionsWithSummaries = sessionStore.db.prepare(`
           SELECT DISTINCT s.id FROM sdk_sessions s
-          INNER JOIN summaries sm ON sm.session_db_id = s.id
+          INNER JOIN session_summaries sm ON sm.memory_session_id = s.memory_session_id
           WHERE s.id IN (${placeholders})
         `).all(...ids) as { id: number }[];
         const completedIds = new Set(sessionsWithSummaries.map(r => r.id));

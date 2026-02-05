@@ -155,4 +155,43 @@ describe('SessionStore', () => {
 
     expect(secondComplete.completed_at_epoch).toBe(originalEpoch);
   });
+
+  describe('stale session cleanup query', () => {
+    it('should identify sessions with summaries using session_summaries table', () => {
+      const claudeId1 = 'claude-sess-with-summary';
+      const claudeId2 = 'claude-sess-without-summary';
+      const memoryId1 = 'memory-sess-1';
+
+      const sdkId1 = store.createSDKSession(claudeId1, 'test-project', 'initial prompt');
+      const sdkId2 = store.createSDKSession(claudeId2, 'test-project', 'initial prompt');
+
+      store.updateMemorySessionId(sdkId1, memoryId1);
+
+      const summary = {
+        request: 'Do something',
+        investigated: 'Stuff',
+        learned: 'Things',
+        completed: 'Done',
+        next_steps: 'More',
+        notes: null
+      };
+      store.storeSummary(memoryId1, 'test-project', summary, 1, 0);
+
+      const ids = [sdkId1, sdkId2];
+      const placeholders = ids.map(() => '?').join(',');
+
+      const sessionsWithSummaries = store.db.prepare(`
+        SELECT DISTINCT s.id FROM sdk_sessions s
+        INNER JOIN session_summaries sm ON sm.memory_session_id = s.memory_session_id
+        WHERE s.id IN (${placeholders})
+      `).all(...ids) as { id: number }[];
+
+      expect(sessionsWithSummaries.length).toBe(1);
+      expect(sessionsWithSummaries[0].id).toBe(sdkId1);
+
+      const completedIds = new Set(sessionsWithSummaries.map(r => r.id));
+      expect(completedIds.has(sdkId1)).toBe(true);
+      expect(completedIds.has(sdkId2)).toBe(false);
+    });
+  });
 });
