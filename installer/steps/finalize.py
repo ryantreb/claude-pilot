@@ -89,7 +89,7 @@ class FinalizeStep(BaseStep):
 
         steps.extend(
             [
-                ("Start Claude Pilot", "Run: claude (in your project folder)"),
+                ("Start Claude Pilot", "Run: pilot (in your project folder)"),
                 ("Connect IDE", "Run: /ide → Enables real-time diagnostics"),
             ]
         )

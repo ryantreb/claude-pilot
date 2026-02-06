@@ -112,13 +112,13 @@ REDIRECTS = {
     },
     "EnterPlanMode": {
         "message": "EnterPlanMode is BANNED (project uses /spec workflow)",
-        "alternative": "Use Skill(skill='spec') for planning via /spec → /plan → /implement → /verify",
-        "example": "Skill(skill='spec', args='task description')",
+        "alternative": "Use Skill(skill='spec') for dispatch, or invoke phases directly: spec-plan, spec-implement, spec-verify",
+        "example": "Skill(skill='spec', args='task description') or Skill(skill='spec-plan', args='task description')",
     },
     "ExitPlanMode": {
         "message": "ExitPlanMode is BANNED (project uses /spec workflow)",
-        "alternative": "Use AskUserQuestion to get plan approval, not ExitPlanMode",
-        "example": "AskUserQuestion to confirm plan, then Skill(implement, plan-path)",
+        "alternative": "Use AskUserQuestion for plan approval, then Skill(skill='spec-implement', args='plan-path')",
+        "example": "AskUserQuestion to confirm plan, then Skill(skill='spec-implement', args='plan-path')",
     },
 }
 

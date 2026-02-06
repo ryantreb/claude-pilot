@@ -11,6 +11,7 @@ from pathlib import Path
 
 THRESHOLD_WARN = 80
 THRESHOLD_STOP = 90
+THRESHOLD_CRITICAL = 95
 LEARN_THRESHOLDS = [40, 60, 80]
 
 CACHE_FILE = Path("/tmp/.claude_context_cache.json")
@@ -254,6 +255,15 @@ def run_context_monitor() -> int:
             new_learn_shown.append(threshold)
             break
 
+    if percentage >= THRESHOLD_CRITICAL:
+        save_cache(total_tokens, session_id, new_learn_shown if new_learn_shown else None)
+        print("", file=sys.stderr)
+        print(f"{RED}🚨 CONTEXT {percentage:.0f}% - CRITICAL: HANDOFF IMMEDIATELY{NC}", file=sys.stderr)
+        print(f"{RED}Do NOT write code, fix errors, or run commands.{NC}", file=sys.stderr)
+        print(f"{RED}ONLY action: write /tmp/claude-continuation.md then run:{NC}", file=sys.stderr)
+        print(f"{RED}  ~/.pilot/bin/pilot send-clear [plan-path|--general]{NC}", file=sys.stderr)
+        return 2
+
     if percentage >= THRESHOLD_STOP:
         save_cache(total_tokens, session_id, new_learn_shown if new_learn_shown else None)
         print("", file=sys.stderr)
@@ -264,21 +274,9 @@ def run_context_monitor() -> int:
             if spec_status == "COMPLETE":
                 return 2
 
-        print(f"{RED}⚠️  CONTEXT {percentage:.0f}% - HANDOFF NOW (not optional){NC}", file=sys.stderr)
-        print(f"{RED}STOP current work. Your NEXT actions must be:{NC}", file=sys.stderr)
-        print(
-            f"{RED}1. Check for active plan: grep -l '^Status: PENDING\\|^Status: COMPLETE' docs/plans/*.md 2>/dev/null | head -1{NC}",
-            file=sys.stderr,
-        )
-        print(f"{RED}2. Write /tmp/claude-continuation.md (include Active Plan path if found){NC}", file=sys.stderr)
-        print(
-            f"{RED}3. /learn check: Reusable pattern discovered? Invoke Skill(learn) automatically.{NC}",
-            file=sys.stderr,
-        )
-        print(
-            f"{RED}4. Run: ~/.pilot/bin/pilot send-clear <plan-path>  (or --general if no active plan){NC}",
-            file=sys.stderr,
-        )
+        print(f"{RED}⚠️  CONTEXT {percentage:.0f}% - STOP and execute handoff protocol{NC}", file=sys.stderr)
+        print(f"{RED}Do NOT continue fixing errors. Document remaining work and hand off.{NC}", file=sys.stderr)
+        print(f"{RED}Follow context-continuation.md rules → write continuation file → send-clear{NC}", file=sys.stderr)
         return 2
 
     if percentage >= THRESHOLD_WARN and not shown_80_warn:

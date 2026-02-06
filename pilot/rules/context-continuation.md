@@ -6,14 +6,22 @@
 
 **NEVER rush or compromise quality due to context pressure.**
 
-- Context warnings are **informational**, not emergencies
 - You can ALWAYS continue in the next session - work is never lost
 - A well-done task split across 2 sessions is better than a rushed task in 1 session
 - **Quality is the #1 metric** - clean code, proper tests, thorough implementation
-- If context is high, finish the CURRENT task properly, then hand off cleanly
 - Do NOT skip tests, compress explanations, or cut corners to "beat" context limits
 
 **The context limit is not your enemy.** It's just a checkpoint. The plan file, Pilot Memory, and continuation files ensure seamless handoff. Trust the system.
+
+### ⛔ But at 90%+, HANDOFF OVERRIDES EVERYTHING
+
+**At 90% context, the handoff IS the quality action.** Failing to hand off means losing ALL work.
+
+- **"Finish current task" means the single tool call in progress** - NOT "fix every remaining error"
+- **Do NOT start new fix cycles** at 90%+ (running linters, fixing type errors, running tests)
+- **Document remaining errors** in the continuation file for the next session
+- The "fix ALL errors" rule is **suspended** at 90%+ - incomplete fixes are expected and acceptable
+- The next session will continue exactly where you left off - nothing is lost
 
 ## How It Works
 

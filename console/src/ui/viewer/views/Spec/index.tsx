@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardBody, Badge, Icon, Spinner, Progress } from '../../components/ui';
 import { SpecContent } from './SpecContent';
+import { TIMING } from '../../constants/timing';
 
 interface PlanInfo {
   name: string;
@@ -109,7 +110,14 @@ export function SpecView() {
 
   useEffect(() => {
     loadSpecs();
-  }, [loadSpecs]);
+    const interval = setInterval(() => {
+      loadSpecs();
+      if (selectedSpec) {
+        loadContent(selectedSpec);
+      }
+    }, TIMING.SPEC_REFRESH_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [loadSpecs, loadContent, selectedSpec]);
 
   useEffect(() => {
     if (selectedSpec) {

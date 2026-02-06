@@ -2,22 +2,28 @@
 
 ## Task Complexity Triage
 
-**Before starting any task, classify its complexity:**
+**Default mode is quick mode (direct execution).** Only suggest `/spec` for high-complexity tasks, and always let the user decide.
 
 | Complexity | Characteristics | Action |
 |------------|-----------------|--------|
-| **Trivial** | Single file, obvious fix, <5 min | Execute directly, no planning needed |
+| **Trivial** | Single file, obvious fix | Execute directly, no planning needed |
 | **Moderate** | 2-5 files, clear scope, straightforward | Use TaskCreate/TaskUpdate to track, then execute |
-| **Complex** | Architectural impact, ambiguous requirements, 5+ files | Use `/spec` for full planning workflow |
+| **High** | Major architectural change, cross-cutting refactor, new subsystem, 10+ files | **Ask user** if they want `/spec` or quick mode |
 
-**Decision Checklist:**
-- [ ] Does it touch more than 5 files? → `/spec`
-- [ ] Are requirements ambiguous or incomplete? → `/spec`
-- [ ] Does it change core architecture or interfaces? → `/spec`
-- [ ] Will it take multiple sessions? → `/spec`
-- [ ] Is it a simple bug fix or small feature? → Execute directly with task tracking
+**When to suggest /spec (ask, never auto-invoke):**
+- Major new subsystem or architectural redesign
+- Cross-cutting changes spanning 10+ files with unclear dependencies
+- Multi-session work where a plan file is essential for continuity
 
-**Match effort to complexity.** Don't over-engineer trivial tasks with full specs. Don't under-plan complex work by skipping `/spec`.
+**Stay in quick mode for everything else**, including:
+- Bug fixes of any size
+- Features touching 2-8 files with clear scope
+- Refactors with well-understood boundaries
+- Anything the user didn't explicitly request `/spec` for
+
+**If you think `/spec` would help, ask:** "This looks like a larger architectural change. Want me to use `/spec` for planning, or continue in quick mode?"
+
+**Never auto-invoke `/spec`.** The user always chooses.
 
 ---
 
@@ -102,10 +108,10 @@ Tasks 3 and 4 won't show as ready until Task 2 completes.
 
 There are TWO verification points that use a single verifier sub-agent each:
 
-| Phase | Agent | Purpose |
-|-------|-------|---------|
-| **End of Planning (Step 7)** | `plan-verifier` | Verify plan captures user requirements before approval |
-| **End of Implementation (Step 8)** | `spec-verifier` | Verify code implements the plan correctly |
+| Phase Skill | Agent | Purpose |
+|-------------|-------|---------|
+| **`spec-plan` (Step 1.7)** | `plan-verifier` | Verify plan captures user requirements before approval |
+| **`spec-verify` (Step 3.8)** | `spec-verifier` | Verify code implements the plan correctly |
 
 **⛔ VERIFICATION STEPS ARE MANDATORY - NEVER SKIP THEM.**
 
@@ -135,26 +141,40 @@ Note: Task management tools (TaskCreate, TaskList, etc.) are ALWAYS allowed.
 
 ## /spec Workflow
 
-The `/spec` command handles everything in one flow:
+The `/spec` command is a **dispatcher** that invokes phase skills via `Skill()`:
 
 ```
-Plan → Verify Plan → Approve → Implement → Verify Code → Done
-              ↓         ↑                        ↓
-              fix       │                        fix
-              ↓         │                        ↓
-              ──────────┘         ←──────────────┘
+/spec → Dispatcher
+          ├→ Skill('spec-plan')      → Plan, verify, approve
+          ├→ Skill('spec-implement') → TDD loop for each task
+          └→ Skill('spec-verify')    → Tests, execution, code review
+```
+
+### Phase Dispatch
+
+| Status | Approved | Skill Invoked |
+|--------|----------|---------------|
+| PENDING | No | `Skill(skill='spec-plan', args='<plan-path>')` |
+| PENDING | Yes | `Skill(skill='spec-implement', args='<plan-path>')` |
+| COMPLETE | * | `Skill(skill='spec-verify', args='<plan-path>')` |
+| VERIFIED | * | Report completion, done |
+
+### The Feedback Loop
+
+```
+spec-verify finds issues → Status: PENDING → spec-implement fixes → COMPLETE → spec-verify → ... → VERIFIED
 ```
 
 **Two Verification Points (MANDATORY - NEVER SKIP):**
 
 | Point | What | When |
 |-------|------|------|
-| **Plan Verification (Step 7)** | Verifier checks plan matches user requirements | Before approval |
-| **Code Verification (Step 8)** | Verifier checks code implements plan correctly | After implementation |
+| **Plan Verification (Step 1.7)** | `plan-verifier` checks plan matches user requirements | End of `spec-plan` |
+| **Code Verification (Step 3.8)** | `spec-verifier` checks code implements plan correctly | During `spec-verify` |
 
 **⛔ Both verification steps are NON-NEGOTIABLE. Skipping is FORBIDDEN.**
 
-**⛔ CRITICAL: Only ONE user interaction point exists: Plan Approval.**
+**⛔ CRITICAL: Only ONE user interaction point exists: Plan Approval (in `spec-plan`).**
 
 Everything else is automatic:
 - Plan verification findings are fixed automatically before showing to user
@@ -162,6 +182,7 @@ Everything else is automatic:
 - Code verification findings are fixed automatically (must_fix AND should_fix)
 - Re-verification loops automatically until clean
 - Session handoffs happen automatically
+- Phase transitions happen via `Skill()` calls
 
 **NEVER ask "Should I fix these findings?" or "Want me to address these issues?"**
 The user approved the plan. Verification fixes are part of that approval.
@@ -180,10 +201,10 @@ The user approved the plan. Verification fixes are part of that approval.
 
 ## Quality Over Speed
 
-- Context warnings are informational, not emergencies
-- Finish current task properly, then hand off
-- Never skip tests or cut corners
+- Below 90%: finish current task properly, then hand off
+- Never skip tests or cut corners when context allows
 - A clean handoff beats rushed completion
+- **At 90%+ context: HANDOFF IS THE PRIORITY.** Do not start new fix cycles (linting, type checking, error fixing). Document remaining work and hand off immediately. The "fix all errors" mandate is suspended - the next session will handle them.
 
 ## No Stopping - Automatic Continuation
 
