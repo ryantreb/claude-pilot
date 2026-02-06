@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Github, Linkedin, Mail, ScrollText, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import { smoothScrollTo } from "@/utils/smoothScroll";
@@ -65,6 +65,28 @@ const Footer = () => {
                   Pricing
                 </button>
               </li>
+              <li>
+                <a
+                  href="https://pilot.openchangelog.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                >
+                  <ScrollText className="h-3.5 w-3.5" />
+                  Changelog
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/maxritter/claude-pilot/blob/main/LICENSE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                >
+                  <Scale className="h-3.5 w-3.5" />
+                  License
+                </a>
+              </li>
             </ul>
           </nav>
 
@@ -126,7 +148,16 @@ const Footer = () => {
             >
               Max Ritter
             </a>
-            .
+            . All rights reserved.
+            {" · "}
+            <a
+              href="https://github.com/maxritter/claude-pilot/blob/main/LICENSE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              License
+            </a>
           </p>
         </div>
       </div>

@@ -223,6 +223,7 @@ __marimo__/
 
 # Claude Code
 CLAUDE.md
+.devcontainer
 .claude.backup.*
 *.backup
 .claude/config/

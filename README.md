@@ -13,7 +13,7 @@ Claude Code ships fast but breaks things — Pilot fixes that:</br>
 [![Last Commit](https://img.shields.io/github/last-commit/maxritter/claude-pilot?color=blue)](https://github.com/maxritter/claude-pilot/commits/main)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/maxritter/claude-pilot/pulls)
 
-⭐ [Star this repo](https://github.com/maxritter/claude-pilot) · 🌐 [Website](https://claude-pilot.com) · 📋 [Changelog](https://pilot.openchangelog.com/) · 🔔 [Follow for updates](https://www.linkedin.com/in/rittermax/)
+⭐ [Star this repo](https://github.com/maxritter/claude-pilot) · 🌐 [Website](https://claude-pilot.com) · 🔔 [Follow for updates](https://www.linkedin.com/in/rittermax/) · 📋 [Changelog](https://pilot.openchangelog.com/) · 📄 [License](LICENSE)
 
 <br>
 
@@ -42,6 +42,7 @@ After installation, run `pilot` to launch Claude Pilot. Use `/sync` to load rule
 - [Usage](#-usage)
 - [Claude Pilot Console](#-claude-pilot-console)
 - [What's Inside](#-whats-inside)
+- [Changelog](#-changelog)
 - [License](#-license)
 - [Contributing](#-contributing)
 
@@ -244,6 +245,12 @@ Access the web-based Claude Pilot Console at **http://localhost:41777** to visua
 | Context degrades mid-task | Endless Mode preserves context |
 | Every session starts fresh | Persistent memory across sessions |
 | Hope it works | Verified before marked complete |
+
+---
+
+## 📋 Changelog
+
+See the full changelog at [pilot.openchangelog.com](https://pilot.openchangelog.com/).
 
 ---
 
