@@ -45,6 +45,7 @@ export class SessionStore {
     this.repairSessionIdColumnRename();
     this.addFailedAtEpochColumn();
     this.ensureSessionPlansTable();
+    this.createProjectRootsTable();
   }
 
   /**
@@ -663,6 +664,53 @@ export class SessionStore {
     this.db
       .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
       .run(21, new Date().toISOString());
+  }
+
+  /** Create project_roots table (migration 23). */
+  private createProjectRootsTable(): void {
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(23) as
+      | SchemaVersion
+      | undefined;
+    if (applied) return;
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS project_roots (
+        project TEXT PRIMARY KEY,
+        root_path TEXT NOT NULL,
+        last_seen_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )
+    `);
+
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(23, new Date().toISOString());
+  }
+
+  /** Insert or update a project's root path. */
+  upsertProjectRoot(project: string, rootPath: string): void {
+    this.db
+      .prepare(
+        `INSERT INTO project_roots (project, root_path, last_seen_at)
+         VALUES (?, ?, datetime('now'))
+         ON CONFLICT(project) DO UPDATE SET root_path = excluded.root_path, last_seen_at = datetime('now')`,
+      )
+      .run(project, rootPath);
+  }
+
+  /** Get the root path for a given project, or null if unknown. */
+  getProjectRoot(project: string): string | null {
+    const row = this.db
+      .prepare("SELECT root_path FROM project_roots WHERE project = ?")
+      .get(project) as { root_path: string } | undefined;
+    return row?.root_path ?? null;
+  }
+
+  /** Get all known project roots. */
+  getAllProjectRoots(): Array<{ project: string; rootPath: string; lastSeenAt: string }> {
+    const rows = this.db
+      .prepare("SELECT project, root_path, last_seen_at FROM project_roots ORDER BY project")
+      .all() as Array<{ project: string; root_path: string; last_seen_at: string }>;
+    return rows.map((r) => ({ project: r.project, rootPath: r.root_path, lastSeenAt: r.last_seen_at }));
   }
 
   /**

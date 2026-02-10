@@ -3,22 +3,61 @@ import { StatsCard } from './StatsCard';
 interface Stats {
   observations: number;
   summaries: number;
+  sessions: number;
   lastObservationAt: string | null;
   projects: number;
 }
 
+interface SpecStats {
+  totalSpecs: number;
+  verified: number;
+  inProgress: number;
+  pending: number;
+  avgIterations: number;
+  totalTasksCompleted: number;
+  totalTasks: number;
+  completionTimeline: Array<{ date: string; count: number }>;
+  recentlyVerified: Array<{ name: string; verifiedAt: string }>;
+}
+
 interface StatsGridProps {
   stats: Stats;
+  specStats?: SpecStats;
   selectedProject?: string | null;
 }
 
-export function StatsGrid({ stats, selectedProject }: StatsGridProps) {
+export function StatsGrid({ stats, specStats, selectedProject }: StatsGridProps) {
+  const successRate = specStats && specStats.totalSpecs > 0
+    ? `${Math.round((specStats.verified / specStats.totalSpecs) * 100)}% success`
+    : undefined;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard
         icon="lucide:brain"
         label="Observations"
         value={stats.observations.toLocaleString()}
+      />
+      <StatsCard
+        icon="lucide:scroll"
+        label="Total Specs"
+        value={specStats?.totalSpecs ?? 0}
+      />
+      <StatsCard
+        icon="lucide:shield-check"
+        label="Verified"
+        value={specStats?.verified ?? 0}
+        subtext={successRate}
+      />
+      <StatsCard
+        icon="lucide:loader"
+        label="In Progress"
+        value={specStats?.inProgress ?? 0}
+      />
+      <StatsCard
+        icon="lucide:history"
+        label="Sessions"
+        value={stats.sessions.toLocaleString()}
       />
       <StatsCard
         icon="lucide:clock"

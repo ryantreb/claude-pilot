@@ -3,6 +3,7 @@ import { Card, CardBody, Badge, Icon, Button, Spinner, Progress, Tooltip, ScopeB
 import { SpecContent } from './SpecContent';
 import { WorktreePanel } from './WorktreePanel';
 import { TIMING } from '../../constants/timing';
+import { useProject } from '../../context';
 
 interface PlanInfo {
   name: string;
@@ -67,6 +68,7 @@ function parsePlanContent(content: string): ParsedPlan {
 }
 
 export function SpecView() {
+  const { selectedProject } = useProject();
   const [specs, setSpecs] = useState<PlanInfo[]>([]);
   const [selectedSpec, setSelectedSpec] = useState<string | null>(null);
   const [content, setContent] = useState<PlanContent | null>(null);
@@ -75,9 +77,11 @@ export function SpecView() {
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const projectParam = selectedProject ? `?project=${encodeURIComponent(selectedProject)}` : '';
+
   const loadSpecs = useCallback(async () => {
     try {
-      const res = await fetch('/api/plans/active');
+      const res = await fetch(`/api/plans/active${projectParam}`);
       const data = await res.json();
       setSpecs(data.specs || []);
 
@@ -91,7 +95,7 @@ export function SpecView() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedSpec]);
+  }, [selectedSpec, projectParam]);
 
   const loadContent = useCallback(async (filePath: string, background = false) => {
     if (!background) {
@@ -99,7 +103,7 @@ export function SpecView() {
     }
     setError(null);
     try {
-      const res = await fetch(`/api/plan/content?path=${encodeURIComponent(filePath)}`);
+      const res = await fetch(`/api/plan/content?path=${encodeURIComponent(filePath)}${selectedProject ? `&project=${encodeURIComponent(selectedProject)}` : ''}`);
       if (!res.ok) {
         throw new Error('Failed to load spec content');
       }
@@ -113,7 +117,7 @@ export function SpecView() {
         setIsLoadingContent(false);
       }
     }
-  }, []);
+  }, [selectedProject]);
 
   const deleteSpec = useCallback(async (filePath: string) => {
     if (!confirm(`Delete spec "${filePath.split('/').pop()}"? This cannot be undone.`)) {

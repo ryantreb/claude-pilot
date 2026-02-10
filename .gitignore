@@ -244,3 +244,4 @@ bun.lock
 
 # Kiro
 .kiro/
+.worktrees/

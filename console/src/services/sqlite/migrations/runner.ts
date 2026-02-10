@@ -28,6 +28,7 @@ export class MigrationRunner {
     this.addFailedAtEpochColumn();
     this.createTagsTable();
     this.removeObservationTypeCheckConstraint();
+    this.createProjectRootsTable();
   }
 
   /**
@@ -750,5 +751,25 @@ export class MigrationRunner {
       .run(22, new Date().toISOString());
 
     logger.debug("DB", "Successfully removed CHECK constraint from observations.type");
+  }
+
+  /** Create project_roots table (migration 23). */
+  private createProjectRootsTable(): void {
+    const applied = this.db.prepare("SELECT version FROM schema_versions WHERE version = ?").get(23) as
+      | SchemaVersion
+      | undefined;
+    if (applied) return;
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS project_roots (
+        project TEXT PRIMARY KEY,
+        root_path TEXT NOT NULL,
+        last_seen_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )
+    `);
+
+    this.db
+      .prepare("INSERT OR IGNORE INTO schema_versions (version, applied_at) VALUES (?, ?)")
+      .run(23, new Date().toISOString());
   }
 }

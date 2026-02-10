@@ -246,7 +246,7 @@ export class WorkerService {
     this.metricsService = new MetricsService(this.dbManager, this.sessionManager, this.startTime);
     this.server.registerRoutes(new MetricsRoutes(this.metricsService));
 
-    this.vexorRoutes = new VexorRoutes();
+    this.vexorRoutes = new VexorRoutes(this.dbManager);
     this.server.registerRoutes(this.vexorRoutes);
 
     startRetentionScheduler(this.dbManager);
@@ -262,6 +262,10 @@ export class WorkerService {
 
     await this.server.listen(port, bind);
     logger.info("SYSTEM", "Worker started", { bind, host, port, pid: process.pid });
+
+    const projectRoot = process.env.CLAUDE_PROJECT_ROOT || process.cwd();
+    const projectName = path.basename(projectRoot);
+    this.dbManager.getSessionStore().upsertProjectRoot(projectName, projectRoot);
 
     this.initializeBackground().catch((error) => {
       logger.error("SYSTEM", "Background initialization failed", {}, error as Error);

@@ -18,6 +18,7 @@ describe("Dashboard project filtering", () => {
     const stats = {
       observations: 10,
       summaries: 5,
+      sessions: 8,
       lastObservationAt: "2m ago",
       projects: 3,
     };
