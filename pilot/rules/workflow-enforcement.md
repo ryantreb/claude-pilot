@@ -319,6 +319,19 @@ Worktree isolation is controlled by the `Worktree:` field in the plan header (de
 - If the user discards changes, the worktree is removed without merging
 - Plans missing the `Worktree:` field default to `Yes` for backward compatibility
 
+**Worktree CLI commands** (see `pilot-cli.md` for full reference with JSON output formats):
+
+```bash
+pilot worktree detect --json <slug>   # Check if worktree exists
+pilot worktree create --json <slug>   # Create AND register with session
+pilot worktree diff --json <slug>     # List changed files
+pilot worktree sync --json <slug>     # Squash merge to base branch
+pilot worktree cleanup --json <slug>  # Remove worktree and branch
+pilot worktree status --json          # Show active worktree info
+```
+
+**Dirty working tree:** If `create` fails with `"error": "dirty"`, ask the user via `AskUserQuestion` whether to commit changes, stash them, or skip worktree isolation. See spec-implement Step 2.1b for the full handling flow.
+
 ## Task Completion Tracking
 
 **Update the plan file after EACH task:**

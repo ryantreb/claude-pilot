@@ -96,38 +96,40 @@ spec-implement → spec-verify → issues found → spec-implement → spec-veri
 2. **Check for existing worktree** (continuation session or verify→implement feedback loop):
 
    ```bash
-   # Use the worktree module to detect an existing worktree
-   uv run python -c "
-   from launcher.worktree import detect_worktree
-   from pathlib import Path
-   info = detect_worktree(Path('<project_root>'), '<plan_slug>')
-   if info: print(f'FOUND:{info.path}:{info.branch}:{info.base_branch}')
-   else: print('NONE')
-   "
+   ~/.pilot/bin/pilot worktree detect --json <plan_slug>
+   # Returns: {"found": true, "path": "...", "branch": "...", "base_branch": "..."} or {"found": false}
    ```
 
-3. **If worktree exists:** Resume it — set CWD to the worktree path via wrapper pipe command:
+3. **If worktree exists** (`"found": true`): Resume it — `cd` to the `path` from the JSON output for all subsequent commands.
+
+4. **If no worktree exists** (`"found": false`): Create one:
 
    ```bash
-   ~/.pilot/bin/pilot pipe set-worktree <worktree_path>
+   ~/.pilot/bin/pilot worktree create --json <plan_slug>
+   # Returns: {"path": "...", "branch": "spec/<slug>", "base_branch": "main"}
    ```
 
-   Then `cd` to the worktree path for all subsequent commands.
+   Then `cd` to the `path` from the JSON output for all subsequent commands.
 
-4. **If no worktree exists:** Create one:
+5. **If creation fails due to dirty working tree** (JSON contains `"error": "dirty"`):
 
-   ```bash
-   uv run python -c "
-   from launcher.worktree import create_worktree
-   from pathlib import Path
-   info = create_worktree(Path('<project_root>'), '<plan_slug>')
-   print(f'CREATED:{info.path}:{info.branch}:{info.base_branch}')
-   "
+   The worktree cannot be created with uncommitted changes. Show the user the changed files from the error detail, then ask:
+
+   ```
+   AskUserQuestion:
+     question: "Worktree creation requires a clean working tree. How should we handle your uncommitted changes?"
+     header: "Dirty tree"
+     options:
+       - "Commit changes" (Recommended) — Commit current changes before creating the worktree
+       - "Stash changes" — Stash changes (restore later with `git stash pop`)
+       - "Skip worktree" — Work directly on the current branch instead (no isolation)
    ```
 
-   Then set CWD via wrapper pipe command and `cd` to the worktree path.
+   **If "Commit changes":** Run `git add` for the changed files, commit with an appropriate message, then retry `pilot worktree create`.
+   **If "Stash changes":** Run `git stash push -m "auto-stash before spec worktree"`, then retry `pilot worktree create`.
+   **If "Skip worktree":** Continue without worktree isolation — implementation happens on the current branch. Log a note to the user.
 
-5. **If creation fails due to dirty working tree:** Report to user and ask them to stash or commit changes first. Do NOT proceed with implementation until the worktree is created.
+   Do NOT proceed with worktree creation until the working tree is clean or the user chooses to skip.
 
 6. **If creation fails due to old git version** (error contains "git >= 2.15 required"): Log a warning and continue without worktree isolation. Implementation will happen directly on the current branch. This is a graceful fallback for systems with older git versions.
 

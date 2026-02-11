@@ -399,41 +399,26 @@ Run the test suite and type checker one final time to catch any regressions from
 
 This is the THIRD user interaction point in the `/spec` workflow (first is worktree choice, second is plan approval).
 
-1. **Check for active worktree:**
+1. **Extract plan slug** from the plan file path:
+   - `docs/plans/2026-02-09-add-auth.md` → plan_slug = `add-auth` (strip date prefix and `.md`)
+
+2. **Check for active worktree:**
 
    ```bash
-   uv run python -c "
-   from launcher.worktree import detect_worktree
-   from pathlib import Path
-   import re
-   plan_path = '<plan-path>'
-   slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', Path(plan_path).stem)
-   info = detect_worktree(Path('<project_root>'), slug)
-   if info: print(f'ACTIVE:{info.path}:{info.branch}:{info.base_branch}')
-   else: print('NONE')
-   "
+   ~/.pilot/bin/pilot worktree detect --json <plan_slug>
+   # Returns: {"found": true, "path": "...", "branch": "...", "base_branch": "..."} or {"found": false}
    ```
 
-2. **If no worktree is active:** Skip to Step 3.12 (this is a non-worktree spec run or worktree was already synced).
+3. **If no worktree is active** (`"found": false`): Skip to Step 3.12 (this is a non-worktree spec run or worktree was already synced).
 
-3. **Show diff summary:**
+4. **Show diff summary:**
 
    ```bash
-   uv run python -c "
-   from launcher.worktree import detect_worktree, list_worktree_changes
-   from pathlib import Path
-   import re
-   plan_path = '<plan-path>'
-   slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', Path(plan_path).stem)
-   info = detect_worktree(Path('<project_root>'), slug)
-   if info:
-       changes = list_worktree_changes(info, Path('<project_root>'))
-       for c in changes: print(f'{c.status}\t{c.path}')
-       print(f'---\nTotal: {len(changes)} files changed')
-   "
+   ~/.pilot/bin/pilot worktree diff --json <plan_slug>
+   # Returns JSON with changed files list
    ```
 
-4. **Ask user for sync decision:**
+5. **Ask user for sync decision:**
 
    ```
    AskUserQuestion:
@@ -444,28 +429,21 @@ This is the THIRD user interaction point in the `/spec` workflow (first is workt
        - "Discard all changes" — Remove worktree and branch without merging
    ```
 
-5. **Handle user choice:**
+6. **Handle user choice:**
 
    **If "Yes, squash merge":**
 
    ```bash
-   uv run python -c "
-   from launcher.worktree import detect_worktree, sync_worktree, cleanup_worktree
-   from pathlib import Path
-   import re, json
-   plan_path = '<plan-path>'
-   slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', Path(plan_path).stem)
-   info = detect_worktree(Path('<project_root>'), slug)
-   result = sync_worktree(info, Path('<project_root>'))
-   if result.success:
-       cleanup_worktree(info, Path('<project_root>'))
-       print(json.dumps({'success': True, 'files_changed': result.files_changed, 'commit_hash': result.commit_hash}))
-   else:
-       print(json.dumps({'success': False, 'error': result.error}))
-   "
+   ~/.pilot/bin/pilot worktree sync --json <plan_slug>
+   # Returns: {"success": true, "files_changed": N, "commit_hash": "..."} or {"success": false, "error": "..."}
    ```
 
-   Then clear worktree from wrapper: `~/.pilot/bin/pilot pipe clear-worktree`
+   If sync succeeds, clean up the worktree:
+
+   ```bash
+   ~/.pilot/bin/pilot worktree cleanup --json <plan_slug>
+   ```
+
    Report: "✅ Changes synced to `<base_branch>` — N files changed, commit `<hash>`"
 
    **If "No, keep worktree":**
@@ -474,19 +452,9 @@ This is the THIRD user interaction point in the `/spec` workflow (first is workt
    **If "Discard all changes":**
 
    ```bash
-   uv run python -c "
-   from launcher.worktree import detect_worktree, cleanup_worktree
-   from pathlib import Path
-   import re
-   plan_path = '<plan-path>'
-   slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', Path(plan_path).stem)
-   info = detect_worktree(Path('<project_root>'), slug)
-   cleanup_worktree(info, Path('<project_root>'))
-   print('DISCARDED')
-   "
+   ~/.pilot/bin/pilot worktree cleanup --json <plan_slug>
    ```
 
-   Then clear worktree from wrapper: `~/.pilot/bin/pilot pipe clear-worktree`
    Report: "Worktree and branch discarded."
 
 ### Step 3.12: Update Plan Status
