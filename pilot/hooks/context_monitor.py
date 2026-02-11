@@ -240,7 +240,7 @@ def _get_continuation_path() -> str:
 def _read_statusline_context_pct() -> float | None:
     """Read authoritative context percentage from statusline cache.
 
-    Returns None if cache is missing, corrupt, or stale (>60s old).
+    Returns None if cache is missing, corrupt, stale (>60s), or from a different Claude Code session.
     """
     pilot_session_id = os.environ.get("PILOT_SESSION_ID", "").strip()
     if not pilot_session_id:
@@ -253,6 +253,11 @@ def _read_statusline_context_pct() -> float | None:
         ts = data.get("ts")
         if ts is None or time.time() - ts > 60:
             return None
+        cached_session_id = data.get("session_id")
+        if cached_session_id:
+            current_session_id = get_current_session_id()
+            if current_session_id and cached_session_id != current_session_id:
+                return None
         pct = data.get("pct")
         return float(pct) if pct is not None else None
     except (json.JSONDecodeError, OSError, ValueError, TypeError):
