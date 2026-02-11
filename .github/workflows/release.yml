@@ -46,8 +46,8 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MSG"
 
-          # Check for fix: or feat: prefix
-          if echo "$COMMIT_MSG" | grep -qE "^(fix|feat):"; then
+          # Check for fix: or feat: prefix (first line or squash merge body)
+          if echo "$COMMIT_MSG" | grep -qE "(^|\* )(fix|feat):"; then
             echo "Release commit detected (fix: or feat:)"
             echo "should_run=true" >> "$GITHUB_OUTPUT"
             exit 0
