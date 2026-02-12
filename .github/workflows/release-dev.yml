@@ -287,3 +287,38 @@ jobs:
               done
 
           echo "Cleanup complete"
+
+  # Deploy website preview in parallel with other jobs (no approval needed)
+  deploy-website-preview:
+    name: Deploy Website (Preview)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install git-crypt
+        run: sudo apt-get update && sudo apt-get install -y git-crypt
+
+      - name: Unlock repository
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+        run: bash .github/workflows/scripts/setup-git-crypt.sh
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel (Preview)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_jAsHrk71vRyWK6bCTYGJyp0q
+          VERCEL_PROJECT_ID: prj_TXccrJI83HyNvQUZxqStUFgus9NB
+        run: |
+          DEPLOY_URL=$(vercel deploy --token=$VERCEL_TOKEN)
+          echo "Preview deployed to: $DEPLOY_URL"
