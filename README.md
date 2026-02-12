@@ -263,6 +263,7 @@ The `pilot` binary (`~/.pilot/bin/pilot`) manages sessions, worktrees, licensing
 | `pilot send-clear <plan.md>`          | Trigger Endless Mode continuation with plan context              |
 | `pilot send-clear --general`          | Trigger continuation without a plan                              |
 | `pilot register-plan <path> <status>` | Associate a plan file with the current session                   |
+| `pilot sessions [--json]`             | Show count of active Pilot sessions                              |
 
 </details>
 
