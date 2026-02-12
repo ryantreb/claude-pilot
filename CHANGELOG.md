@@ -2,6 +2,13 @@
 
 All notable changes to Claude Pilot will be documented in this file.
 
+## [6.4.4] - 2026-02-12
+
+### Bug Fixes
+
+- Fix npx package cache detection for versioned packages like open-websearch@latest
+- Pre-cache npx MCP servers during install and reorder post-install steps
+
 ## [6.4.3] - 2026-02-12
 
 ### Bug Fixes
