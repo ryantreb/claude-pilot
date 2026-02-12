@@ -5,7 +5,7 @@ import {
   Infinity as InfinityIcon,
   Shield,
   Search,
-  Cpu,
+
   GitBranch,
 } from "lucide-react";
 import { useInView } from "@/hooks/use-in-view";
@@ -64,15 +64,6 @@ const agents = [
     bgColor: "bg-rose-400/10",
     borderColor: "border-rose-400/30",
     desc: "Implements each task with strict TDD in the main context. Full access to quality hooks, rules, and project context.",
-  },
-  {
-    name: "STANDARDS",
-    role: "Knowledge Base",
-    icon: Cpu,
-    color: "text-cyan-400",
-    bgColor: "bg-cyan-400/10",
-    borderColor: "border-cyan-400/30",
-    desc: "13 coding standards activated conditionally by file type — API design, accessibility, components, responsive design, testing, and more.",
   },
   {
     name: "WORKTREE",

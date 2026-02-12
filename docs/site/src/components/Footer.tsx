@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Github, Linkedin, Mail, ScrollText, Scale } from "lucide-react";
+import { Github, Linkedin, Mail, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import { navigateToSection } from "@/utils/navigateToSection";
@@ -38,34 +38,10 @@ const Footer = () => {
               </li>
               <li>
                 <button
-                  onClick={() => navigateToSection('problem', location.pathname, navigate)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  The Problem
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateToSection('workflow', location.pathname, navigate)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Usage
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => navigateToSection('features', location.pathname, navigate)}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  What's Inside
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateToSection('deep-dive', location.pathname, navigate)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Under the Hood
+                  Features
                 </button>
               </li>
               <li>
@@ -101,17 +77,6 @@ const Footer = () => {
                 >
                   <ScrollText className="h-3.5 w-3.5" />
                   Changelog
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/maxritter/claude-pilot/blob/main/LICENSE"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
-                >
-                  <Scale className="h-3.5 w-3.5" />
-                  License
                 </a>
               </li>
             </ul>
