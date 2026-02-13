@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardBody, Badge, Icon, Button, Spinner, Progress, Tooltip } from '../../components/ui';
 import { SpecContent } from './SpecContent';
 import { WorktreePanel } from './WorktreePanel';
@@ -79,6 +79,15 @@ export function SpecView() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const projectParam = selectedProject ? `?project=${encodeURIComponent(selectedProject)}` : '';
+  const lastProjectRef = useRef(selectedProject);
+
+  if (lastProjectRef.current !== selectedProject) {
+    lastProjectRef.current = selectedProject;
+    setSelectedSpec(null);
+    setContent(null);
+    setError(null);
+    setIsLoading(true);
+  }
 
   const loadSpecs = useCallback(async () => {
     try {

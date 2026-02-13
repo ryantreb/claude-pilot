@@ -21,8 +21,10 @@ reviews:
       - "DRAFT"
 
   path_filters:
-    # Exclude git-crypted directory from reviews
+    # Exclude git-crypt encrypted directories from reviews (see .gitattributes)
+    - "!launcher/**"
     - "!pilot/**"
+    - "!docs/site/api/**"
 
   path_instructions:
     # Test files - brief review focused on coverage

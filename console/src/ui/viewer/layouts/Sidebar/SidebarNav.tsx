@@ -11,6 +11,7 @@ const navItems = [
   { icon: 'lucide:scroll', label: 'Specification', href: '#/spec' },
   { icon: 'lucide:brain', label: 'Memories', href: '#/memories' },
   { icon: 'lucide:history', label: 'Sessions', href: '#/sessions' },
+  { icon: 'lucide:bar-chart-3', label: 'Usage', href: '#/usage' },
   { icon: 'lucide:search', label: 'Search', href: '#/search' },
 ];
 

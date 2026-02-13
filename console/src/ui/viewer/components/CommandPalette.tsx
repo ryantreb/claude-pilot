@@ -60,6 +60,14 @@ export function CommandPalette({
         action: () => onNavigate('/search'),
       },
       {
+        id: 'nav-usage',
+        label: 'Go to Usage',
+        shortcut: 'G U',
+        category: 'navigation',
+        icon: 'lucide:bar-chart-3',
+        action: () => onNavigate('/usage'),
+      },
+      {
         id: 'action-theme',
         label: 'Toggle Theme',
         shortcut: getShortcutDisplay(SHORTCUTS.TOGGLE_THEME),

@@ -65,6 +65,7 @@ import { AuthRoutes } from "./worker/http/routes/AuthRoutes.js";
 import { PlanRoutes } from "./worker/http/routes/PlanRoutes.js";
 import { WorktreeRoutes } from "./worker/http/routes/WorktreeRoutes.js";
 import { VexorRoutes } from "./worker/http/routes/VexorRoutes.js";
+import { UsageRoutes } from "./worker/http/routes/UsageRoutes.js";
 import { LicenseRoutes } from "./worker/http/routes/LicenseRoutes.js";
 import { VaultRoutes } from "./worker/http/routes/VaultRoutes.js";
 import { MetricsService } from "./worker/MetricsService.js";
@@ -251,6 +252,7 @@ export class WorkerService {
     this.vexorRoutes = new VexorRoutes(this.dbManager);
     this.server.registerRoutes(this.vexorRoutes);
 
+    this.server.registerRoutes(new UsageRoutes());
     this.server.registerRoutes(new LicenseRoutes());
     this.server.registerRoutes(new VaultRoutes());
 
