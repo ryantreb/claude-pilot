@@ -203,15 +203,15 @@ Options:
 
 ```bash
 # Project-scoped (recommended) — installs to .claude/ in the project
-sx add .claude/skills/<name> --yes --type skill --name "<name>" --no-install --scope-repo <repo-url>
-sx add .claude/rules/<name>.md --yes --type rule --name "<name>" --no-install --scope-repo <repo-url>
-sx add .claude/commands/<name>.md --yes --type command --name "<name>" --no-install --scope-repo <repo-url>
+sx add .claude/skills/<name> --yes --type skill --name "<name>" --scope-repo <repo-url>
+sx add .claude/rules/<name>.md --yes --type rule --name "<name>" --scope-repo <repo-url>
+sx add .claude/commands/<name>.md --yes --type command --name "<name>" --scope-repo <repo-url>
 
 # Global — installs to ~/.claude/ everywhere
-sx add .claude/skills/<name> --yes --type skill --name "<name>" --no-install --scope-global
+sx add .claude/skills/<name> --yes --type skill --name "<name>" --scope-global
 ```
 
-**Note:** Always use `--no-install` when pushing your own assets — they're already installed locally.
+**Warning:** Do NOT use `--no-install` — it skips updating the vault lockfile, making assets invisible to `sx install` for teammates.
 
 ### Step P.6: Verify Push
 

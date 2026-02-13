@@ -24,11 +24,11 @@ sx install --repair --target /path     # Install for a project you're not inside
 
 # Push assets to team (project-scoped — recommended)
 REPO=$(git remote get-url origin)
-sx add .claude/skills/my-skill --yes --type skill --name "my-skill" --no-install --scope-repo $REPO
-sx add .claude/rules/my-rule.md --yes --type rule --name "my-rule" --no-install --scope-repo $REPO
+sx add .claude/skills/my-skill --yes --type skill --name "my-skill" --scope-repo $REPO
+sx add .claude/rules/my-rule.md --yes --type rule --name "my-rule" --scope-repo $REPO
 
 # Push assets globally (all repos)
-sx add .claude/rules/my-rule.md --yes --type rule --name "my-rule" --no-install --scope-global
+sx add .claude/rules/my-rule.md --yes --type rule --name "my-rule" --scope-global
 
 # Browse
 sx vault show <asset-name>             # Show asset details and versions
@@ -74,7 +74,6 @@ To change an existing asset's scope, run `sx add <name>` again to reconfigure in
 - Vault auto-increments versions: v1 -> v2 -> v3 on each `sx add`
 - `sx vault list` shows latest version and total version count
 - `sx vault show <name>` shows all versions
-- `--no-install` flag prevents re-installing locally when you're the author
 
 ### Setup (First Time)
 
@@ -94,7 +93,7 @@ sx vault list
 
 ### Tips
 
-- Always use `--no-install` when pushing your own assets (they're already local)
+- Do NOT use `--no-install` when pushing — it skips the vault lockfile update, making assets invisible to teammates
 - Use `--name` to control the asset name in the vault
 - Always use `sx install --repair --target .` to install assets to the current project
 - Use `--target /path` to install for a project from outside it (CI pipelines, Docker)

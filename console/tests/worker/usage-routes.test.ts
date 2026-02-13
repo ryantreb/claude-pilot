@@ -1,16 +1,11 @@
 /**
  * Tests for UsageRoutes
  *
- * Tests the /api/usage/* endpoints with mocked execFileSync calls.
- * Covers: daily/monthly/models endpoints, caching, date validation, missing ccusage.
+ * Tests the /api/usage/* endpoints with mocked runCcusage calls.
+ * Covers: daily/monthly/models endpoints, caching, date validation,
+ * missing ccusage, concurrency, and deduplication.
  */
-import { describe, it, expect, mock, beforeEach, afterEach } from "bun:test";
-
-const mockExecFileSync = mock(() => "{}");
-
-mock.module("child_process", () => ({
-  execFileSync: mockExecFileSync,
-}));
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 
 const originalBunWhich = Bun.which.bind(Bun);
 let mockCcusagePath: string | null = "/usr/local/bin/ccusage";
@@ -36,7 +31,7 @@ function createMockReq(query: Record<string, string> = {}): any {
   return { query };
 }
 
-const SAMPLE_DAILY = JSON.stringify({
+const SAMPLE_DAILY_PARSED = {
   daily: [
     {
       date: "2026-02-01",
@@ -52,9 +47,9 @@ const SAMPLE_DAILY = JSON.stringify({
       ],
     },
   ],
-});
+};
 
-const SAMPLE_MONTHLY = JSON.stringify({
+const SAMPLE_MONTHLY_PARSED = {
   monthly: [
     {
       month: "2026-02",
@@ -71,13 +66,24 @@ const SAMPLE_MONTHLY = JSON.stringify({
       ],
     },
   ],
-});
+};
+
+/** Helper: mock runCcusage on a routes instance to return parsed data based on args */
+function mockRunCcusage(routes: UsageRoutes, overrides?: { daily?: unknown; monthly?: unknown }) {
+  const daily = overrides?.daily ?? SAMPLE_DAILY_PARSED;
+  const monthly = overrides?.monthly ?? SAMPLE_MONTHLY_PARSED;
+  let callCount = 0;
+  (routes as any).runCcusage = async (args: string[]) => {
+    callCount++;
+    return args[0] === "daily" ? daily : monthly;
+  };
+  return { getCallCount: () => callCount };
+}
 
 describe("UsageRoutes", () => {
   let routes: UsageRoutes;
 
   beforeEach(() => {
-    mockExecFileSync.mockReset();
     mockCcusagePath = "/usr/local/bin/ccusage";
     Bun.which = ((cmd: string) => (cmd === "ccusage" ? mockCcusagePath : originalBunWhich(cmd))) as typeof Bun.which;
     routes = new UsageRoutes();
@@ -104,7 +110,7 @@ describe("UsageRoutes", () => {
 
   describe("GET /api/usage/daily", () => {
     it("should return daily usage data", async () => {
-      mockExecFileSync.mockReturnValue(SAMPLE_DAILY);
+      mockRunCcusage(routes);
       const req = createMockReq({ since: "20260201" });
       const res = createMockRes();
 
@@ -137,20 +143,20 @@ describe("UsageRoutes", () => {
     });
 
     it("should use default 30-day window when no since provided", async () => {
-      mockExecFileSync.mockReturnValue(SAMPLE_DAILY);
+      const mock = mockRunCcusage(routes);
       const req = createMockReq({});
       const res = createMockRes();
 
       await routes.handleDaily(req, res);
 
       expect(res.body.available).toBe(true);
-      expect(mockExecFileSync).toHaveBeenCalled();
+      expect(mock.getCallCount()).toBe(1);
     });
   });
 
   describe("GET /api/usage/monthly", () => {
     it("should return monthly usage data", async () => {
-      mockExecFileSync.mockReturnValue(SAMPLE_MONTHLY);
+      mockRunCcusage(routes);
       const req = createMockReq();
       const res = createMockRes();
 
@@ -165,7 +171,7 @@ describe("UsageRoutes", () => {
 
   describe("GET /api/usage/models", () => {
     it("should aggregate model data from monthly endpoint", async () => {
-      mockExecFileSync.mockReturnValue(SAMPLE_MONTHLY);
+      mockRunCcusage(routes);
       const req = createMockReq();
       const res = createMockRes();
 
@@ -186,7 +192,7 @@ describe("UsageRoutes", () => {
 
   describe("caching", () => {
     it("should cache results for 5 minutes", async () => {
-      mockExecFileSync.mockReturnValue(SAMPLE_DAILY);
+      const mock = mockRunCcusage(routes);
       const req = createMockReq({ since: "20260201" });
       const res1 = createMockRes();
       const res2 = createMockRes();
@@ -194,7 +200,7 @@ describe("UsageRoutes", () => {
       await routes.handleDaily(req, res1);
       await routes.handleDaily(req, res2);
 
-      expect(mockExecFileSync).toHaveBeenCalledTimes(1);
+      expect(mock.getCallCount()).toBe(1);
       expect(res2.body.available).toBe(true);
     });
   });
@@ -215,8 +221,12 @@ describe("UsageRoutes", () => {
 
   describe("error recovery", () => {
     it("should allow retry after ccusage command fails", async () => {
-      mockExecFileSync.mockImplementationOnce(() => { throw new Error("timeout"); });
-      mockExecFileSync.mockReturnValueOnce(SAMPLE_DAILY);
+      let callNum = 0;
+      (routes as any).runCcusage = async () => {
+        callNum++;
+        if (callNum === 1) throw new Error("timeout");
+        return SAMPLE_DAILY_PARSED;
+      };
 
       const req = createMockReq({ since: "20260201" });
       const res1 = createMockRes();
@@ -234,9 +244,59 @@ describe("UsageRoutes", () => {
     });
   });
 
+  describe("concurrent requests", () => {
+    it("should not block parallel daily and monthly requests", async () => {
+      const callOrder: string[] = [];
+
+      (routes as any).runCcusage = async (args: string[]) => {
+        const type = args[0];
+        callOrder.push(`start-${type}`);
+        await new Promise((r) => setTimeout(r, 50));
+        callOrder.push(`end-${type}`);
+        if (type === "daily") return SAMPLE_DAILY_PARSED;
+        return SAMPLE_MONTHLY_PARSED;
+      };
+
+      const req = createMockReq({ since: "20260201" });
+      const dailyRes = createMockRes();
+      const monthlyRes = createMockRes();
+
+      await Promise.all([
+        routes.handleDaily(req, dailyRes),
+        routes.handleMonthly(createMockReq(), monthlyRes),
+      ]);
+
+      expect(dailyRes.body.available).toBe(true);
+      expect(monthlyRes.body.available).toBe(true);
+      expect(callOrder[0]).toBe("start-daily");
+      expect(callOrder[1]).toBe("start-monthly");
+    });
+
+    it("should deduplicate concurrent monthly and models requests", async () => {
+      let callCount = 0;
+      (routes as any).runCcusage = async () => {
+        callCount++;
+        await new Promise((r) => setTimeout(r, 50));
+        return SAMPLE_MONTHLY_PARSED;
+      };
+
+      const monthlyRes = createMockRes();
+      const modelsRes = createMockRes();
+
+      await Promise.all([
+        routes.handleMonthly(createMockReq(), monthlyRes),
+        routes.handleModels(createMockReq(), modelsRes),
+      ]);
+
+      expect(callCount).toBe(1);
+      expect(monthlyRes.body.available).toBe(true);
+      expect(modelsRes.body.available).toBe(true);
+    });
+  });
+
   describe("date validation", () => {
     it("should accept valid YYYYMMDD dates", async () => {
-      mockExecFileSync.mockReturnValue(SAMPLE_DAILY);
+      mockRunCcusage(routes);
       const req = createMockReq({ since: "20260101", until: "20260131" });
       const res = createMockRes();
 

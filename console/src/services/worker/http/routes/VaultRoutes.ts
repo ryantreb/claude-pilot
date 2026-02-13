@@ -123,12 +123,14 @@ export class VaultRoutes extends BaseRouteHandler {
       return;
     }
 
+    const projectRoot = process.env.CLAUDE_PROJECT_ROOT || process.cwd();
+
     this._isInstalling = true;
     this.statusCache = null;
     res.json({ started: true });
 
     try {
-      await this.runSxCommand([sxPath, "install", "--repair"], INSTALL_TIMEOUT_MS);
+      await this.runSxCommand([sxPath, "install", "--repair", "--target", projectRoot], INSTALL_TIMEOUT_MS);
       logger.info("HTTP", "Vault install --repair completed");
     } catch (error) {
       logger.error("HTTP", "Vault install failed", {}, error as Error);

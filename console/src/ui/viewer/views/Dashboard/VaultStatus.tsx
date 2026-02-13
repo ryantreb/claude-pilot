@@ -28,15 +28,6 @@ interface VaultStatusProps {
   isLoading?: boolean;
 }
 
-const TYPE_ICONS: Record<string, string> = {
-  skill: 'lucide:cpu',
-  rule: 'lucide:scroll-text',
-  command: 'lucide:terminal',
-  agent: 'lucide:bot',
-  hook: 'lucide:webhook',
-  mcp: 'lucide:plug',
-};
-
 function formatVaultUrl(url: string): string {
   try {
     const u = new URL(url);
@@ -142,29 +133,6 @@ export function VaultStatus(props: VaultStatusProps) {
             <span className="text-base-content/70">In vault:</span>
             <span className="font-semibold">{catalog.length}</span>
           </div>
-
-          {/* Installed assets list */}
-          {assets.length > 0 && (
-            <div className="pt-2 space-y-1.5">
-              {assets.map((asset) => (
-                <div key={`${asset.scope}-${asset.name}`} className="flex items-center gap-2 text-xs">
-                  <Icon
-                    icon={TYPE_ICONS[asset.type] || 'lucide:file'}
-                    size={14}
-                    className="text-primary/70"
-                  />
-                  <span className="font-mono font-medium">{asset.name}</span>
-                  <span className="text-base-content/40">v{asset.version}</span>
-                  <Badge
-                    variant={asset.scope === 'Global' ? 'ghost' : 'info'}
-                    size="xs"
-                  >
-                    {asset.scope === 'Global' ? 'global' : 'project'}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </CardBody>
     </Card>

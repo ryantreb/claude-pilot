@@ -297,6 +297,34 @@ describe("VaultRoutes", () => {
       expect((routes as any).statusCache).toBeNull();
     });
 
+    it("passes --target with project root to install command", async () => {
+      const routes = new VaultRoutes();
+      (routes as any).resolveSxBinary = () => "/usr/local/bin/sx";
+      let capturedArgs: string[] = [];
+      (routes as any).runSxCommand = async (args: string[]) => { capturedArgs = args; return ""; };
+
+      let installHandler: any;
+      const fakeApp = {
+        get: () => {},
+        post: (_path: string, handler: any) => { installHandler = handler; },
+      };
+      routes.setupRoutes(fakeApp as any);
+
+      const fakeRes = {
+        status: () => fakeRes,
+        json: () => {},
+      };
+
+      await installHandler({}, fakeRes);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(capturedArgs).toContain("--target");
+      expect(capturedArgs).toContain("--repair");
+      const targetIdx = capturedArgs.indexOf("--target");
+      expect(targetIdx).toBeGreaterThan(-1);
+      expect(capturedArgs[targetIdx + 1]).toBeDefined();
+    });
+
     it("resets isInstalling even when install fails", async () => {
       const routes = new VaultRoutes();
       (routes as any).resolveSxBinary = () => "/usr/local/bin/sx";

@@ -9,8 +9,43 @@ export function UsageView() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg" />
+      <div className="space-y-8">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-2xl font-bold">Usage</h1>
+          <span className="text-xs text-base-content/40 flex items-center gap-2">
+            <span className="loading loading-spinner loading-xs" />
+            Loading usage data...
+          </span>
+        </div>
+
+        {/* Skeleton summary cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="stats shadow bg-base-200 animate-pulse">
+              <div className="stat">
+                <div className="h-3 bg-base-300 rounded w-20 mb-2" />
+                <div className="h-8 bg-base-300 rounded w-24 mb-1" />
+                <div className="h-3 bg-base-300 rounded w-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton chart cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="card bg-base-200 lg:col-span-2 animate-pulse">
+            <div className="card-body">
+              <div className="h-4 bg-base-300 rounded w-48 mb-4" />
+              <div className="h-48 bg-base-300 rounded" />
+            </div>
+          </div>
+          <div className="card bg-base-200 animate-pulse">
+            <div className="card-body">
+              <div className="h-4 bg-base-300 rounded w-40 mb-4" />
+              <div className="h-48 bg-base-300 rounded" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

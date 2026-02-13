@@ -6,7 +6,6 @@
  */
 
 import express, { type Request, type Response } from "express";
-import { execFileSync } from "child_process";
 import { BaseRouteHandler } from "../BaseRouteHandler.js";
 
 const DATE_REGEX = /^\d{8}$/;
@@ -117,7 +116,7 @@ export class UsageRoutes extends BaseRouteHandler {
     res.json({ available: true, models });
   }
 
-  private async getCachedOrExecute(cacheKey: string, execute: () => unknown): Promise<unknown> {
+  private async getCachedOrExecute(cacheKey: string, execute: () => Promise<unknown>): Promise<unknown> {
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return cached.data;
@@ -128,8 +127,7 @@ export class UsageRoutes extends BaseRouteHandler {
       return pending;
     }
 
-    const promise = Promise.resolve().then(() => {
-      const data = execute();
+    const promise = execute().then((data) => {
       this.cache.set(cacheKey, { data, timestamp: Date.now() });
       return data;
     }).finally(() => {
@@ -140,17 +138,30 @@ export class UsageRoutes extends BaseRouteHandler {
     return promise;
   }
 
-  private runCcusage(args: string[]): unknown {
+  private async runCcusage(args: string[]): Promise<unknown> {
+    const proc = Bun.spawn(["ccusage", ...args], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+
+    const timer = setTimeout(() => {
+      try { proc.kill("SIGTERM"); } catch {}
+    }, 30_000);
+
     try {
-      const output = execFileSync("ccusage", args, {
-        encoding: "utf-8",
-        timeout: 30_000,
-        maxBuffer: 10 * 1024 * 1024,
-      });
-      return JSON.parse(output);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      throw new Error(`ccusage command failed: ${message}`);
+      const [stdout, stderr] = await Promise.all([
+        new Response(proc.stdout).text(),
+        new Response(proc.stderr).text(),
+      ]);
+      const exitCode = await proc.exited;
+
+      if (exitCode !== 0) {
+        throw new Error(`ccusage command failed: ${stderr.slice(0, 200)}`);
+      }
+
+      return JSON.parse(stdout);
+    } finally {
+      clearTimeout(timer);
     }
   }
 
