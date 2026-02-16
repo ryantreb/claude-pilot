@@ -7,7 +7,7 @@ const testimonials = [
     role: "Senior Developer",
   },
   {
-    quote: "Endless Mode is a game-changer. I used to lose context halfway through complex refactors. Now it just hands off cleanly and picks up exactly where it left off.",
+    quote: "The persistent memory is what sold me. I can pick up a project after a week and Claude already knows my architecture decisions, the bugs we fixed, and why we chose certain patterns. No more re-explaining everything.",
     role: "Full-Stack Engineer",
   },
   {

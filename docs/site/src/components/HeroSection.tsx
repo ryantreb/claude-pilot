@@ -103,7 +103,7 @@ const HeroSection = () => {
             Persistent Memory
           </Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">
-            Endless Mode
+            Quality Hooks
           </Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">
             Team Vault

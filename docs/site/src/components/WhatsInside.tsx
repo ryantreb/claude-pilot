@@ -21,12 +21,6 @@ interface InsideItem {
 
 const insideItems: InsideItem[] = [
   {
-    icon: InfinityIcon,
-    title: "Endless Mode",
-    description: "Never lose context mid-task",
-    summary: "Context monitor tracks usage and automatically hands off to a new session at critical thresholds. State is preserved, memory persists, and multiple sessions run in parallel without interference.",
-  },
-  {
     icon: Workflow,
     title: "Spec-Driven Development",
     description: "Plan → Approve → Implement → Verify",
@@ -43,6 +37,12 @@ const insideItems: InsideItem[] = [
     title: "Rules, Commands & Standards",
     description: "Rules · Commands · Standards",
     summary: "Production-tested best practices loaded every session. Coding standards activate by file type. Structured workflows via /spec, /sync, /vault, /learn. Custom rules survive updates.",
+  },
+  {
+    icon: InfinityIcon,
+    title: "Persistent Memory",
+    description: "Context carries across sessions",
+    summary: "Every decision, discovery, and debugging insight is captured to Pilot Console. Pick up any project after days or weeks — Claude already knows your architecture, patterns, and past work.",
   },
   {
     icon: Plug2,
@@ -66,7 +66,7 @@ const insideItems: InsideItem[] = [
     icon: GitBranch,
     title: "Isolated Workspaces",
     description: "Safe experimentation, clean git history",
-    summary: "Spec implementation runs in isolated git worktrees. Review changes, squash merge when verified, or discard without touching your main branch. Worktree state survives session restarts.",
+    summary: "Spec implementation runs in isolated git worktrees. Review changes, squash merge when verified, or discard without touching your main branch. Worktree state survives across auto-compaction cycles.",
   },
 ];
 

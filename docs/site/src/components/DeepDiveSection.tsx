@@ -21,9 +21,10 @@ import { useInView } from "@/hooks/use-in-view";
 const hooksPipeline = [
   {
     trigger: "SessionStart",
-    description: "On startup, clear, or compact",
+    description: "On startup, clear, or after compaction",
     hooks: [
       "Load persistent memory from Pilot Console",
+      "Restore plan state after compaction (post_compact_restore.py)",
       "Initialize session tracking (async)",
     ],
     color: "text-sky-400",
@@ -31,93 +32,99 @@ const hooksPipeline = [
     borderColor: "border-sky-400/30",
   },
   {
-    trigger: "PostToolUse",
-    description: "After every Write / Edit operation",
-    hooks: [
-      "File checker: auto-format, lint, type-check (Python, TypeScript, Go)",
-      "TDD enforcer: warns if no failing test exists",
-      "Memory observation: captures development context",
-      "Context monitor: automatic session handoff",
-    ],
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-    borderColor: "border-primary/30",
-  },
-  {
     trigger: "PreToolUse",
     description: "Before search, web, or task tools",
     hooks: [
-      "Tool redirect: routes tools to correct context",
+      "Block WebSearch/WebFetch — redirect to MCP alternatives",
+      "Block EnterPlanMode/ExitPlanMode — project uses /spec",
+      "Hint vexor for semantic Grep patterns",
     ],
     color: "text-amber-400",
     bgColor: "bg-amber-400/10",
     borderColor: "border-amber-400/30",
   },
   {
+    trigger: "PostToolUse",
+    description: "After every Write / Edit / MultiEdit",
+    hooks: [
+      "File checker: auto-format, lint, type-check (Python, TypeScript, Go)",
+      "TDD enforcer: warns if no failing test exists",
+      "Context monitor: warns at 65%+, caution at 75%+",
+      "Memory observation: captures development context (async)",
+    ],
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+    borderColor: "border-primary/30",
+  },
+  {
+    trigger: "PreCompact",
+    description: "Before auto-compaction fires at ~83%",
+    hooks: [
+      "Capture active plan, task list, and key context to memory",
+    ],
+    color: "text-violet-400",
+    bgColor: "bg-violet-400/10",
+    borderColor: "border-violet-400/30",
+  },
+  {
     trigger: "Stop",
     description: "When Claude tries to finish",
     hooks: [
       "Spec stop guard: blocks if verification incomplete",
-      "Session summary: saves observations to memory",
+      "Session summary: saves observations to memory (async)",
     ],
     color: "text-rose-400",
     bgColor: "bg-rose-400/10",
     borderColor: "border-rose-400/30",
+  },
+  {
+    trigger: "SessionEnd",
+    description: "When the session closes",
+    hooks: [
+      "Stop worker daemon if no other sessions active",
+      "Send OS notification (spec complete or session ended)",
+    ],
+    color: "text-slate-400",
+    bgColor: "bg-slate-400/10",
+    borderColor: "border-slate-400/30",
   },
 ];
 
 const rulesCategories = [
   {
     icon: Shield,
-    category: "Quality Enforcement",
-    rules: ["TDD enforcement", "Verification before completion", "Execution verification", "Workflow enforcement"],
+    category: "Core Workflow",
+    rules: ["Workflow enforcement & /spec orchestration", "TDD & test strategy", "Execution verification & completion"],
   },
   {
     icon: Brain,
-    category: "Context Management",
-    rules: ["Context continuation (Endless Mode)", "Persistent memory system", "Coding standards"],
-  },
-  {
-    icon: FileCode2,
-    category: "Language Standards",
-    rules: ["Python (uv + pytest + ruff + basedpyright)", "TypeScript (ESLint + Prettier + vtsls)", "Go (gofmt + golangci-lint + gopls)"],
+    category: "Development Practices",
+    rules: ["Project policies & debugging", "Auto-compaction & context management", "Persistent memory & online learning"],
   },
   {
     icon: Search,
-    category: "Tool Integration",
-    rules: ["Vexor semantic search", "Context7 library docs", "grep-mcp GitHub search", "Web search + fetch", "Playwright CLI (E2E)", "MCP CLI"],
+    category: "Tools",
+    rules: ["Context7 + grep-mcp + web search + GitHub CLI", "Pilot CLI + MCP-CLI + Vexor search", "Playwright CLI (E2E browser testing)"],
   },
   {
     icon: GitBranch,
-    category: "Development Workflow",
-    rules: ["Git operations", "GitHub CLI", "Systematic debugging", "Testing strategies & coverage"],
+    category: "Collaboration",
+    rules: ["Team Vault asset sharing via sx", "Custom rules, commands & skills", "Shareable across teams via Git"],
   },
   {
-    icon: BookOpen,
-    category: "Learning & Knowledge",
-    rules: ["Online learning system", "Knowledge extraction patterns"],
+    icon: Cpu,
+    category: "Language Standards",
+    rules: ["Python — uv, pytest, ruff, basedpyright", "TypeScript — npm/pnpm, Jest, ESLint, Prettier", "Go — Modules, testing, formatting, error handling"],
   },
-];
-
-const standardsList = [
-  { name: "Python", desc: "uv, pytest, ruff, basedpyright, type hints", ext: "*.py" },
-  { name: "TypeScript", desc: "npm/pnpm, Jest, ESLint, Prettier, React", ext: "*.ts, *.tsx" },
-  { name: "Go", desc: "Modules, testing, formatting, error handling", ext: "*.go" },
-  { name: "Testing", desc: "Unit, integration, mocking, coverage goals", ext: "*test*, *spec*" },
-  { name: "API Design", desc: "RESTful patterns, error handling, versioning", ext: "*route*, *api*" },
-  { name: "Data Models", desc: "Schemas, type safety, migrations, relations", ext: "*model*, *schema*" },
-  { name: "Components", desc: "Reusable patterns, props, documentation", ext: "*.tsx, *.vue" },
-  { name: "CSS / Styling", desc: "Naming, organization, responsive, performance", ext: "*.css, *.scss" },
-  { name: "Responsive Design", desc: "Mobile-first, breakpoints, touch interactions", ext: "*.css, *.tsx" },
-  { name: "Design System", desc: "Color palette, typography, spacing, consistency", ext: "*.css, *.tsx" },
-  { name: "Accessibility", desc: "WCAG, ARIA, keyboard nav, screen readers", ext: "*.tsx, *.html" },
-  { name: "DB Migrations", desc: "Schema changes, data transforms, rollbacks", ext: "*migration*" },
-  { name: "Query Optimization", desc: "Indexing, N+1 problems, performance", ext: "*query*, *dao*" },
-  { name: "Test Organization", desc: "File structure, naming, fixtures, setup", ext: "*test*, *spec*" },
+  {
+    icon: Layers,
+    category: "Architecture Standards",
+    rules: ["Frontend — Components, CSS, accessibility, responsive", "Backend — API design, data models, migrations", "Activated by file type — loaded only when needed"],
+  },
 ];
 
 const mcpServers = [
-  { icon: BookOpen, name: "Context7", desc: "Library documentation lookup — get API docs for any dependency" },
+  { icon: BookOpen, name: "lib-docs", desc: "Library documentation lookup — get API docs for any dependency" },
   { icon: Brain, name: "mem-search", desc: "Persistent memory search — recall context from past sessions" },
   { icon: Globe, name: "web-search", desc: "Web search via DuckDuckGo, Bing, and Exa" },
   { icon: Search, name: "grep-mcp", desc: "GitHub code search — find real-world usage patterns" },
@@ -128,7 +135,6 @@ const DeepDiveSection = () => {
   const [headerRef, headerInView] = useInView<HTMLDivElement>();
   const [hooksRef, hooksInView] = useInView<HTMLDivElement>();
   const [rulesRef, rulesInView] = useInView<HTMLDivElement>();
-  const [standardsRef, standardsInView] = useInView<HTMLDivElement>();
   const [mcpRef, mcpInView] = useInView<HTMLDivElement>();
   const [contextRef, contextInView] = useInView<HTMLDivElement>();
 
@@ -162,27 +168,27 @@ const DeepDiveSection = () => {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-foreground">Hooks Pipeline</h3>
-              <p className="text-sm text-muted-foreground">Hooks fire automatically at every stage of development</p>
+              <p className="text-sm text-muted-foreground">15 hooks across 6 lifecycle events — fire automatically at every stage</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {hooksPipeline.map((stage) => (
               <div
                 key={stage.trigger}
-                className={`rounded-2xl p-5 sm:p-6 border ${stage.borderColor} bg-card/30 backdrop-blur-sm`}
+                className={`rounded-2xl p-5 border ${stage.borderColor} bg-card/30 backdrop-blur-sm`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-                  <div className={`${stage.bgColor} px-3 py-1.5 rounded-lg inline-flex items-center gap-2 w-fit`}>
+                <div className="mb-3">
+                  <div className={`${stage.bgColor} px-3 py-1.5 rounded-lg inline-flex items-center gap-2 w-fit mb-2`}>
                     <Terminal className={`h-4 w-4 ${stage.color}`} />
                     <code className={`text-sm font-semibold ${stage.color}`}>{stage.trigger}</code>
                   </div>
-                  <span className="text-sm text-muted-foreground">{stage.description}</span>
+                  <p className="text-xs text-muted-foreground">{stage.description}</p>
                 </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="space-y-1.5">
                   {stage.hooks.map((hook) => (
-                    <div key={hook} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className={`h-4 w-4 ${stage.color} flex-shrink-0 mt-0.5`} />
+                    <div key={hook} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <CheckCircle2 className={`h-3.5 w-3.5 ${stage.color} flex-shrink-0 mt-0.5`} />
                       <span>{hook}</span>
                     </div>
                   ))}
@@ -202,8 +208,8 @@ const DeepDiveSection = () => {
               <Gauge className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-foreground">Context Monitor & Endless Mode</h3>
-              <p className="text-sm text-muted-foreground">Intelligent context management with automatic session continuity</p>
+              <h3 className="text-2xl font-bold text-foreground">Context Monitor & Auto-Compaction</h3>
+              <p className="text-sm text-muted-foreground">Automatic context preservation with seamless session continuity</p>
             </div>
           </div>
 
@@ -211,31 +217,31 @@ const DeepDiveSection = () => {
             <div className="rounded-2xl p-5 border border-amber-400/30 bg-card/30 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-amber-400" />
-                <span className="text-lg font-bold text-foreground">80%</span>
-                <span className="text-xs text-amber-400 font-medium">WARN</span>
+                <span className="text-lg font-bold text-foreground">65%</span>
+                <span className="text-xs text-amber-400 font-medium">INFO</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Prepare for continuation. Pilot begins saving state, wrapping up current work, and preparing handoff notes for the next session.
+                Informational notice. Auto-compaction will handle context management automatically. No action needed — work continues normally.
               </p>
             </div>
             <div className="rounded-2xl p-5 border border-orange-500/30 bg-card/30 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-orange-500" />
-                <span className="text-lg font-bold text-foreground">90%</span>
-                <span className="text-xs text-orange-500 font-medium">CRITICAL</span>
+                <span className="text-lg font-bold text-foreground">75%</span>
+                <span className="text-xs text-orange-500 font-medium">CAUTION</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Mandatory handoff. Pilot saves session state to <code className="text-primary text-xs">~/.pilot/sessions/</code>, writes a continuation file, and seamlessly picks up in a new session.
+                Auto-compaction approaching. Complete current task with full quality — no rush, no context is lost. Hooks capture state to persistent memory.
               </p>
             </div>
             <div className="rounded-2xl p-5 border border-rose-500/30 bg-card/30 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-rose-500" />
-                <span className="text-lg font-bold text-foreground">95%</span>
-                <span className="text-xs text-rose-500 font-medium">URGENT</span>
+                <span className="text-lg font-bold text-foreground">~83%</span>
+                <span className="text-xs text-rose-500 font-medium">AUTO-COMPACT</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Emergency handoff. All progress is preserved — no work lost. Multiple Pilot sessions can run in parallel on the same project without interference.
+                Auto-compaction fires. All progress preserved — recent files rehydrated, task list restored, plan state re-injected. Work resumes seamlessly.
               </p>
             </div>
           </div>
@@ -251,8 +257,8 @@ const DeepDiveSection = () => {
               <Layers className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-foreground">Built-in Rules</h3>
-              <p className="text-sm text-muted-foreground">Loaded every session — production-tested best practices always in context</p>
+              <h3 className="text-2xl font-bold text-foreground">Built-in Rules & Standards</h3>
+              <p className="text-sm text-muted-foreground">Loaded every session — production-tested best practices and coding standards always in context</p>
             </div>
           </div>
 
@@ -279,35 +285,6 @@ const DeepDiveSection = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Standards Grid */}
-        <div
-          ref={standardsRef}
-          className={`mb-16 ${standardsInView ? "animate-fade-in-up" : "opacity-0"}`}
-        >
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Cpu className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-foreground">Built-in Coding Standards</h3>
-              <p className="text-sm text-muted-foreground">Conditional rules activated by file type — loaded only when working with matching files</p>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {standardsList.map((standard) => (
-              <div
-                key={standard.name}
-                className="rounded-xl p-4 border border-border/50 bg-card/30 backdrop-blur-sm hover:border-primary/30 transition-colors"
-              >
-                <h4 className="font-medium text-foreground text-sm mb-1">{standard.name}</h4>
-                <p className="text-xs text-muted-foreground mb-2">{standard.desc}</p>
-                <p className="text-[10px] text-muted-foreground/60 font-mono">{standard.ext}</p>
-              </div>
-            ))}
           </div>
         </div>
 

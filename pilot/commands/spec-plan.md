@@ -31,7 +31,7 @@ hooks:
 | 7   | **NEVER assume - verify by reading files**                                                               |
 | 8   | **Re-read plan after user edits** - Before asking for approval again                                     |
 | 9   | **Quality over speed** - Never rush due to context pressure                                              |
-| 10  | **Plan file is source of truth** - Survives session clears                                               |
+| 10  | **Plan file is source of truth** - Survives across auto-compaction cycles                                               |
 
 ---
 
@@ -204,7 +204,7 @@ hooks:
 6. **Why this matters:**
    - Status bar shows "Spec: <name> [/plan]" immediately
    - User sees progress even during exploration phase
-   - Plan file exists for continuation if session clears
+   - Plan file exists for continuation across auto-compaction cycles
    - Plan is correctly associated with this specific terminal
 
 **CRITICAL:** Do this FIRST, before any exploration or questions.
@@ -628,7 +628,6 @@ Both agents persist their findings JSON to the session directory for reliable re
 
    **If user approves (selects "Yes" or any approval option):**
    - Update `Approved: No` → `Approved: Yes` in the plan file
-   - **⛔ Phase Transition Context Guard:** Run `~/.pilot/bin/pilot check-context --json`. If >= 80%, hand off instead (see spec.md Section 0.3).
    - **Invoke implementation phase:** `Skill(skill='spec-implement', args='<plan-path>')`
 
    **If user selects "No, I need to make changes":**
@@ -650,54 +649,8 @@ Both agents persist their findings JSON to the session directory for reliable re
 
 ---
 
-## Context Management (90% Handoff)
+## Context Management
 
-After each major operation, check context:
-
-```bash
-~/.pilot/bin/pilot check-context --json
-```
-
-**Between iterations:**
-
-1. If context >= 90%: hand off cleanly (don't rush!)
-2. If context 80-89%: continue but wrap up current task with quality
-3. If context < 80%: continue the loop freely
-
-If response shows `"status": "CLEAR_NEEDED"` (context >= 90%):
-
-**⚠️ CRITICAL: Execute ALL steps below in a SINGLE turn. DO NOT stop or wait for user response between steps.**
-
-**Step 1: Write continuation file (GUARANTEED BACKUP)**
-
-Write to `~/.pilot/sessions/$PILOT_SESSION_ID/continuation.md`:
-
-```markdown
-# Session Continuation (/spec)
-
-**Plan:** <plan-path>
-**Phase:** planning
-**Current Task:** [description of where you are in planning]
-
-**Completed This Session:**
-
-- [x] [What was finished]
-
-**Next Steps:**
-
-1. [What to do immediately when resuming]
-
-**Context:**
-
-- [Key decisions or blockers]
-```
-
-**Step 2: Trigger session clear**
-
-```bash
-~/.pilot/bin/pilot send-clear <plan-path>
-```
-
-Pilot will restart with `/spec --continue <plan-path>`
+Context is managed automatically by auto-compaction at 90%. No agent action needed — just keep working.
 
 ARGUMENTS: $ARGUMENTS
