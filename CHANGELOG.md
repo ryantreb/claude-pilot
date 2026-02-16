@@ -2,6 +2,12 @@
 
 All notable changes to Claude Pilot will be documented in this file.
 
+## [6.6.0] - 2026-02-16
+
+### Features
+
+- Compaction-based context preservation, branding overhaul, and bugfixes 
+
 ## [6.5.9] - 2026-02-15
 
 ### Bug Fixes
