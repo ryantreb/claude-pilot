@@ -55,6 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_status = wt_sub.add_parser("status", help="Show current worktree status.")
     p_status.add_argument("--json", dest="json_output", action="store_true")
 
+    # Statusline command
+    subparsers.add_parser("statusline", help="Run status line formatter (called by Claude Code).")
+
     return parser
 
 
@@ -74,6 +77,7 @@ def main() -> int:
         cmd_worktree_create, cmd_worktree_detect, cmd_worktree_diff,
         cmd_worktree_sync, cmd_worktree_cleanup, cmd_worktree_status,
     )
+    from launcher.statusline_cmd import cmd_statusline
 
     # Handle worktree subcommands
     if args.command == "worktree":
@@ -103,6 +107,7 @@ def main() -> int:
         ),
         "register-plan": lambda: cmd_register_plan(args.plan_path, args.status),
         "sessions": lambda: cmd_sessions(json_output=getattr(args, "json_output", False)),
+        "statusline": cmd_statusline,
     }
 
     handler = dispatch.get(args.command)
