@@ -578,9 +578,7 @@ See the full changelog at [pilot.openchangelog.com](https://pilot.openchangelog.
 
 **Pull Requests** — New features, improvements, and bug fixes are welcome. You can improve Pilot with Pilot — a self-improving loop where your contributions make the tool that makes contributions better.
 
-**Bug Reports** — Found a bug? [Open an issue](https://github.com/maxritter/claude-pilot/issues) on GitHub (Trial and Solo users).
-
-**Feature Requests** — Available on the [Team plan](https://claude-pilot.com/#pricing) via priority email support.
+**Bug Reports** — Found a bug? [Open an issue](https://github.com/maxritter/claude-pilot/issues) on GitHub.
 
 ---
 
