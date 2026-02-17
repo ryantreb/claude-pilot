@@ -43,6 +43,18 @@ def build_parser() -> argparse.ArgumentParser:
     sub_sessions = subparsers.add_parser("sessions", help="Show the number of active Pilot sessions.")
     sub_sessions.add_argument("--json", dest="json_output", action="store_true")
 
+    # Worktree command
+    sub_worktree = subparsers.add_parser("worktree", help="Manage spec worktrees.")
+    wt_sub = sub_worktree.add_subparsers(dest="wt_command", metavar="SUBCOMMAND")
+
+    for name in ("create", "detect", "diff", "sync", "cleanup"):
+        p = wt_sub.add_parser(name, help=f"{name.capitalize()} a worktree.")
+        p.add_argument("plan_slug", help="Plan slug (e.g., add-auth)")
+        p.add_argument("--json", dest="json_output", action="store_true")
+
+    p_status = wt_sub.add_parser("status", help="Show current worktree status.")
+    p_status.add_argument("--json", dest="json_output", action="store_true")
+
     return parser
 
 
@@ -58,6 +70,26 @@ def main() -> int:
     from launcher.context import cmd_check_context
     from launcher.plan import cmd_register_plan
     from launcher.session import cmd_sessions
+    from launcher.worktree import (
+        cmd_worktree_create, cmd_worktree_detect, cmd_worktree_diff,
+        cmd_worktree_sync, cmd_worktree_cleanup, cmd_worktree_status,
+    )
+
+    # Handle worktree subcommands
+    if args.command == "worktree":
+        wt_dispatch = {
+            "create": lambda: cmd_worktree_create(args.plan_slug, getattr(args, "json_output", False)),
+            "detect": lambda: cmd_worktree_detect(args.plan_slug, getattr(args, "json_output", False)),
+            "diff": lambda: cmd_worktree_diff(args.plan_slug, getattr(args, "json_output", False)),
+            "sync": lambda: cmd_worktree_sync(args.plan_slug, getattr(args, "json_output", False)),
+            "cleanup": lambda: cmd_worktree_cleanup(args.plan_slug, getattr(args, "json_output", False)),
+            "status": lambda: cmd_worktree_status(getattr(args, "json_output", False)),
+        }
+        wt_cmd = getattr(args, "wt_command", None)
+        if wt_cmd and wt_cmd in wt_dispatch:
+            return wt_dispatch[wt_cmd]()
+        parser.print_help()
+        return 0
 
     dispatch = {
         "status": lambda: cmd_status(json_output=getattr(args, "json_output", False)),
