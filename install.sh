@@ -58,6 +58,12 @@ if [ -f "$SETTINGS_FILE" ]; then
 import json
 with open('$SETTINGS_FILE') as f:
     data = json.load(f)
+# Fix statusline command
+sl = data.get('statusLine', {})
+if 'command' in sl:
+    sl['command'] = sl['command'].replace('/.pilot/bin/pilot ', '/.pilot/bin/pilot-run ')
+    data['statusLine'] = sl
+# Fix env var if present
 env = data.get('env', {})
 if 'CLAUDE_CODE_STATUSLINE' in env:
     env['CLAUDE_CODE_STATUSLINE'] = env['CLAUDE_CODE_STATUSLINE'].replace(
@@ -76,7 +82,25 @@ cat > "$HOME/.pilot/.license" << 'LICENSE'
 LICENSE
 echo "  [x] Created free license stub"
 
-# 7. Copy deminified JS services if available
+# 7. Patch hooks that reference the pilot binary
+HOOKS_DIR="$HOME/.claude/pilot/hooks"
+if [ -f "$HOOKS_DIR/session_end.py" ]; then
+    sed -i 's|"pilot-run"|"pilot-run"|; s|/ "bin" / "pilot"|/ "bin" / "pilot-run"|' "$HOOKS_DIR/session_end.py" 2>/dev/null
+    # More reliable: replace the exact line
+    python3 -c "
+p = '$HOOKS_DIR/session_end.py'
+with open(p) as f:
+    content = f.read()
+content = content.replace(
+    '/ \".pilot\" / \"bin\" / \"pilot\"',
+    '/ \".pilot\" / \"bin\" / \"pilot-run\"'
+)
+with open(p, 'w') as f:
+    f.write(content)
+" 2>/dev/null && echo "  [x] Patched session_end.py to use pilot-run" || echo "  [-] Could not patch session_end.py (manual fix needed)"
+fi
+
+# 8. Copy deminified JS services if available
 if [ -d "$SCRIPT_DIR/pilot/scripts" ]; then
     for f in "$SCRIPT_DIR/pilot/scripts/"*.cjs; do
         [ -f "$f" ] && cp "$f" "$PLUGIN_DIR/scripts/"
