@@ -29,6 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("deactivate", help="Deactivate license.")
 
+    # Context command
+    sub_context = subparsers.add_parser("check-context", help="Check context window usage percentage.")
+    sub_context.add_argument("--json", dest="json_output", action="store_true")
+    sub_context.add_argument("--threshold", type=int, default=None)
+
     return parser
 
 
@@ -41,6 +46,7 @@ def main() -> int:
         return 0
 
     from launcher.license import cmd_status, cmd_verify, cmd_trial, cmd_activate, cmd_deactivate
+    from launcher.context import cmd_check_context
 
     dispatch = {
         "status": lambda: cmd_status(json_output=getattr(args, "json_output", False)),
@@ -48,6 +54,10 @@ def main() -> int:
         "trial": lambda: cmd_trial(check=getattr(args, "check", False), start=getattr(args, "start", False)),
         "activate": lambda: cmd_activate(key=getattr(args, "key", "")),
         "deactivate": cmd_deactivate,
+        "check-context": lambda: cmd_check_context(
+            json_output=getattr(args, "json_output", False),
+            threshold=getattr(args, "threshold", None),
+        ),
     }
 
     handler = dispatch.get(args.command)
