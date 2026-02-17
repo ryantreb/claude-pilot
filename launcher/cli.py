@@ -39,6 +39,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub_plan.add_argument("plan_path", help="Plan file path")
     sub_plan.add_argument("status", help="Plan status (PENDING, COMPLETE, VERIFIED)")
 
+    # Sessions command
+    sub_sessions = subparsers.add_parser("sessions", help="Show the number of active Pilot sessions.")
+    sub_sessions.add_argument("--json", dest="json_output", action="store_true")
+
     return parser
 
 
@@ -53,6 +57,7 @@ def main() -> int:
     from launcher.license import cmd_status, cmd_verify, cmd_trial, cmd_activate, cmd_deactivate
     from launcher.context import cmd_check_context
     from launcher.plan import cmd_register_plan
+    from launcher.session import cmd_sessions
 
     dispatch = {
         "status": lambda: cmd_status(json_output=getattr(args, "json_output", False)),
@@ -65,6 +70,7 @@ def main() -> int:
             threshold=getattr(args, "threshold", None),
         ),
         "register-plan": lambda: cmd_register_plan(args.plan_path, args.status),
+        "sessions": lambda: cmd_sessions(json_output=getattr(args, "json_output", False)),
     }
 
     handler = dispatch.get(args.command)
