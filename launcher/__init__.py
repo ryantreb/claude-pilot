@@ -3,6 +3,6 @@
 
 def app() -> int:
     """Main entry point called by the shell wrapper."""
-    from launcher.cli import main
+    from .cli import main
 
     return main()

@@ -69,15 +69,15 @@ def main() -> int:
         parser.print_help()
         return 0
 
-    from launcher.license import cmd_status, cmd_verify, cmd_trial, cmd_activate, cmd_deactivate
-    from launcher.context import cmd_check_context
-    from launcher.plan import cmd_register_plan
-    from launcher.session import cmd_sessions
-    from launcher.worktree import (
+    from .license import cmd_status, cmd_verify, cmd_trial, cmd_activate, cmd_deactivate
+    from .context import cmd_check_context
+    from .plan import cmd_register_plan
+    from .session import cmd_sessions
+    from .worktree import (
         cmd_worktree_create, cmd_worktree_detect, cmd_worktree_diff,
         cmd_worktree_sync, cmd_worktree_cleanup, cmd_worktree_status,
     )
-    from launcher.statusline_cmd import cmd_statusline
+    from .statusline_cmd import cmd_statusline
 
     # Handle worktree subcommands
     if args.command == "worktree":
